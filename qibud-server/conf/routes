@@ -1,0 +1,50 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                           controllers.Application.index()
+
+
+GET     /buds                                       controllers.BudsController.buds
+GET     /buds/new                                   controllers.BudsController.budCreateForm
+POST    /buds                                       controllers.BudsController.saveNewBud
+# GET     /buds/:module
+# GET     /buds/:module/:role
+
+# tous les roles du bud rajoutent de la vue à la vue de base
+GET     /bud/:identity                             controllers.BudsController.bud(identity: String)
+# tous les roles du bud rajoutent du formulaire
+GET     /bud/:identity/edit                        controllers.BudsController.budEditForm(identity: String)
+# tous les roles du bud rajoutent de la validation, du "comportement BudStore"
+POST    /bud/:identity                             controllers.BudsController.saveBud(identity: String)
+# tous les roles du bud rajoutent de la validation, du "comportement BudStore"
+GET     /bud/:identity/delete                      controllers.BudsController.deleteBud(identity: String)
+
+# seul le role pointé rajoute de la vue à la vue de base
+GET     /bud/:identity/:pack/:role               controllers.BudsController.budByRole(identity: String, pack: String, role: String)
+# seul le role pointé rajoute du formulaire
+GET     /bud/:identity/:pack/:role/edit          controllers.BudsController.budEditFormByRole(identity: String, pack: String, role: String)
+# seul le role pointé rajoute de la validation, du "comportement BudStore"
+POST    /bud/:identity/:pack/:role               controllers.BudsController.saveBudByRole(identity: String, pack: String, role: String)
+# seul le role pointé rajoute de la validation, du "comportement BudStore"
+GET     /bud/:identity/:pack/:role/delete        controllers.BudsController.deleteBudByRole(identity: String, pack: String, role: String)
+GET     /bud/:identity/:pack/:role/:action/form controllers.BudsController.roleActionForm(identity: String, pack: String, role: String, action: String)
+POST    /bud/:identity/:pack/:role/:action      controllers.BudsController.invokeRoleAction(identity: String, pack: String, role: String, action: String)
+
+GET     /packs                                      controllers.BudPacksController.packs
+GET     /packs/new                                  controllers.BudPacksController.packUploadForm
+POST    /packs                                      controllers.BudPacksController.uploadPack
+
+GET     /pack/:pack                                controllers.BudPacksController.pack(pack: String)
+# doit pouvoir proposer un wizard d'installation si besoin ?
+GET     /pack/:pack/configuration                  controllers.BudPacksController.packConfiguration(pack: String)
+POST    /pack/:pack/configuration                  controllers.BudPacksController.savePackConfiguration(pack: String)
+GET     /pack/:pack/:action/form                  controllers.BudPacksController.actionForm(pack: String, action: String)
+POST    /pack/:pack/:action                       controllers.BudPacksController.invokeAction(pack: String, action: String)
+
+
+
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)

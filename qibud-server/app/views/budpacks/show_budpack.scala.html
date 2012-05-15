@@ -1,0 +1,18 @@
+@(budpack: _root_.buds.BudPack)
+
+@import tags._
+@import _root_.views.tools._
+
+@main( budpack.name(), "budpacks" ) {
+
+    @layout_fluid() {
+    
+        @page_header( budpack.name() )
+        
+        <div class="well">
+            @markdown( budpack.description() )
+        </div>
+
+    }
+    
+}

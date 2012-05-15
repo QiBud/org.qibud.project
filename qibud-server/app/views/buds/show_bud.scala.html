@@ -1,0 +1,18 @@
+@(bud: _root_.buds.Bud)
+
+@import tags._
+@import _root_.views.tools._
+
+@main( bud.entity().title, "buds" ) {
+
+    @layout_fluid() {
+    
+        @page_header( bud.entity().title )
+        
+        <div class="well">
+            @markdown( bud.entity().content )
+        </div>
+
+    }
+    
+}

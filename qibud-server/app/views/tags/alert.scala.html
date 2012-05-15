@@ -1,0 +1,9 @@
+@(heading: String = null,connotation: String = null)(body: Html)
+
+<div class="alert alert-block @if( connotation != null ) { alert-@connotation }">
+    <a class="close" data-dismiss="alert">×</a>
+    @if( heading != null ) {
+    <h4 class="alert-heading">@heading</h4>
+    }
+    @body
+</div>

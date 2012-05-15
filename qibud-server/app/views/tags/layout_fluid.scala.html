@@ -1,0 +1,48 @@
+@(title: String = null, left_sidebar: Html = null, right_sidebar: Html = null)(content: Html)
+
+<div class="container-fluid">
+    @if( left_sidebar == null && right_sidebar == null ) {
+        @content
+    }
+    @if( left_sidebar != null && right_sidebar != null ) {
+        <div class="row-fluid">
+            <div class="span3">
+                <div class="well" style="min-height: 400px">
+                    @left_sidebar
+                </div>
+            </div>
+            <div class="span6">
+                @content
+            </div>
+            <div class="span3">
+                <div class="well" style="min-height: 400px">
+                    @right_sidebar
+                </div>
+            </div>
+        </div>
+    }
+    @if( left_sidebar != null ) {
+        <div class="row-fluid">
+            <div class="span3">
+                <div class="well" style="min-height: 400px">
+                    @left_sidebar
+                </div>
+            </div>
+            <div class="span9">
+                @content
+            </div>
+        </div>
+    }
+    @if( right_sidebar != null ) {
+        <div class="row-fluid">
+            <div class="span9">
+                @content
+            </div>
+            <div class="span3">
+                <div class="well" style="min-height: 400px">
+                    @right_sidebar
+                </div>
+            </div>
+        </div>
+    }
+</div>

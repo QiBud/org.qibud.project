@@ -1,0 +1,12 @@
+@(src: String, href: String = null, title: String = "", style: String = "text-align: center")(caption: Html = Html(""))
+
+<div class="thumbnail">
+    @if( href != null ) {
+        <a href="@href" title="@title"><img src="@src" title="@title" alt="@title" /></a>
+    } else {
+        <img src="@src" title="@title" alt="@title" />
+    }
+    @if( ! caption.body.trim.isEmpty() ) {
+        <div class="caption">@caption</div>
+    }
+</div>

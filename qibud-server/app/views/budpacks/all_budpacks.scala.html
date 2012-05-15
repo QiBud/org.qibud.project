@@ -1,0 +1,24 @@
+@(budpacks: List[_root_.buds.BudPack])
+
+@import tags._
+
+@main( "BudPacks", "budpacks" ) {
+
+    @layout_fluid() {
+    
+        @page_header( "BudPacks" )
+        
+        @if( budpacks.isEmpty() ) {
+            <p>No BudPack found.</p>
+        }
+        @if( ! budpacks.isEmpty() ) {
+            <ul>
+                @for( budpack <- budpacks ) {
+                    <li><a href="@routes.BudPacksController.pack( budpack.name() )">@budpack.name()</a></li>
+                }
+            </ul>
+        }
+    
+    }
+
+}

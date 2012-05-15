@@ -1,0 +1,24 @@
+@(buds: List[_root_.buds.Bud])
+
+@import tags._
+
+@main( "Buds", "buds" ) {
+
+    @layout_fluid() {
+    
+        @page_header( "Buds" )
+        
+        @if( buds.isEmpty() ) {
+            <p>No Bud found.</p>
+        }
+        @if( ! buds.isEmpty() ) {
+            <ul>
+                @for( bud <- buds ) {
+                    <li><a href="@routes.BudsController.bud( bud.identity )">@bud.entity().title</a></li>
+                }
+            </ul>
+        }
+    
+    }
+
+}

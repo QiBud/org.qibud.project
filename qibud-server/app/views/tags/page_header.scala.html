@@ -1,0 +1,5 @@
+@( title: String, subtitle: String = "", id: String = "" )
+
+<div class="page-header"@if( ! id.isEmpty() ) { id="@id" } >
+    <h1 class="page_title">@title@if(!subtitle.isEmpty()) { <small class="page_title">@subtitle</small>}</h1>
+</div>

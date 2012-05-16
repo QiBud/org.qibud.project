@@ -27,8 +27,8 @@ public class Global
         GraphDB graphDB = GraphDB.getInstance();
         AttachmentsDB attachmentsDB = AttachmentsDB.getInstance();
 
-        graphDB.startGraphDatabase();
-        attachmentsDB.startAttachmentsDatabase();
+        graphDB.start();
+        attachmentsDB.start();
 
         Bud rootBud = budRepository.findRootBud();
         if ( rootBud == null ) {
@@ -36,22 +36,14 @@ public class Global
         }
 
         LOGGER.info( "QiBud Server Started with Root Bud: {}", rootBud );
-
-        registerEmergencyShutdownHook();
     }
 
     @Override
     public void onStop( Application aplctn )
     {
-        GraphDB.getInstance().shutdownEmbeddedDatabase();
-        AttachmentsDB.getInstance().shutdownAttachmentsDatabase();
+        GraphDB.getInstance().shutdown();
+        AttachmentsDB.getInstance().shutdown();
         super.onStop( aplctn );
-    }
-
-    private void registerEmergencyShutdownHook()
-    {
-        GraphDB.getInstance().shutdownEmbeddedDatabase();
-        AttachmentsDB.getInstance().shutdownAttachmentsDatabase();
     }
 
 }

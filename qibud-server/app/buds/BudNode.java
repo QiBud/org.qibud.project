@@ -43,4 +43,10 @@ public class BudNode
         return o instanceof BudNode && underlyingNode.equals( ( ( BudNode ) o ).getUnderlyingNode() );
     }
 
+    @Override
+    public String toString()
+    {
+        return "BudNode[" + getIdentity() + "]";
+    }
+
 }

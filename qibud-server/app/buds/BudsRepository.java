@@ -19,6 +19,11 @@ public class BudsRepository
         return instance;
     }
 
+    public Bud findRootBud()
+    {
+        return findByIdentity( Bud.ROOT_BUD_IDENTITY );
+    }
+
     public List<Bud> findAll()
     {
         List<BudEntity> allBudEntities = BudEntity.find.all();

@@ -1,6 +1,9 @@
 package buds;
 
+import java.io.InputStream;
+
 import models.BudEntity;
+import storage.AttachmentsDB;
 import storage.GraphDB;
 
 public class BudsFactory
@@ -19,7 +22,6 @@ public class BudsFactory
     public Bud createRootBud()
     {
         // Create ROOT BudEntity
-        // TODO Move to BudFactory
         BudEntity rootBudEntity = new BudEntity();
         rootBudEntity.identity = Bud.ROOT_BUD_IDENTITY;
         rootBudEntity.title = "Root Bud";
@@ -27,8 +29,10 @@ public class BudsFactory
 
         // Create ROOT BudNode
         GraphDB.getInstance().createBudNode( Bud.ROOT_BUD_IDENTITY );
-
-        // Create ROOT BudAttachments?
+        // Create ROOT BudAttachments
+        String filename = "whats.a.bud.svg";
+        InputStream attachmentInputStream = getClass().getResourceAsStream( filename );
+        AttachmentsDB.getInstance().storeAttachment( Bud.ROOT_BUD_IDENTITY, filename, attachmentInputStream );
 
         return new Bud( rootBudEntity );
     }

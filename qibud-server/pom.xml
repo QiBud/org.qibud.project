@@ -36,9 +36,9 @@
             <version>1.7</version>
         </dependency>
         <dependency>
-            <groupId>com.google.code</groupId>
-            <artifactId>morphia</artifactId>
-            <version>0.91</version>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>2.7.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.tika</groupId>

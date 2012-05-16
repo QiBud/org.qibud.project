@@ -43,7 +43,7 @@ public class Bud
         return node;
     }
 
-    public BudAttachments attachments()
+    public List<BudAttachment> attachments()
     {
         return null;
     }

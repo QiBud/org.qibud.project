@@ -8,7 +8,6 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-import buds.Bud;
 import buds.BudNode;
 import utils.QiBudException;
 
@@ -16,8 +15,6 @@ public class GraphDB
 {
 
     private static GraphDB instance;
-
-    private GraphDatabaseService graphDatabase;
 
     public static synchronized GraphDB getInstance()
     {
@@ -27,7 +24,9 @@ public class GraphDB
         return instance;
     }
 
-    public synchronized void startEmbeddedDatabase()
+    private GraphDatabaseService graphDatabase;
+
+    public synchronized void startGraphDatabase()
     {
         if ( graphDatabase == null ) {
             String graphDatabasePath = Play.application().configuration().getString( "qibud.graphdb.path" );

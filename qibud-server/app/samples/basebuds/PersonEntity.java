@@ -1,8 +1,19 @@
 package samples.basebuds;
 
-import play.db.ebean.Model;
+import play.modules.mongodb.jackson.MongoDB;
+
+import net.vz.mongodb.jackson.Id;
+import net.vz.mongodb.jackson.JacksonDBCollection;
+
+import roles.RoleEntity;
 
 public class PersonEntity
-        extends Model
+        implements RoleEntity
 {
+
+    private static final JacksonDBCollection<PersonEntity, String> db = MongoDB.getCollection( "person-entities", PersonEntity.class, String.class );
+
+    @Id
+    public String identity;
+
 }

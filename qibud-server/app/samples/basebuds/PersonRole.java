@@ -5,15 +5,25 @@ import java.util.List;
 
 import roles.Role;
 import roles.RoleAction;
+import roles.RoleActionNotFound;
 
 public class PersonRole
         implements Role<PersonEntity>
 {
 
+    private static final String ROLENAME = "Person";
+
+    private final PersonEntity entity;
+
+    public PersonRole( PersonEntity entity )
+    {
+        this.entity = entity;
+    }
+
     @Override
     public String roleName()
     {
-        throw new UnsupportedOperationException( "Not supported yet." );
+        return ROLENAME;
     }
 
     @Override
@@ -25,7 +35,7 @@ public class PersonRole
     @Override
     public RoleAction actionNamed( String name )
     {
-        return null;
+        throw new RoleActionNotFound( name + " does not exist" );
     }
 
     @Override

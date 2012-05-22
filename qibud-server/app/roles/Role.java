@@ -4,7 +4,7 @@ import java.util.List;
 
 import play.db.ebean.Model;
 
-public interface Role<EntityType extends Model>
+public interface Role<EntityType extends RoleEntity>
 {
 
     String roleName();

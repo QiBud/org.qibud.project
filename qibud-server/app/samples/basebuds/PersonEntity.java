@@ -1,8 +1,8 @@
 package samples.basebuds;
 
-import play.db.ebean.Model;
+import roles.RoleEntity;
 
 public class PersonEntity
-        extends Model
+        implements RoleEntity
 {
 }

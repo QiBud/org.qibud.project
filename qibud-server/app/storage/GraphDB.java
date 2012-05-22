@@ -52,6 +52,10 @@ public class GraphDB
         return instance;
     }
 
+    private GraphDB()
+    {
+    }
+
     private GraphDatabaseService graphDatabase;
 
     public synchronized void start()
@@ -66,7 +70,7 @@ public class GraphDB
             registerShutdownHook( graphDatabasePath, !Play.isProd() );
 
             graphDatabase = new GraphDatabaseFactory().newEmbeddedDatabase( graphDatabasePath );
-            LOGGER.info( "Graph Database Started" );
+            LOGGER.info( "GraphDB Started" );
         }
 
         // BudReferenceNode creation if needed
@@ -106,7 +110,7 @@ public class GraphDB
         if ( graphDatabase != null ) {
             graphDatabase.shutdown();
             graphDatabase = null;
-            LOGGER.info( "Graph Database stopped" );
+            LOGGER.info( "GraphD stopped" );
         }
     }
 
@@ -117,7 +121,7 @@ public class GraphDB
         if ( graphDatabaseDir.exists() ) {
             try {
                 FileUtils.deleteDirectory( graphDatabaseDir );
-                LOGGER.warn( "Graph Database cleared" );
+                LOGGER.warn( "GraphDB cleared!" );
             } catch ( IOException ex ) {
                 throw new QiBudException( ex );
             }
@@ -201,10 +205,6 @@ public class GraphDB
     private Node getBudRefNode()
     {
         return Iterables.first( graphDatabase.getReferenceNode().getRelationships( Direction.OUTGOING, RelTypes.IS_BUD_REF ) ).getEndNode();
-    }
-
-    private GraphDB()
-    {
     }
 
 }

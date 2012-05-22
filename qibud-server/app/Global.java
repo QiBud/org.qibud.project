@@ -9,30 +9,28 @@ import buds.Bud;
 import buds.BudsFactory;
 import buds.BudsRepository;
 import storage.AttachmentsDB;
+import storage.EntitiesDB;
 import storage.GraphDB;
 
 public class Global
         extends GlobalSettings
 {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger( Global.class );
+    private static final Logger LOGGER = LoggerFactory.getLogger( "org.qibud.server" );
 
     @Override
     public void onStart( Application aplctn )
     {
         super.onStart( aplctn );
+        LOGGER.info( "QiBud Server starting ..." );
 
-        BudsRepository budRepository = BudsRepository.getInstance();
-        BudsFactory budFactory = BudsFactory.getInstance();
-        GraphDB graphDB = GraphDB.getInstance();
-        AttachmentsDB attachmentsDB = AttachmentsDB.getInstance();
+        EntitiesDB.getInstance().start();
+        GraphDB.getInstance().start();
+        AttachmentsDB.getInstance().start();
 
-        graphDB.start();
-        attachmentsDB.start();
-
-        Bud rootBud = budRepository.findRootBud();
+        Bud rootBud = BudsRepository.getInstance().findRootBud();
         if ( rootBud == null ) {
-            rootBud = budFactory.createRootBud();
+            rootBud = BudsFactory.getInstance().createRootBud();
         }
 
         LOGGER.info( "QiBud Server Started with Root Bud: {}", rootBud );
@@ -43,6 +41,7 @@ public class Global
     {
         GraphDB.getInstance().shutdown();
         AttachmentsDB.getInstance().shutdown();
+        EntitiesDB.getInstance().shutdown();
         super.onStop( aplctn );
     }
 

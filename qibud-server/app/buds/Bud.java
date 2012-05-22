@@ -8,7 +8,6 @@ import com.mongodb.gridfs.GridFSDBFile;
 
 import org.neo4j.graphdb.Node;
 
-import models.BudEntity;
 import roles.Role;
 import storage.AttachmentsDB;
 import storage.GraphDB;

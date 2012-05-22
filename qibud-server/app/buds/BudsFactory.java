@@ -1,6 +1,5 @@
 package buds;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
 
 import play.Play;
@@ -8,7 +7,6 @@ import play.Play;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import models.BudEntity;
 import storage.AttachmentsDB;
 import storage.GraphDB;
 
@@ -29,7 +27,7 @@ public class BudsFactory
 
     public Bud createRootBud()
     {
-        BudEntity rootBudEntity = BudEntity.find.byId( Bud.ROOT_BUD_IDENTITY );
+        BudEntity rootBudEntity = BudEntity.findById( Bud.ROOT_BUD_IDENTITY );
         if ( rootBudEntity != null ) {
             throw new IllegalStateException( "The Root Bud already exists, check your code" );
         }
@@ -39,7 +37,7 @@ public class BudsFactory
             rootBudEntity = new BudEntity();
             rootBudEntity.identity = Bud.ROOT_BUD_IDENTITY;
             rootBudEntity.title = "Root Bud";
-            rootBudEntity.save();
+            BudEntity.save( rootBudEntity );
 
             // Create ROOT BudNode
             GraphDB graphDatabase = GraphDB.getInstance();
@@ -56,7 +54,7 @@ public class BudsFactory
         } catch ( RuntimeException ex ) {
 
             // Manual rollback
-            BudEntity rootBud = BudEntity.find.byId( Bud.ROOT_BUD_IDENTITY );
+            BudEntity rootBud = BudEntity.findById( Bud.ROOT_BUD_IDENTITY );
             if ( rootBud != null ) {
                 try {
                     AttachmentsDB.getInstance().deleteBudDBFiles( Bud.ROOT_BUD_IDENTITY );
@@ -68,7 +66,7 @@ public class BudsFactory
                 } catch ( RuntimeException graphEx ) {
                     LOGGER.warn( "Unable to cleanup RootBud node after creation failure", graphEx );
                 }
-                rootBud.delete();
+                BudEntity.delete( rootBud );
                 LOGGER.error( "Something went wrong when creating Root Bud, hanges have been manually rollbacked", ex );
             }
 

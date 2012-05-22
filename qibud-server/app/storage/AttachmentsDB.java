@@ -23,6 +23,14 @@ import org.slf4j.LoggerFactory;
 import buds.BudAttachment;
 import utils.QiBudException;
 
+/**
+ * Hold binary content attached to Buds.
+ * 
+ * Uploaded files are added as MongoDB GridFS files.
+ * 
+ * TODO Async task that extract attachment metadata and store it as a Mongo document alongside the GridFS file.
+ * TODO Controller that output attachment metadata as a json resource
+ */
 public class AttachmentsDB
 {
 
@@ -44,6 +52,10 @@ public class AttachmentsDB
         return instance;
     }
 
+    private AttachmentsDB()
+    {
+    }
+
     private Mongo mongo;
 
     private DB attachmentsDB;
@@ -55,21 +67,22 @@ public class AttachmentsDB
             Integer port = Play.application().configuration().getInt( CONFIG_PORT );
             String dbName = Play.application().configuration().getString( CONFIG_DB );
             if ( StringUtils.isEmpty( host ) ) {
-                throw new QiBudException( "MongoDB host is empty, check your configuration (" + CONFIG_HOST + ")" );
+                throw new QiBudException( "AttachmentsDB host is empty, check your configuration (" + CONFIG_HOST + ")" );
             }
             if ( port == null ) {
-                throw new QiBudException( "MongoDB port is empty, check your configuration (" + CONFIG_PORT + ")" );
+                throw new QiBudException( "AttachmentsDB port is empty, check your configuration (" + CONFIG_PORT + ")" );
             }
             if ( StringUtils.isEmpty( dbName ) ) {
-                throw new QiBudException( "MongoDB database name is empty, check your configuration (" + CONFIG_DB + ")" );
+                throw new QiBudException( "AttachmentsDB database name is empty, check your configuration (" + CONFIG_DB + ")" );
             }
-            LOGGER.info( "AttachmentsDB[{},{},{}]", new Object[]{ host, port, dbName } );
 
             registerShutdownHook( host, port, dbName, !Play.isProd() );
 
             Couple<Mongo, DB> mongoCouple = connectToMongoDB( host, port, dbName );
             mongo = mongoCouple.left();
             attachmentsDB = mongoCouple.right();
+
+            LOGGER.info( "AttachmentsDB started" );
         }
     }
 
@@ -79,7 +92,7 @@ public class AttachmentsDB
             mongo.close();
             mongo = null;
             attachmentsDB = null;
-            LOGGER.info( "Attachments DB stopped" );
+            LOGGER.info( "AttachmentsDB stopped" );
         }
     }
 
@@ -105,7 +118,7 @@ public class AttachmentsDB
         Couple<Mongo, DB> mongoCouple = connectToMongoDB( host, port, dbName );
         mongoCouple.right().dropDatabase();
         mongoCouple.left().close();
-        LOGGER.info( "Attachments DB cleared" );
+        LOGGER.warn( "AttachmentsDB cleared!" );
     }
 
     public void storeAttachment( String budIdentity, String baseName, InputStream inputStream )
@@ -156,10 +169,6 @@ public class AttachmentsDB
         } catch ( MongoException ex ) {
             throw new QiBudException( ex );
         }
-    }
-
-    private AttachmentsDB()
-    {
     }
 
 }

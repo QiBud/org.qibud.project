@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import models.BudEntity;
-
 public class BudsRepository
 {
 
@@ -26,7 +24,7 @@ public class BudsRepository
 
     public List<Bud> findAll()
     {
-        List<BudEntity> allBudEntities = BudEntity.find.all();
+        List<BudEntity> allBudEntities = BudEntity.findAll();
         if ( allBudEntities == null || allBudEntities.isEmpty() ) {
             return Collections.emptyList();
         }
@@ -39,7 +37,7 @@ public class BudsRepository
 
     public Bud findByIdentity( String identity )
     {
-        BudEntity entity = BudEntity.find.byId( identity );
+        BudEntity entity = BudEntity.findById( identity );
         if ( entity == null ) {
             return null;
         }

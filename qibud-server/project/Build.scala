@@ -1,6 +1,7 @@
 import sbt._
 import Keys._
 import PlayProject._
+import sbtbuildinfo.Plugin._
 
 object ApplicationBuild extends Build {
 
@@ -15,11 +16,15 @@ object ApplicationBuild extends Build {
       // Add your project dependencies here,
     )
 
-    val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA
+    val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA,
+      settings = Defaults.defaultSettings ++ buildInfoSettings
     ).dependsOn(
       qiBudApi
     ).settings(
       // Add your own project settings here      
+      sourceGenerators in Compile <+= buildInfo,
+      buildInfoKeys := Seq[Scoped](name, version, scalaVersion, sbtVersion),
+      buildInfoPackage := "utils"
     )
 
 }

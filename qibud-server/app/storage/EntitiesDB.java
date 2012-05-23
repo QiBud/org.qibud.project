@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import utils.QiBudException;
+import utils.Threads;
 
 /**
  * Reference Bud Entities holder.
@@ -80,19 +81,21 @@ public class EntitiesDB
 
     private void registerShutdownHook( final String servers, final String credentials, final String dbName, final boolean clear )
     {
-        Runtime.getRuntime().addShutdownHook( new Thread( new Runnable()
-        {
-
-            @Override
-            public void run()
+        if ( !Threads.isThreadRegisteredAsShutdownHook( "entitiesdb-shutdown" ) ) {
+            Runtime.getRuntime().addShutdownHook( new Thread( new Runnable()
             {
-                shutdown();
-                if ( clear ) {
-                    clear( servers, credentials, dbName );
-                }
-            }
 
-        } ) );
+                @Override
+                public void run()
+                {
+                    shutdown();
+                    if ( clear ) {
+                        clear( servers, credentials, dbName );
+                    }
+                }
+
+            }, "entitiesdb-shutdown" ) );
+        }
     }
 
     private void clear( String servers, String credentials, String dbName )

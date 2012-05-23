@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import akka.util.Duration;
 import buds.BudAttachment;
 import utils.QiBudException;
+import utils.Threads;
 
 /**
  * Hold binary content attached to Buds.
@@ -105,19 +106,21 @@ public class AttachmentsDB
 
     private void registerShutdownHook( final String host, final Integer port, final String dbName, final boolean clear )
     {
-        Runtime.getRuntime().addShutdownHook( new Thread( new Runnable()
-        {
-
-            @Override
-            public void run()
+        if ( !Threads.isThreadRegisteredAsShutdownHook( "attachmentsdb-shutdown" ) ) {
+            Runtime.getRuntime().addShutdownHook( new Thread( new Runnable()
             {
-                shutdown();
-                if ( clear ) {
-                    clear( host, port, dbName );
-                }
-            }
 
-        } ) );
+                @Override
+                public void run()
+                {
+                    shutdown();
+                    if ( clear ) {
+                        clear( host, port, dbName );
+                    }
+                }
+
+            }, "attachmentsdb-shutdown" ) );
+        }
     }
 
     private void clear( String host, Integer port, String dbName )
@@ -151,7 +154,7 @@ public class AttachmentsDB
         gridFSInputFile.save();
 
         // Schedule metadata extraction
-        Akka.system().scheduler().scheduleOnce( Duration.create( 1, TimeUnit.SECONDS ), new Runnable()
+        Akka.system().scheduler().scheduleOnce( Duration.create( 10, TimeUnit.SECONDS ), new Runnable()
         {
 
             @Override

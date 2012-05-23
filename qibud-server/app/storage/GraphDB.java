@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import buds.BudNode;
 import utils.QiBudException;
+import utils.Threads;
 
 /**
  * Bud Graph Holder.
@@ -90,19 +91,21 @@ public class GraphDB
 
     private void registerShutdownHook( final String graphDatabasePath, final boolean clear )
     {
-        Runtime.getRuntime().addShutdownHook( new Thread( new Runnable()
-        {
-
-            @Override
-            public void run()
+        if ( !Threads.isThreadRegisteredAsShutdownHook( "graphdb-shutdown" ) ) {
+            Runtime.getRuntime().addShutdownHook( new Thread( new Runnable()
             {
-                shutdown();
-                if ( clear ) {
-                    clear( graphDatabasePath );
-                }
-            }
 
-        } ) );
+                @Override
+                public void run()
+                {
+                    shutdown();
+                    if ( clear ) {
+                        clear( graphDatabasePath );
+                    }
+                }
+
+            }, "graphdb-shutdown" ) );
+        }
     }
 
     public synchronized void shutdown()

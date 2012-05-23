@@ -14,24 +14,31 @@
     @if( ! bud.attachments().isEmpty() ) {
         <h3>Attachments</h3>
         @for( eachAttachment <- bud.attachments() ) {
-            <p>
-                <span style="font-weight: bold">@eachAttachment.filename()</span>
-                <br/>
-                <small>@eachAttachment.md5()</small>
-            </p>
+            <p style="font-weight: bold">@eachAttachment.filename()</p>
+            <p class="pull-left"><small>@eachAttachment.md5()</small></p>
+            <p style="text-align:right"><a href="@routes.Buds.attachment( bud.identity(), eachAttachment.id() )" target="_blank" class="btn btn-mini"><i class="icon-download-alt"></i> Download</a></p>
             @if( eachAttachment.contentType() == null ) {
-                <p class="pull-right" style="padding-left: 1em"><a href="@routes.Buds.attachment( bud.identity(), eachAttachment.id() )" class="btn btn-mini">Download</a></p>
                 <div class="progress progress-danger progress-striped active">
                     <div class="bar" style='width: 100%;'>Gathering metadata</div>
                 </div>
             }
             @if( eachAttachment.contentType() != null ) {
-                <div class="accordion" id='attachment-@eachAttachment.id()-metadata'>
+                <div class="accordion" id="attachment-@eachAttachment.id()-accordion">
                     <div class="accordion-group">
                         <div class="accordion-heading">
-                            <a class="accordion-toggle" data-toggle="collapse" data-parent='#attachment-@eachAttachment.id()-metadata' href="#attachment-@eachAttachment.id()-metadata-collapse">Metadata</a>
+                            <a class="accordion-toggle" data-toggle="collapse" data-parent='#attachment-@eachAttachment.id()-accordion' href="#attachment-@eachAttachment.id()-preview"><i class="icon-eye-open"></i> Preview</a>
                         </div>
-                        <div id="attachment-@eachAttachment.id()-metadata-collapse" class="accordion-body in collapse">
+                        <div id="attachment-@eachAttachment.id()-preview" class="accordion-body collapse in">
+                            <div class="accordion-inner">
+                                @img( routes.Buds.attachment( bud.identity(), eachAttachment.id() ).toString() )
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-group">
+                        <div class="accordion-heading">
+                            <a class="accordion-toggle" data-toggle="collapse" data-parent='#attachment-@eachAttachment.id()-accordion' href="#attachment-@eachAttachment.id()-metadata"><i class="icon-list"></i> Metadata</a>
+                        </div>
+                        <div id="attachment-@eachAttachment.id()-metadata" class="accordion-body collapse in">
                             <div class="accordion-inner">
                                 <table class="table table-condensed table-striped">
                                     <thead>
@@ -54,7 +61,6 @@
                         </div>
                     </div>
                 </div>
-                @img( routes.Buds.attachment( bud.identity(), eachAttachment.id() ).toString() )
             }
             
         }
@@ -68,9 +74,9 @@
         @page_header(bud.entity().title)
         
         <p>
-            <a href="@routes.Buds.budEditForm( bud.identity() )" class="btn btn-mini btn-primary">Edit</a>
+            <a href="@routes.Buds.budEditForm( bud.identity() )" class="btn btn-mini btn-primary"><i class="icon-edit"></i> Edit</a>
             @if( bud.isRoot() ) {
-                <a class="btn btn-mini btn-danger disabled" title="You cannot delete the root Bud">Delete</a>
+                <a class="btn btn-mini btn-danger disabled" title="You cannot delete the root Bud"><i class="icon-trash"></i> Delete</a>
             }
             @if( ! bud.isRoot() ) {
                 <a href="@routes.Buds.deleteBud( bud.identity() )" class="btn btn-mini btn-danger">Delete</a>

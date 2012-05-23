@@ -38,6 +38,8 @@ import utils.Threads;
  * An async Akka task extract attachment metadata and store it as a Mongo
  * document alongside the GridFS file.
  * A Controller Action output attachment metadata as a json resource.
+ * 
+ * TODO Allow the use of MongoDB replicas sets
  */
 public class AttachmentsDB
 {

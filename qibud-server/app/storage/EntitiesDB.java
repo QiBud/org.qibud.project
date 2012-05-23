@@ -24,7 +24,8 @@ import utils.Threads;
  * This class don't do anything but loading the plugin configuration and wiping
  * the whole data in dev and test modes.
  * 
- * TODO Database connection outside a play application using the Play module is
+ * TODO Allow the use of MongoDB replicas sets
+ *      Database connection outside a play application using the Play module is
  *      tricky. We need that to clear the data in dev and test modes. It's done
  *      by reading the plugin configuration and register a shutdown hook that
  *      manually connect to MongoDB to drop the data. For testing purpose it

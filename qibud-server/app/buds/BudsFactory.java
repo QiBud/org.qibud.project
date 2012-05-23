@@ -5,12 +5,18 @@ import java.util.Date;
 
 import play.Play;
 
+import org.bson.types.ObjectId;
+import org.codeartisans.java.toolbox.exceptions.NullArgumentException;
+import org.neo4j.graphdb.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import storage.AttachmentsDB;
 import storage.GraphDB;
 
+/**
+ * TODO Move this code to Bud.
+ */
 public class BudsFactory
 {
 
@@ -24,6 +30,35 @@ public class BudsFactory
             instance = new BudsFactory();
         }
         return instance;
+    }
+
+    // FIXME This is a naïve implementation
+    public Bud createNewBud( Bud creationBud, String title, String content )
+    {
+        NullArgumentException.ensureNotNull( "Creation Bud", creationBud );
+        NullArgumentException.ensureNotEmpty( "Title", title );
+
+        // Generate new identity
+        String identity = new ObjectId().toString();
+
+        try {
+            // Create BudEntity
+            BudEntity budEntity = new BudEntity();
+            budEntity.identity = identity;
+            budEntity.title = title;
+            budEntity.content = content;
+            BudEntity.save( budEntity );
+
+            // Create BudNode
+            GraphDB graphDatabase = GraphDB.getInstance();
+            Node creationNode = graphDatabase.getBudNode( creationBud.identity() );
+            graphDatabase.createBudNode( identity ); // TODO Bud create new Bud
+
+            return new Bud( budEntity );
+        } catch ( RuntimeException ex ) {
+            // TODO Manual rollback
+            throw ex;
+        }
     }
 
     public Bud createRootBud()

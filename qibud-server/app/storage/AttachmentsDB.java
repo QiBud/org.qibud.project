@@ -1,10 +1,13 @@
 package storage;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import play.Play;
+import play.libs.Akka;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -16,11 +19,14 @@ import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.tika.Tika;
+import org.apache.tika.metadata.Metadata;
 import org.bson.types.ObjectId;
 import org.codeartisans.java.toolbox.Couple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import akka.util.Duration;
 import buds.BudAttachment;
 import utils.QiBudException;
 
@@ -133,14 +139,65 @@ public class AttachmentsDB
         if ( inputStream == null ) {
             throw new IllegalArgumentException( "InputStream is null" );
         }
-        String filename = budIdentity + "/" + baseName;
+
+        final String filename = budIdentity + "/" + baseName;
+
+        // Save minimal data
         GridFS gridFS = new GridFS( attachmentsDB );
         GridFSInputFile gridFSInputFile = gridFS.createFile( inputStream );
         gridFSInputFile.setFilename( filename );
         gridFSInputFile.put( BudAttachment.IDENTITY, budIdentity );
         gridFSInputFile.put( BudAttachment.ORIGINAL_FILENAME, baseName );
-        // TODO schedule metadata extraction
         gridFSInputFile.save();
+
+        // Schedule metadata extraction
+        Akka.system().scheduler().scheduleOnce( Duration.create( 1, TimeUnit.SECONDS ), new Runnable()
+        {
+
+            @Override
+            public void run()
+            {
+                gatherMedatada( filename );
+            }
+
+        } );
+    }
+
+    private void gatherMedatada( String filename )
+    {
+        GridFSDBFile dbFile = new GridFS( attachmentsDB ).findOne( filename );
+        if ( dbFile == null ) {
+            LOGGER.warn( "Cannot gather metadata, attachment does not exists (filename: " + filename + ")" );
+            return;
+        }
+        try {
+
+            Tika tika = new Tika();
+
+            // Detecting content-type
+            InputStream inputStream = dbFile.getInputStream();
+            String contentType = tika.detect( inputStream );
+            dbFile.put( "contentType", contentType );
+            inputStream.close();
+
+            // Gather metadata
+            inputStream = dbFile.getInputStream();
+            Metadata tikameta = new Metadata();
+            tika.parse( inputStream, tikameta ); // TODO Use extracted content once QiBud as a full text search engine.
+            inputStream.close();
+
+            DBObject mongometa = new BasicDBObject( tikameta.size() );
+            for ( String eachMetaKey : tikameta.names() ) {
+                mongometa.put( eachMetaKey, tikameta.get( eachMetaKey ) );
+            }
+            dbFile.setMetaData( mongometa );
+
+            dbFile.save();
+            LOGGER.info( "Gathered metadada for " + filename );
+
+        } catch ( IOException ex ) {
+            LOGGER.error( "Unable to gather metadata (filename: " + filename + "): " + ex.getMessage(), ex );
+        }
     }
 
     /**

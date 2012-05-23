@@ -3,19 +3,44 @@
 @import tags._
 @import _root_.views.tools._
 
+@sidebar = {
+    <p class="pull-left" style="padding-right: 1em; font-weight: bold">Qi</p>
+    <div class="progress progress-striped active">
+        <div class="bar" style='width: 50%;'>@bud.graphNode().getQi()</div>
+    </div>
+    @if( bud.attachments().isEmpty() ) {
+        <p>No attachments.</p>
+    }
+    @if( ! bud.attachments().isEmpty() ) {
+        <h3>Attachments</h3>
+        @for( eachAttachment <- bud.attachments() ) {
+            <p style="font-weight: bold">@eachAttachment.filename()</p>
+            @if( eachAttachment.contentType() == null ) {
+                <p class="pull-right" style="padding-left: 1em"><a href="@routes.BudsController.attachment( bud.identity(), eachAttachment.id() )" class="btn btn-mini">Download</a></p>
+                <div class="progress progress-danger progress-striped active">
+                    <div class="bar" style='width: 100%;'>Gathering metadata</div>
+                </div>
+            }
+            @if( eachAttachment.contentType() != null ) {
+                @alert("TODO","danger") {
+                    <p>Implement full attachment view now that metadata is extracted.</p>
+                    <p>Displayed as an &lt;img/&gt; below for now ...</p>
+                }
+                @img( routes.BudsController.attachment( bud.identity(), eachAttachment.id() ).toString() )
+            }
+            
+        }
+    }
+}
+
 @main( bud.entity().title, "buds" ) {
 
-    @layout_fluid() {
+    @layout_fluid(right_sidebar = sidebar) {
     
-        @page_header( bud.entity().title )
-        
-        <div class="well">
-            @markdown( bud.entity().content )
-        </div>
-        
-        <p>Qi: @bud.graphNode().getQi()</p>
-        <p>Attachments: @bud.attachments()</p>
+        @page_header(bud.entity().title)
 
+        @markdown( bud.entity().content )
+ 
     }
     
 }

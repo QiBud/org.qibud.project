@@ -16,6 +16,7 @@ import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
 
 import org.apache.commons.lang.StringUtils;
+import org.bson.types.ObjectId;
 import org.codeartisans.java.toolbox.Couple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,8 +138,17 @@ public class AttachmentsDB
         GridFSInputFile gridFSInputFile = gridFS.createFile( inputStream );
         gridFSInputFile.setFilename( filename );
         gridFSInputFile.put( BudAttachment.IDENTITY, budIdentity );
-        // TODO extract and save metadata
+        gridFSInputFile.put( BudAttachment.ORIGINAL_FILENAME, baseName );
+        // TODO schedule metadata extraction
         gridFSInputFile.save();
+    }
+
+    /**
+     * @param attachmentId This is not the Bud identity but the BudAttachemnt id!
+     */
+    public GridFSDBFile getDBFile( String attachmentId )
+    {
+        return new GridFS( attachmentsDB ).findOne( new ObjectId( attachmentId ) );
     }
 
     public List<GridFSDBFile> getBudDBFiles( String identity )

@@ -5,8 +5,11 @@ import java.util.List;
 import play.mvc.Controller;
 import play.mvc.Result;
 
+import com.mongodb.gridfs.GridFSDBFile;
+
 import buds.Bud;
 import buds.BudsRepository;
+import storage.AttachmentsDB;
 import views.html.buds.all_buds;
 import views.html.buds.show_bud;
 
@@ -37,6 +40,19 @@ public class BudsController
             return notFound();
         }
         return ok( show_bud.render( bud ) );
+    }
+
+    public static Result attachment( String identity, String attachment_id )
+    {
+        Bud bud = BudsRepository.getInstance().findByIdentity( identity );
+        if ( bud == null ) {
+            return notFound();
+        }
+        GridFSDBFile dbFile = AttachmentsDB.getInstance().getDBFile( attachment_id );
+        if ( dbFile.getContentType() != null ) {
+            return ok( dbFile.getInputStream() ).as( dbFile.getContentType() );
+        }
+        return ok( dbFile.getInputStream() );
     }
 
     public static Result budEditForm( String identity )

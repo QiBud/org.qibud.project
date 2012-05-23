@@ -14,6 +14,8 @@ POST    /buds                                       controllers.BudsController.s
 
 # tous les roles du bud rajoutent de la vue à la vue de base
 GET     /bud/:identity                             controllers.BudsController.bud(identity: String)
+# bud attachments
+GET     /bud/:identity/attachment/:attachment_id   controllers.BudsController.attachment(identity: String, attachment_id: String)
 # tous les roles du bud rajoutent du formulaire
 GET     /bud/:identity/edit                        controllers.BudsController.budEditForm(identity: String)
 # tous les roles du bud rajoutent de la validation, du "comportement BudStore"

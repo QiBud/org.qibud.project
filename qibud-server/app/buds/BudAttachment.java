@@ -3,12 +3,15 @@ package buds;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.google.common.base.Strings;
 import com.mongodb.gridfs.GridFSDBFile;
 
 public class BudAttachment
 {
 
     public static final String IDENTITY = "bud_identity";
+
+    public static final String ORIGINAL_FILENAME = "bud_original_filename";
 
     private final GridFSDBFile gridFSFile;
 
@@ -17,12 +20,30 @@ public class BudAttachment
         this.gridFSFile = gridFSFile;
     }
 
-    public String getContentType()
+    public String id()
+    {
+        return gridFSFile.getId().toString();
+    }
+
+    public String filename()
+    {
+        if ( gridFSFile.containsField( ORIGINAL_FILENAME ) ) {
+            return ( String ) gridFSFile.get( ORIGINAL_FILENAME );
+        }
+        return gridFSFile.getFilename();
+    }
+
+    public String md5()
+    {
+        return gridFSFile.getMD5();
+    }
+
+    public String contentType()
     {
         return gridFSFile.getContentType();
     }
 
-    public long getContentLength()
+    public long contentLength()
     {
         return gridFSFile.getLength();
     }

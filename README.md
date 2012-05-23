@@ -1,5 +1,3 @@
-title: QiBud Colaboration Hub
-
 # QiBud Colaboration Hub
 
 ## Technical Facts

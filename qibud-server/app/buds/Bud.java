@@ -73,6 +73,11 @@ public class Bud
         return Collections.emptyList();
     }
 
+    public final boolean isRoot()
+    {
+        return ROOT_BUD_IDENTITY.equals( entity.identity );
+    }
+
     @Override
     public boolean equals( Object obj )
     {

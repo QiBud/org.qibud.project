@@ -4,8 +4,8 @@
 @import _root_.views.tools._
 
 @sidebar = {
-    <p class="pull-left" style="padding-right: 1em; font-weight: bold">Qi</p>
-    <div class="progress progress-striped active">
+    <h3 class="pull-left" style="padding-right: 1em; font-weight: bold">Qi</h3>
+    <div class="progress progress-striped active" style="margin-top:0.4em">
         <div class="bar" style='width: 50%;'>@bud.graphNode().getQi()</div>
     </div>
     @if( bud.attachments().isEmpty() ) {
@@ -38,6 +38,16 @@
     @layout_fluid(right_sidebar = sidebar) {
     
         @page_header(bud.entity().title)
+        
+        <p>
+            <a href="@routes.BudsController.budEditForm( bud.identity() )" class="btn btn-mini btn-primary">Edit</a>
+            @if( bud.isRoot() ) {
+                <a class="btn btn-mini btn-danger disabled" title="You cannot delete the root Bud">Delete</a>
+            }
+            @if( ! bud.isRoot() ) {
+                <a href="@routes.BudsController.deleteBud( bud.identity() )" class="btn btn-mini btn-danger">Delete</a>
+            }
+        </p>
 
         @markdown( bud.entity().content )
  

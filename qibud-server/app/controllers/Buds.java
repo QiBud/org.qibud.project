@@ -14,7 +14,7 @@ import storage.AttachmentsDB;
 import views.html.buds.all_buds;
 import views.html.buds.show_bud;
 
-public class BudsController
+public class Buds
         extends Controller
 {
 

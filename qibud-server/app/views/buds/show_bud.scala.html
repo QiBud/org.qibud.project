@@ -16,7 +16,7 @@
         @for( eachAttachment <- bud.attachments() ) {
             <p style="font-weight: bold">@eachAttachment.filename()</p>
             @if( eachAttachment.contentType() == null ) {
-                <p class="pull-right" style="padding-left: 1em"><a href="@routes.BudsController.attachment( bud.identity(), eachAttachment.id() )" class="btn btn-mini">Download</a></p>
+                <p class="pull-right" style="padding-left: 1em"><a href="@routes.Buds.attachment( bud.identity(), eachAttachment.id() )" class="btn btn-mini">Download</a></p>
                 <div class="progress progress-danger progress-striped active">
                     <div class="bar" style='width: 100%;'>Gathering metadata</div>
                 </div>
@@ -26,7 +26,8 @@
                     <p>Implement full attachment view now that metadata is extracted.</p>
                     <p>Displayed as an &lt;img/&gt; below for now ...</p>
                 }
-                @img( routes.BudsController.attachment( bud.identity(), eachAttachment.id() ).toString() )
+                <p><a href="@routes.Buds.attachmentMetadata( bud.identity(), eachAttachment.id() )" class="btn btn-mini">Metadata</a></p>
+                @img( routes.Buds.attachment( bud.identity(), eachAttachment.id() ).toString() )
             }
             
         }
@@ -40,12 +41,12 @@
         @page_header(bud.entity().title)
         
         <p>
-            <a href="@routes.BudsController.budEditForm( bud.identity() )" class="btn btn-mini btn-primary">Edit</a>
+            <a href="@routes.Buds.budEditForm( bud.identity() )" class="btn btn-mini btn-primary">Edit</a>
             @if( bud.isRoot() ) {
                 <a class="btn btn-mini btn-danger disabled" title="You cannot delete the root Bud">Delete</a>
             }
             @if( ! bud.isRoot() ) {
-                <a href="@routes.BudsController.deleteBud( bud.identity() )" class="btn btn-mini btn-danger">Delete</a>
+                <a href="@routes.Buds.deleteBud( bud.identity() )" class="btn btn-mini btn-danger">Delete</a>
             }
         </p>
 

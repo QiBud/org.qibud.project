@@ -34,9 +34,9 @@ import utils.QiBudException;
  * Hold binary content attached to Buds.
  * 
  * Uploaded files are added as MongoDB GridFS files.
- * 
- * TODO Async task that extract attachment metadata and store it as a Mongo document alongside the GridFS file.
- * TODO Controller that output attachment metadata as a json resource
+ * An async Akka task extract attachment metadata and store it as a Mongo
+ * document alongside the GridFS file.
+ * A Controller Action output attachment metadata as a json resource.
  */
 public class AttachmentsDB
 {

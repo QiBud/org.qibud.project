@@ -10,7 +10,7 @@ import buds.BudPacksRepository;
 import views.html.budpacks.all_budpacks;
 import views.html.budpacks.show_budpack;
 
-public class BudPacksController
+public class BudPacks
         extends Controller
 {
 

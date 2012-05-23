@@ -14,7 +14,7 @@
         @if( ! buds.isEmpty() ) {
             <ul>
                 @for( bud <- buds ) {
-                    <li><a href="@routes.BudsController.bud( bud.identity )">@bud.entity().title</a></li>
+                    <li><a href="@routes.Buds.bud( bud.identity )">@bud.entity().title</a></li>
                 }
             </ul>
         }

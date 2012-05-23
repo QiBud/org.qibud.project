@@ -2,8 +2,8 @@ package buds;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 
-import com.google.common.base.Strings;
 import com.mongodb.gridfs.GridFSDBFile;
 
 public class BudAttachment
@@ -46,6 +46,11 @@ public class BudAttachment
     public long contentLength()
     {
         return gridFSFile.getLength();
+    }
+
+    public Map<String, ?> metadata()
+    {
+        return gridFSFile.getMetaData().toMap();
     }
 
     public void writeTo( OutputStream outputStream )

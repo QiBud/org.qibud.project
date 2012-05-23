@@ -1,6 +1,7 @@
 package buds;
 
 import java.io.InputStream;
+import java.util.Date;
 
 import play.Play;
 
@@ -37,6 +38,7 @@ public class BudsFactory
             rootBudEntity = new BudEntity();
             rootBudEntity.identity = Bud.ROOT_BUD_IDENTITY;
             rootBudEntity.title = "Root Bud";
+            rootBudEntity.postedAt = new Date();
             rootBudEntity.content = "## This is the Root Bud\nFor now this Bud has no Role and this sample content only.";
             BudEntity.save( rootBudEntity );
 

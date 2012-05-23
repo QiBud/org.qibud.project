@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import play.data.format.Formats;
+import play.data.validation.Constraints;
 import play.modules.mongodb.jackson.MongoDB;
 
 import net.vz.mongodb.jackson.Id;
@@ -20,10 +22,17 @@ public class BudEntity
     @Id
     public String identity;
 
+    @Constraints.Required
+    @Constraints.MinLength( 3 )
+    @Constraints.MaxLength( 1024 )
+    @Formats.NonEmpty
     public String title;
 
+    @Constraints.Required
+    @Formats.DateTime( pattern = "YYYY-MM-dd" )
     public Date postedAt;
 
+    @Constraints.MaxLength( 10000 )
     public String content;
 
     public static BudEntity findById( String id )

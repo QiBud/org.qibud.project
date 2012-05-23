@@ -2,6 +2,7 @@ package controllers;
 
 import java.util.List;
 
+import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 
@@ -9,6 +10,7 @@ import com.mongodb.DBObject;
 import com.mongodb.gridfs.GridFSDBFile;
 
 import buds.Bud;
+import buds.BudEntity;
 import buds.BudsRepository;
 import storage.AttachmentsDB;
 import views.html.buds.all_buds;
@@ -23,6 +25,8 @@ public class Buds
         List<Bud> allBuds = BudsRepository.getInstance().findAll();
         return ok( all_buds.render( allBuds ) );
     }
+
+    static final Form<BudEntity> budEntityForm = form( BudEntity.class );
 
     public static Result budCreateForm()
     {
@@ -50,6 +54,9 @@ public class Buds
             return notFound();
         }
         GridFSDBFile dbFile = AttachmentsDB.getInstance().getDBFile( attachment_id );
+        if ( dbFile == null ) {
+            return notFound();
+        }
         if ( dbFile.getContentType() != null ) {
             return ok( dbFile.getInputStream() ).as( dbFile.getContentType() );
         }
@@ -63,11 +70,12 @@ public class Buds
             return notFound();
         }
         GridFSDBFile dbFile = AttachmentsDB.getInstance().getDBFile( attachment_id );
-        DBObject metaData = dbFile.getMetaData();
-        if ( metaData == null ) {
-            return ok( "{}" ).as( "application/json" );
+        if ( dbFile == null ) {
+            return notFound();
         }
-        return ok( metaData.toString() ).as( "application/json" );
+        DBObject metaData = dbFile.getMetaData();
+        String json = metaData == null ? "{}" : metaData.toString();
+        return ok( json ).as( "application/json" );
     }
 
     public static Result budEditForm( String identity )

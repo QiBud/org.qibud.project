@@ -14,7 +14,11 @@
     @if( ! bud.attachments().isEmpty() ) {
         <h3>Attachments</h3>
         @for( eachAttachment <- bud.attachments() ) {
-            <p style="font-weight: bold">@eachAttachment.filename()</p>
+            <p>
+                <span style="font-weight: bold">@eachAttachment.filename()</span>
+                <br/>
+                <small>@eachAttachment.md5()</small>
+            </p>
             @if( eachAttachment.contentType() == null ) {
                 <p class="pull-right" style="padding-left: 1em"><a href="@routes.Buds.attachment( bud.identity(), eachAttachment.id() )" class="btn btn-mini">Download</a></p>
                 <div class="progress progress-danger progress-striped active">
@@ -22,11 +26,34 @@
                 </div>
             }
             @if( eachAttachment.contentType() != null ) {
-                @alert("TODO","danger") {
-                    <p>Implement full attachment view now that metadata is extracted.</p>
-                    <p>Displayed as an &lt;img/&gt; below for now ...</p>
-                }
-                <p><a href="@routes.Buds.attachmentMetadata( bud.identity(), eachAttachment.id() )" class="btn btn-mini">Metadata</a></p>
+                <div class="accordion" id='attachment-@eachAttachment.id()-metadata'>
+                    <div class="accordion-group">
+                        <div class="accordion-heading">
+                            <a class="accordion-toggle" data-toggle="collapse" data-parent='#attachment-@eachAttachment.id()-metadata' href="#attachment-@eachAttachment.id()-metadata-collapse">Metadata</a>
+                        </div>
+                        <div id="attachment-@eachAttachment.id()-metadata-collapse" class="accordion-body in collapse">
+                            <div class="accordion-inner">
+                                <table class="table table-condensed table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Key</th>
+                                            <th>Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for( meta <- eachAttachment.metadata() ) {
+                                            <tr>
+                                                <td>@meta._1</td>
+                                                <td>@meta._2</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                                <p style="text-align:right"><a href="@routes.Buds.attachmentMetadata( bud.identity(), eachAttachment.id() )" target="_blank" class="btn btn-mini">As JSON</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 @img( routes.Buds.attachment( bud.identity(), eachAttachment.id() ).toString() )
             }
             

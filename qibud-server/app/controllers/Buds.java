@@ -18,6 +18,7 @@ import views.html.buds.all_buds;
 import views.html.buds.show_bud;
 import views.html.buds.edit_bud;
 
+
 public class Buds
         extends Controller
 {
@@ -113,7 +114,7 @@ public class Buds
             bud.entity().title = updated.title;
             bud.entity().content = updated.content;
             BudEntity.save(bud.entity());
-            return redirect( "/bud/" + bud.identity() );
+            return redirect( routes.Buds.bud( bud.identity() ) );
         }
         
     }

@@ -24,17 +24,48 @@
         </fieldset>
         
         <fieldset>
+            
         <legend>Content</legend>
-        @html5_textarea(
-            editForm("content"),
-            '_value -> bud.entity().content,
-            '_help -> "edit your content here"
-        )
+        <textarea id="mask" name="content"></textarea>
+        <div id="editor-wrapper"></div>
         </fieldset>
+        <script src="/assets/javascripts/epiceditor.js"></script> 
+        <script>
+              
+              var wrapper = document.getElementById('editor-wrapper');
+
+              var ed = new EpicEditor(wrapper);
+              ed.options({
+                  file:{
+                    name:'content',
+                    defaultContent:'@(bud.entity().content)'
+                  },
+                 basePath:'/assets/epic-editor',
+                 focusOnLoad:true
+              }).load();
+        </script>
+        <script src="/assets/javascripts/jquery-1.7.2.js"></script> 
         
         <div class="actions">
-            <input type="submit" class="btn primary" value="save">
+            <input id="save" type="submit" class="btn primary" value="save">
+            <a href="@routes.Buds.bud( bud.identity() )" class="btn secondary">cancel</a>
         </div>
+        
+        <script>
+            $(document).ready(function(){
+                  
+                  $('#mask').attr("style","visibility: hidden;");
+              });
+              
+              $("#save").click(function (event) {
+                  event.preventDefault();
+                  
+                  var text =  $( '.epiceditor-textarea',  frames[$('iframe').filter(function() { return this.id.match(/epiceditor-.*/) } ).first().attr('id')].document ).first().val(); 
+                  
+                  $('#mask').attr("value",text);  
+                  $('form').submit();
+              });
+        </script>
         }
         
 

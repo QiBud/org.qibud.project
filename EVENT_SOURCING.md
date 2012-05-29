@@ -4,7 +4,7 @@ QiBud applies the EventSourcing pattern. Martin Fowler defines EventSourcing as
 follows: "Capture all changes to an application state as a sequence of events."
 
 You can find a lenghty article on his website:
-[Event Sourcing]http://martinfowler.com/eaaDev/EventSourcing.html
+[Event Sourcing](http://martinfowler.com/eaaDev/EventSourcing.html)
 
 As a consequence, all Bud state changes must be captured as a sequence of
 events.

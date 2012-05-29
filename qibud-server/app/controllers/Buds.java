@@ -113,7 +113,7 @@ public class Buds
             bud.entity().title = updated.title;
             bud.entity().content = updated.content;
             BudEntity.save(bud.entity());
-            return ok( show_bud.render( bud ) );
+            return redirect( "/bud/" + bud.identity() );
         }
         
     }

@@ -1,0 +1,90 @@
+@(bud: _root_.buds.Bud, editForm: Form[_root_.forms.BudForm])
+
+@import tags._
+@import _root_.views.tools._
+
+@sidebar = {
+    @show_bud_sidebar( bud )
+}
+
+@main( bud.entity().title, "buds" ) {
+
+    @layout_fluid(right_sidebar = sidebar) {
+    
+        @page_header(bud.entity().title)
+        
+        @helper.form(action = routes.Buds.saveBud(bud.entity().identity)) {
+        <fieldset>
+        <legend>Title</legend>
+        @html5_text(
+            editForm("title"),
+            '_value -> bud.entity().title,
+            '_help -> "choose a good title"
+        )
+        </fieldset>
+        
+        <fieldset>
+            
+        <legend>Content</legend>
+        @html5_textarea(
+            editForm("content"),
+            '_id -> "mask",
+            '_value -> bud.entity().title,
+            '_help -> "choose a good title"
+        )
+        <div id="editor-wrapper"></div>
+        </fieldset>
+        <script src="/assets/javascripts/epiceditor.js"></script> 
+        <script>
+              
+              
+        </script>
+        <div class="actions">
+            <input id="save" type="submit" class="btn primary" value="save">
+            <a href="@routes.Buds.bud( bud.identity() )" class="btn secondary">cancel</a>
+        </div>
+        <!-- todo remove after javascript unification -->
+        <script src='/assets/javascripts/jquery-1.7.2.js' type="text/javascript"></script>
+        <script>
+            $(document).ready(function(){
+                  $('textarea[name=content]').hide();
+                  
+                  
+                  var wrapper = document.getElementById('editor-wrapper');
+
+                  var ed = new EpicEditor(wrapper);
+                  ed.options({
+                      file:{
+                        name:'content',
+                        defaultContent:''
+                      },
+                     basePath:'/assets/epic-editor',
+                     focusOnLoad:true
+                  }).load(function (){
+                      var area = $( '.epiceditor-textarea',  frames[$('iframe').filter(function() { return this.id.match(/epiceditor-.*/) } ).first().attr('id')].document ).first()
+                      area.val( $('textarea[name=content]').val() )
+
+                });
+              
+                  
+                  
+                  $("#save").click(function (event) {
+                  event.preventDefault();
+
+                  var text =  $( '.epiceditor-textarea',  frames[$('iframe').filter(function() { return this.id.match(/epiceditor-.*/) } ).first().attr('id')].document ).first().val(); 
+
+                  $('textarea[name=content]').val(text);  
+                  $('form').submit();
+                });
+              });
+              
+             
+        </script>
+        }
+        
+
+        
+ 
+    }
+    
+}

@@ -1,0 +1,105 @@
+@(bud: _root_.buds.Bud, editForm: Form[_root_.forms.BudForm])
+
+@import tags._
+@import _root_.views.tools._
+
+@sidebar = {
+    <h3 class="pull-left" style="padding-right: 1em; font-weight: bold">Qi</h3>
+    <div class="progress progress-striped active" style="margin-top:0.4em">
+        <div class="bar" style='width: 50%;'>@bud.graphNode().getQi()</div>
+    </div>
+    @if( bud.attachments().isEmpty() ) {
+        <p>No attachments.</p>
+    }
+    @if( ! bud.attachments().isEmpty() ) {
+        <h3>Attachments</h3>
+        @for( eachAttachment <- bud.attachments() ) {
+            <p style="font-weight: bold">@eachAttachment.filename()</p>
+            <p class="pull-left"><small>@eachAttachment.md5()</small></p>
+            <p style="text-align:right"><a href="@routes.Buds.attachment( bud.identity(), eachAttachment.id() )" target="_blank" class="btn btn-mini"><i class="icon-download-alt"></i> Download</a></p>
+            @if( eachAttachment.contentType() == null ) {
+                <div class="progress progress-danger progress-striped active">
+                    <div class="bar" style='width: 100%;'>Gathering metadata</div>
+                </div>
+            }
+            @if( eachAttachment.contentType() != null ) {
+                <div class="accordion" id="attachment-@eachAttachment.id()-accordion">
+                    <div class="accordion-group">
+                        <div class="accordion-heading">
+                            <a class="accordion-toggle" data-toggle="collapse" data-parent='#attachment-@eachAttachment.id()-accordion' href="#attachment-@eachAttachment.id()-preview"><i class="icon-eye-open"></i> Preview</a>
+                        </div>
+                        <div id="attachment-@eachAttachment.id()-preview" class="accordion-body collapse in">
+                            <div class="accordion-inner">
+                                @img( routes.Buds.attachment( bud.identity(), eachAttachment.id() ).toString() )
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-group">
+                        <div class="accordion-heading">
+                            <a class="accordion-toggle" data-toggle="collapse" data-parent='#attachment-@eachAttachment.id()-accordion' href="#attachment-@eachAttachment.id()-metadata"><i class="icon-list"></i> Metadata</a>
+                        </div>
+                        <div id="attachment-@eachAttachment.id()-metadata" class="accordion-body collapse in">
+                            <div class="accordion-inner">
+                                <table class="table table-condensed table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Key</th>
+                                            <th>Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for( meta <- eachAttachment.metadata() ) {
+                                            <tr>
+                                                <td>@meta._1</td>
+                                                <td>@meta._2</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                                <p style="text-align:right"><a href="@routes.Buds.attachmentMetadata( bud.identity(), eachAttachment.id() )" target="_blank" class="btn btn-mini">As JSON</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            
+        }
+    }
+}
+
+@main( bud.entity().title, "buds" ) {
+
+    @layout_fluid(right_sidebar = sidebar) {
+    
+        @page_header(bud.entity().title)
+        
+        @helper.form(action = routes.Buds.saveBud(bud.entity().identity)) {
+        <fieldset>
+        <legend>Title</legend>
+        @html5_text(
+            editForm("title"),
+            '_value -> bud.entity().title,
+            '_help -> "choose a good title"
+        )
+        </fieldset>
+        
+        <fieldset>
+        <legend>Content</legend>
+        @html5_textarea(
+            editForm("content"),
+            '_value -> bud.entity().content,
+            '_help -> "edit your content here"
+        )
+        </fieldset>
+        
+        <div class="actions">
+            <input type="submit" class="btn primary" value="save">
+        </div>
+        }
+        
+
+        
+ 
+    }
+    
+}

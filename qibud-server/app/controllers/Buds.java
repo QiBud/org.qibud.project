@@ -10,16 +10,20 @@ import com.mongodb.DBObject;
 import com.mongodb.gridfs.GridFSDBFile;
 
 import buds.Bud;
+import buds.BudEntity;
 import buds.BudsRepository;
 import forms.BudForm;
 import storage.AttachmentsDB;
 import views.html.buds.all_buds;
 import views.html.buds.show_bud;
+import views.html.buds.edit_bud;
 
 public class Buds
         extends Controller
 {
 
+    final static Form<BudForm> budForm = form(BudForm.class);
+    
     public static Result buds()
     {
         List<Bud> allBuds = BudsRepository.getInstance().findAll();
@@ -81,13 +85,37 @@ public class Buds
     public static Result budEditForm( String identity )
     {
         // Sam, see https://github.com/playframework/Play20/blob/master/samples/java/forms/app/controllers/Contacts.java
-        return TODO;
+        Bud bud = BudsRepository.getInstance().findByIdentity( identity );
+        
+        
+        if ( bud == null ) {
+            return notFound();
+        }
+        
+        
+        return ok( edit_bud.render( bud, form(BudForm.class).fill(BudForm.filledWith(bud))) );
     }
 
-    public static Result saveBud( String identity )
+    public static Result saveBud(String identity)
     {
-        // Sam, see https://github.com/playframework/Play20/blob/master/samples/java/forms/app/controllers/Contacts.java
-        return TODO;
+        Bud bud = BudsRepository.getInstance().findByIdentity( identity );
+
+        if ( bud == null ) {
+            return notFound();
+        }
+        
+        Form<BudForm> filledForm = budForm.bindFromRequest();
+        
+        if(filledForm.hasErrors()) {
+            return badRequest(edit_bud.render(bud,filledForm));
+        } else {
+            BudForm updated = filledForm.get();
+            bud.entity().title = updated.title;
+            bud.entity().content = updated.content;
+            BudEntity.save(bud.entity());
+            return ok( show_bud.render( bud ) );
+        }
+        
     }
 
     public static Result deleteBud( String identity )

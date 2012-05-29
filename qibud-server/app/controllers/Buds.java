@@ -10,8 +10,8 @@ import com.mongodb.DBObject;
 import com.mongodb.gridfs.GridFSDBFile;
 
 import buds.Bud;
-import buds.BudEntity;
 import buds.BudsRepository;
+import forms.BudForm;
 import storage.AttachmentsDB;
 import views.html.buds.all_buds;
 import views.html.buds.show_bud;
@@ -26,7 +26,7 @@ public class Buds
         return ok( all_buds.render( allBuds ) );
     }
 
-    static final Form<BudEntity> budEntityForm = form( BudEntity.class );
+    static final Form<BudForm> budEntityForm = form( BudForm.class );
 
     public static Result budCreateForm()
     {
@@ -80,11 +80,13 @@ public class Buds
 
     public static Result budEditForm( String identity )
     {
+        // Sam, see https://github.com/playframework/Play20/blob/master/samples/java/forms/app/controllers/Contacts.java
         return TODO;
     }
 
     public static Result saveBud( String identity )
     {
+        // Sam, see https://github.com/playframework/Play20/blob/master/samples/java/forms/app/controllers/Contacts.java
         return TODO;
     }
 

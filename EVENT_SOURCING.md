@@ -21,3 +21,13 @@ means that the model in existing Cathedral EventStore is not suitable and we
 should consider either a deep refactoring, writing a new or reusing an existing
 EventStore that suits our needs.
 
+# TO READ
+
+http://www.mail-archive.com/qi4j-dev@lists.ops4j.org/msg05917.html
+
+http://qi4j-dev.23929.n6.nabble.com/EventSourcing-and-UoW-completion-sequence-td832.html
+
+https://github.com/Qi4j/qi4j-sdk/blob/develop/libraries/eventsourcing/src/main/java/org/qi4j/library/eventsourcing/domain/api/UnitOfWorkDomainEventsValue.java#L27
+
+ 
+

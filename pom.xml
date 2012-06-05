@@ -11,6 +11,9 @@
     
     <modules>
         <module>qibud-api</module>
+        <module>qibud-mongodb-support</module>
+        <module>qibud-eventstore</module>
+        <module>qibud-eventstore-mongodb</module>
         <module>qibud-server</module>
     </modules>
 

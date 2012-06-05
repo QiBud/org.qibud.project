@@ -2,7 +2,6 @@ package storage;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -13,7 +12,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
-import com.mongodb.MongoException;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
@@ -23,6 +21,7 @@ import org.apache.tika.Tika;
 import org.apache.tika.metadata.Metadata;
 import org.bson.types.ObjectId;
 import org.codeartisans.java.toolbox.Couple;
+import org.qibud.mongodb.MongoDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,7 +87,7 @@ public class AttachmentsDB
 
             registerShutdownHook( host, port, dbName, !Play.isProd() );
 
-            Couple<Mongo, DB> mongoCouple = connectToMongoDB( host, port, dbName );
+            Couple<Mongo, DB> mongoCouple = MongoDB.connectToMongoDB( host, port, dbName );
             mongo = mongoCouple.left();
             attachmentsDB = mongoCouple.right();
 
@@ -127,7 +126,7 @@ public class AttachmentsDB
 
     private void clear( String host, Integer port, String dbName )
     {
-        Couple<Mongo, DB> mongoCouple = connectToMongoDB( host, port, dbName );
+        Couple<Mongo, DB> mongoCouple = MongoDB.connectToMongoDB( host, port, dbName );
         mongoCouple.right().dropDatabase();
         mongoCouple.left().close();
         LOGGER.warn( "AttachmentsDB cleared!" );
@@ -227,19 +226,6 @@ public class AttachmentsDB
         List<GridFSDBFile> budDBFiles = gridFS.find( query );
         for ( GridFSDBFile eachDBFile : budDBFiles ) {
             gridFS.remove( eachDBFile.getFilename() );
-        }
-    }
-
-    private Couple<Mongo, DB> connectToMongoDB( String host, Integer port, String dbName )
-    {
-        try {
-            Mongo mongoInstance = new Mongo( host, port );
-            DB attachmentsDBInstance = mongoInstance.getDB( dbName );
-            return new Couple<Mongo, DB>( mongoInstance, attachmentsDBInstance );
-        } catch ( UnknownHostException ex ) {
-            throw new QiBudException( ex );
-        } catch ( MongoException ex ) {
-            throw new QiBudException( ex );
         }
     }
 

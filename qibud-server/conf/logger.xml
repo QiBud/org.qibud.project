@@ -16,11 +16,14 @@
         </encoder>
     </appender>
   
+    <logger name="org.bson" level="WARN" />
     <logger name="com.mongodb" level="WARN" />
     <logger name="org.neo4j" level="WARN" />
     <logger name="neo4j" level="WARN" />
     <logger name="net.sf.ehcache" level="WARN" />
     <logger name="javax.management" level="WARN" />
+    
+    <logger name="org.qibud" level="DEBUG" />
 
     <root level="DEBUG">
         <appender-ref ref="STDOUT" />

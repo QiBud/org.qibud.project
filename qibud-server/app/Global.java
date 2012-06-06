@@ -1,7 +1,14 @@
 
+import java.lang.reflect.Method;
+
 import play.Application;
 import play.GlobalSettings;
+import play.mvc.Action;
+import play.mvc.Http.Context;
+import play.mvc.Http.Request;
+import play.mvc.Result;
 
+import org.qibud.eventstore.Usecase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +50,39 @@ public class Global
         AttachmentsDB.getInstance().shutdown();
         EntitiesDB.getInstance().shutdown();
         super.onStop( aplctn );
+    }
+
+    @Override
+    public Action onRequest( Request request, Method actionMethod )
+    {
+        Usecase annotation = actionMethod.getAnnotation( Usecase.class );
+        final String usecase;
+        if ( annotation == null ) {
+            usecase = request.method() + ":" + request.uri();
+        } else {
+            usecase = annotation.value();
+        }
+        return new Action.Simple()
+        {
+
+            @Override
+            public Result call( Context ctx )
+                    throws Throwable
+            {
+                LOGGER.debug( "Before request with Usecase '{}'", usecase );
+                try {
+                    Result result = delegate.call( ctx );
+                    LOGGER.debug( "After request with Usecase '{}'", usecase );
+                    return result;
+                } catch ( Throwable ex ) {
+                    LOGGER.debug( "Error after request with Usecase '{}'", usecase, ex );
+                    throw ex;
+                } finally {
+                    LOGGER.debug( "Finally after request with Usecase '{}'", usecase );
+                }
+            }
+
+        };
     }
 
 }

@@ -27,7 +27,7 @@ public class InMemoryEventStore
     }
 
     @Override
-    public long count()
+    public int count()
     {
         return events.size();
     }

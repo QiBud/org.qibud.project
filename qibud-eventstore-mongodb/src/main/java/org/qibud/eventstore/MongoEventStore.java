@@ -69,9 +69,9 @@ public class MongoEventStore
     }
 
     @Override
-    public long count()
+    public int count()
     {
-        return database.getCollection( eventsCollection ).count();
+        return ( int ) database.getCollection( eventsCollection ).count();
     }
 
 }

@@ -18,6 +18,6 @@ public interface EventSource
     /**
      * @return How many DomainEventsSequences are stored in this EventSource.
      */
-    long count();
+    int count();
 
 }

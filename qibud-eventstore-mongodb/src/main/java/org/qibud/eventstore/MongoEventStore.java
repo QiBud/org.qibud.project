@@ -31,23 +31,33 @@ public class MongoEventStore
 
     private final String eventsCollection;
 
-    private final String utilsCollection;
+    private final String attachmentsCollectionsPrefix;
 
-    public MongoEventStore( Mongo driver, String database, String eventsCollection, String utilsCollection )
+    private final String counterCollection;
+
+    public MongoEventStore( Mongo driver, String database, String eventsCollection, String attachmentsCollectionsPrefix, String counterCollection )
     {
         this.driver = driver;
         this.database = driver.getDB( database );
         this.eventsCollection = eventsCollection;
-        this.utilsCollection = utilsCollection;
-        MongoDB.ensureCounter( this.database, this.utilsCollection, COUNTER_NAME );
+        this.attachmentsCollectionsPrefix = attachmentsCollectionsPrefix;
+        this.counterCollection = counterCollection;
+        MongoDB.ensureCounter( this.database, this.counterCollection, COUNTER_NAME );
     }
 
     @Override
     protected void doStoreEvents( DomainEventsSequence domainEventsSequence )
     {
+        database.requestStart();
+        
+        // Prepare changes
         DBObject dbObject = ( DBObject ) JSON.parse( domainEventsSequence.toJSON().toString() );
-        dbObject.put( "_id", MongoDB.getAndIncrementCounter( database, utilsCollection, COUNTER_NAME ) );
+        dbObject.put( "_id", MongoDB.getAndIncrementCounter( database, counterCollection, COUNTER_NAME ) );
+        
+        // Send changes to the underlying database
         database.getCollection( eventsCollection ).save( dbObject, WriteConcern.FSYNC_SAFE );
+        
+        database.requestDone();
     }
 
     @Override
@@ -59,8 +69,8 @@ public class MongoEventStore
             while ( cursor.hasNext() ) {
                 DBObject next = cursor.next();
                 JSONObject jsonObject = new JSONObject( JSON.serialize( next ) );
-                DomainEventsSequence eventdSequence = DomainEventsSequenceImpl.fromJSON( jsonObject );
-                result.add( eventdSequence );
+                DomainEventsSequence eventsSequence = DomainEventsSequenceImpl.fromJSON( jsonObject );
+                result.add( eventsSequence );
             }
             return Collections.unmodifiableList( result );
         } catch ( JSONException ex ) {

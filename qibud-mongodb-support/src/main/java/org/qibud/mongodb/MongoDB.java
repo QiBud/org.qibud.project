@@ -30,6 +30,16 @@ public class MongoDB
         }
     }
 
+    public static void ensureIndex( DB db, String collectionName, boolean unique, String indexName, String... keys )
+    {
+        DBCollection collection = db.getCollection( collectionName );
+        DBObject keysObject = new BasicDBObject( keys.length );
+        for ( String key : keys ) {
+            keysObject.put( key, key );
+        }
+        collection.ensureIndex( keysObject, indexName, unique );
+    }
+
     public static void ensureCounter( DB db, String collectionName, String counterName )
     {
         DBCollection collection = db.getCollection( collectionName );

@@ -15,7 +15,7 @@ import storage.GraphDB;
 public class Bud
 {
 
-    /* package */ static final String ROOT_BUD_IDENTITY = "root";
+    public static final String ROOT_BUD_IDENTITY = "root";
 
     private final BudEntity entity;
 

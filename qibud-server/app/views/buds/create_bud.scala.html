@@ -1,36 +1,40 @@
-@(bud: _root_.buds.Bud, editForm: Form[_root_.forms.BudForm])
+@(parentBud: _root_.buds.Bud, createForm: Form[_root_.forms.BudForm])
 
 @import tags._
 @import _root_.views.tools._
 
+
 @sidebar = {
-    @show_bud_sidebar( bud )
+    @show_bud_sidebar( parentBud )
 }
 
-@main( bud.entity().title, "buds" ) {
+@main( parentBud.entity().title, "createbuds" ) {
 
     @layout_fluid(right_sidebar = sidebar) {
     
-        @page_header(bud.entity().title)
-        
-        @helper.form(action = routes.Buds.saveBud(bud.entity().identity)) {
+        @page_header("New bud from: " + parentBud.entity().title)
+        @helper.form(action = routes.Buds.saveNewBud(parentBud.entity().identity)) {
             <fieldset>
                 @html5_text(
-                    editForm("title"),
+                    createForm("title"),
                     '_label -> "Title"
                 )
                 @html5_textarea(
-                    editForm("content"),
+                    createForm("content"),
                     '_label -> "Content",
                     '_id -> "mask"
                 )
                 <div id="editor-wrapper"></div>
             </fieldset>
+        
+            
         }
+        @markdown_editor( "content", "save" )
         <div class="form-actions">
             <input id="save" type="submit" class="btn btn-primary btn-mini" value="save" />
-            <a href="@routes.Buds.bud( bud.identity() )" class="btn btn-mini">cancel</a>
+            <a href="@routes.Buds.bud( parentBud.identity() )" class="btn btn-mini">cancel</a>
         </div>
-        @markdown_editor( "content", "save" )
+ 
     }
+    
 }

@@ -5,11 +5,13 @@ import play.mvc.Result;
 
 import org.qibud.Dummy;
 
+import play.mvc.With;
 import views.html.index;
 
 /**
  * Web front controller.
  */
+@With(RootBudContext.class)
 public class Application
         extends Controller
 {

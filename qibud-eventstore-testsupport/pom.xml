@@ -8,7 +8,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.qibud.eventstore-mongodb</artifactId>
+    <artifactId>org.qibud.eventstore-testsupport</artifactId>
     <name>${project.artifactId}</name>
 
     <dependencies>
@@ -18,19 +18,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.qibud.mongodb-support</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.qibud.eventstore-testsupport</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

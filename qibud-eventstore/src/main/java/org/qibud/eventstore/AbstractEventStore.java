@@ -11,9 +11,10 @@ import org.codeartisans.java.toolbox.Strings;
 import org.codeartisans.java.toolbox.exceptions.NullArgumentException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.qibud.eventstore.DomainEventAttachment.DataLocator;
 
 public abstract class AbstractEventStore
-        implements EventStore, EventSource, EventStream, EventStoreBackupRestore
+        implements EventStore
 {
 
     private final List<EventStreamListener> listeners = new CopyOnWriteArrayList<EventStreamListener>();
@@ -36,8 +37,15 @@ public abstract class AbstractEventStore
     }
 
     @Override
+    public DomainEventsSequence eventsSequence( int offset )
+    {
+        return eventsSequences( offset, 1 ).get( 0 );
+    }
+
+    @Override
     public final void storeEvents( DomainEventsSequence domainEventsSequence )
     {
+        NullArgumentException.ensureNotEmpty( "events in sequence", domainEventsSequence.events() );
         doStoreEvents( domainEventsSequence );
         dispatch( domainEventsSequence );
     }
@@ -76,7 +84,7 @@ public abstract class AbstractEventStore
             int restored = 0;
             while ( line != null ) {
                 JSONObject json = new JSONObject( line );
-                DomainEventsSequence events = DomainEventsSequenceImpl.fromJSON( json );
+                DomainEventsSequence events = DomainEventsSequenceImpl.fromJSON( json, attachmentDataLocator() );
                 doStoreEvents( events ); // No dispatch!
                 restored++;
                 line = bufferedReader.readLine();
@@ -95,5 +103,7 @@ public abstract class AbstractEventStore
     }
 
     protected abstract void doStoreEvents( DomainEventsSequence domainEventsSequence );
+
+    protected abstract DataLocator attachmentDataLocator();
 
 }

@@ -8,6 +8,8 @@ import java.util.List;
 public interface EventSource
 {
 
+    DomainEventsSequence eventsSequence( int offset );
+
     /**
      * @param offset Offset of the DomainEventsSequences to retrieve.
      * @param limit Maximum number of DomainEventsSequences to retrieve.

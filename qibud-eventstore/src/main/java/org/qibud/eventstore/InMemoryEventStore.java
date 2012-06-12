@@ -1,8 +1,12 @@
 package org.qibud.eventstore;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.qibud.eventstore.DomainEventAttachment.DataLocator;
 
 public class InMemoryEventStore
         extends AbstractEventStore
@@ -35,9 +39,33 @@ public class InMemoryEventStore
         return events.size();
     }
 
-    void clear()
+    @Override
+    public void clear()
     {
         events.clear();
+    }
+
+    @Override
+    protected DataLocator attachmentDataLocator()
+    {
+        return new DataLocator()
+        {
+
+            @Override
+            public InputStream data( String attachmentLocalIdentity )
+                    throws IOException
+            {
+                for ( DomainEventsSequence seq : events ) {
+                    for ( DomainEventAttachment att : seq.attachments() ) {
+                        if ( att.localIdentity().equals( attachmentLocalIdentity ) ) {
+                            return att.data();
+                        }
+                    }
+                }
+                return null;
+            }
+
+        };
     }
 
 }

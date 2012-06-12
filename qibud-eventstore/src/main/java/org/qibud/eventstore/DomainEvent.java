@@ -11,6 +11,11 @@ public interface DomainEvent
 {
 
     /**
+     * Identity of the DomainEvent, local to its DomainEventSequence.
+     */
+    String localIdentity();
+
+    /**
      * Name of the DomainEvent.
      */
     String name();

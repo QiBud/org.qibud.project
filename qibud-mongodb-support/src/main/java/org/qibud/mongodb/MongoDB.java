@@ -9,6 +9,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
+import com.mongodb.WriteConcern;
 
 import org.codeartisans.java.toolbox.Couple;
 import org.slf4j.Logger;
@@ -70,6 +71,15 @@ public class MongoDB
         String nextIdString = res.get( "count" ).toString();
 
         return Long.valueOf( nextIdString );
+    }
+
+    public static void deleteCounter( DB db, String collectionName, String counterName )
+    {
+        DBCollection collection = db.getCollection( collectionName );
+        DBObject query = new BasicDBObject();
+        query.put( "_id", counterName );
+        collection.remove( query, WriteConcern.FSYNC_SAFE );
+        LOGGER.info( "Removed DomainEvent counter!" );
     }
 
     private MongoDB()

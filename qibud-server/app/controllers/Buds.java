@@ -39,6 +39,9 @@ public class Buds
     public static Result budCreateForm( String identity )
     {
         Bud parent = BudsRepository.getInstance().findByIdentity( identity );
+        if ( parent == null ) {
+            return notFound();
+        }
         return ok( create_bud.render(parent, form(BudForm.class)) );     
     }
 

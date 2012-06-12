@@ -11,14 +11,17 @@ import com.mongodb.gridfs.GridFSDBFile;
 
 import buds.Bud;
 import buds.BudEntity;
+import buds.BudsFactory;
 import buds.BudsRepository;
 import forms.BudForm;
+import play.mvc.With;
 import storage.AttachmentsDB;
 import views.html.buds.all_buds;
+import views.html.buds.create_bud;
 import views.html.buds.show_bud;
 import views.html.buds.edit_bud;
 
-
+@With(RootBudContext.class)
 public class Buds
         extends Controller
 {
@@ -33,14 +36,28 @@ public class Buds
 
     static final Form<BudForm> budEntityForm = form( BudForm.class );
 
-    public static Result budCreateForm()
+    public static Result budCreateForm( String identity )
     {
-        return TODO;
+        Bud parent = BudsRepository.getInstance().findByIdentity( identity );
+        if ( parent == null ) {
+            return notFound();
+        }
+        return ok( create_bud.render(parent, form(BudForm.class)) );     
     }
 
-    public static Result saveNewBud()
+    public static Result saveNewBud(String identity)
     {
-        return TODO;
+        Bud parent = BudsRepository.getInstance().findByIdentity( identity );
+        Form<BudForm> filledForm = budForm.bindFromRequest();
+        
+        if(filledForm.hasErrors()) {
+            return badRequest(create_bud.render(parent,filledForm));
+        } else {
+            BudForm newBud = filledForm.get();
+            Bud createdBud = BudsFactory.getInstance().createNewBud(parent, newBud.title, newBud.content);
+            
+            return redirect( routes.Buds.bud( createdBud.identity() ) );
+        }
     }
 
     public static Result bud( String identity )

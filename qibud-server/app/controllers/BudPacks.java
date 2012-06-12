@@ -7,9 +7,12 @@ import play.mvc.Result;
 
 import buds.BudPack;
 import buds.BudPacksRepository;
+import play.mvc.With;
 import views.html.budpacks.all_budpacks;
 import views.html.budpacks.show_budpack;
 
+
+@With(RootBudContext.class)
 public class BudPacks
         extends Controller
 {

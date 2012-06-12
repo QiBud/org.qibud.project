@@ -14,6 +14,7 @@
         @page_header(bud.entity().title)
         
         <p>
+            <a href="@routes.Buds.budCreateForm( bud.identity() )" class="btn btn-mini btn-primary"><i class="icon-plus"></i> New</a>
             <a href="@routes.Buds.budEditForm( bud.identity() )" class="btn btn-mini btn-primary"><i class="icon-edit"></i> Edit</a>
             @if( bud.isRoot() ) {
                 <a class="btn btn-mini btn-danger disabled" title="You cannot delete the root Bud"><i class="icon-trash"></i> Delete</a>

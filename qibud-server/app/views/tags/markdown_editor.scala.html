@@ -1,0 +1,43 @@
+@(textAreaName: String, submitId: String)
+<!-- TODO remove after javascript unification -->
+<script src="/assets/javascripts/epiceditor.js"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+
+        function find_epic_textarea() {
+            return $( '.epiceditor-textarea', frames[$('iframe').filter(function() { return this.id.match(/epiceditor-.*/) } ).first().attr('id')].document ).first();
+        }
+        var $original_textarea = $('textarea[name=@textAreaName]');
+
+        // Hide original textarea
+        $original_textarea.hide();
+
+        // Inflate markdown editor
+        var ed = new EpicEditor( document.getElementById( 'editor-wrapper' ) );
+        ed.options({
+            file:{
+                name:'content',
+                defaultContent:'' },
+            themes:{
+                editor:'/themes/editor/epic-light.css',
+                preview:'/themes/preview/github.css'
+            },
+            basePath:'/assets/epic-editor',
+            focusOnLoad:true
+
+        }).load(function (){
+
+            // Fill markdown editor with content from original textarea
+            find_epic_textarea().val( $original_textarea.val() );
+
+            // Handle form submit
+            $('#@submitId').click( function ( event ) {
+                event.preventDefault();
+                // Fill original textarea with markdown editor content
+                $original_textarea.val( find_epic_textarea().val() );  
+                $('form').submit();
+            });
+        });
+
+        });
+</script>

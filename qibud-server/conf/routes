@@ -7,8 +7,8 @@ GET     /                                               controllers.Application.
 
 
 GET     /buds                                           controllers.Buds.buds
-GET     /buds/new                                       controllers.Buds.budCreateForm
-POST    /buds                                           controllers.Buds.saveNewBud
+GET     /bud/:identity/new                              controllers.Buds.budCreateForm(identity: String)
+POST    /bud/:identity/create                           controllers.Buds.saveNewBud(identity: String)
 # GET     /buds/:module
 # GET     /buds/:module/:role
 

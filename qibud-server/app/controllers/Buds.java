@@ -48,6 +48,9 @@ public class Buds
     public static Result saveNewBud(String identity)
     {
         Bud parent = BudsRepository.getInstance().findByIdentity( identity );
+        if ( parent == null ) {
+            return notFound();
+        }
         Form<BudForm> filledForm = budForm.bindFromRequest();
         
         if(filledForm.hasErrors()) {
@@ -102,9 +105,8 @@ public class Buds
 
     public static Result budEditForm( String identity )
     {
-        // Sam, see https://github.com/playframework/Play20/blob/master/samples/java/forms/app/controllers/Contacts.java
-        Bud bud = BudsRepository.getInstance().findByIdentity( identity );
         
+        Bud bud = BudsRepository.getInstance().findByIdentity( identity );
         
         if ( bud == null ) {
             return notFound();

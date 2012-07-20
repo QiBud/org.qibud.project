@@ -33,7 +33,7 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j</artifactId>
-            <version>1.7</version>
+            <version>1.7.2</version>
         </dependency>
         <dependency>
             <groupId>net.vz.mongodb.jackson</groupId>
@@ -88,7 +88,7 @@
             <plugin>
                 <groupId>de.akquinet.innovation.play2</groupId>
                 <artifactId>play2-maven-plugin</artifactId>
-                <version>1.1.0</version>
+                <version>1.2.1-SNAPSHOT</version>
                 <extensions>true</extensions>
             </plugin>
             <plugin>
@@ -114,5 +114,37 @@
         </plugins>
 
     </build>
+
+    <profiles>
+        <profile>
+            <!-- Continuous Integration -->
+            <id>ci</id>
+            <build>
+                <plugins>
+                    <!-- Automatic Play2 installation -->
+                    <plugin>
+                        <groupId>de.akquinet.innovation.play2</groupId>
+                        <artifactId>play2-maven-plugin</artifactId>
+                        <configuration>
+                            <play2Home>${user.home}/opt/play-${play2.version}</play2Home>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>ci-play-installation</id>
+                                <goals>
+                                    <goal>install-play</goal>
+                                </goals>
+                                <phase>pre-clean</phase>
+                                <configuration>
+                                    <play2version>${play2.version}</play2version>
+                                    <play2basedir>${user.home}/opt</play2basedir>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

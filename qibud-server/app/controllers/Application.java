@@ -18,7 +18,7 @@ public class Application
 
     public static Result index()
     {
-        Dummy dummy = new Dummy();
+        // Dummy dummy = new Dummy();
         return ok( index.render() );
     }
 

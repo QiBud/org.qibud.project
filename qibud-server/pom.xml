@@ -119,9 +119,6 @@
         <profile>
             <!-- Continuous Integration -->
             <id>ci</id>
-            <properties>
-                <path>/opt/jdk/jdk1.6.latest/bin</path>
-            </properties>
             <build>
                 <plugins>
                     <!-- Automatic Play2 installation -->

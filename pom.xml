@@ -16,7 +16,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <play2.version>2.0.1</play2.version>
+        <play2.version>2.0.2</play2.version>
     </properties>
 
     <repositories>

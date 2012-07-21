@@ -120,7 +120,7 @@
             <!-- Continuous Integration -->
             <id>ci</id>
             <properties>
-                <path>${env.PATH}</path>
+                <path>/opt/jdk/jdk1.6.latest/bin</path>
             </properties>
             <build>
                 <plugins>

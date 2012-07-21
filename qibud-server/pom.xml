@@ -119,6 +119,9 @@
         <profile>
             <!-- Continuous Integration -->
             <id>ci</id>
+            <properties>
+                <path>${env.PATH}</path>
+            </properties>
             <build>
                 <plugins>
                     <!-- Automatic Play2 installation -->

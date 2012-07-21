@@ -4,8 +4,7 @@ import java.lang.reflect.Method;
 import play.Application;
 import play.GlobalSettings;
 import play.mvc.Action;
-import play.mvc.Http.Context;
-import play.mvc.Http.Request;
+import play.mvc.Http;
 import play.mvc.Result;
 
 import org.qibud.eventstore.Usecase;
@@ -53,7 +52,7 @@ public class Global
     }
 
     @Override
-    public Action onRequest( Request request, Method actionMethod )
+    public Action onRequest( Http.Request request, Method actionMethod )
     {
         Usecase annotation = actionMethod.getAnnotation( Usecase.class );
         final String usecase;
@@ -66,7 +65,7 @@ public class Global
         {
 
             @Override
-            public Result call( Context ctx )
+            public Result call( Http.Context ctx )
                     throws Throwable
             {
                 LOGGER.debug( "Before request with Usecase '{}'", usecase );

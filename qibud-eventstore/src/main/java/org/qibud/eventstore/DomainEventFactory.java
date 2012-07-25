@@ -30,10 +30,18 @@ public class DomainEventFactory
     /**
      * Create a new DomainEvent.
      */
-    public final DomainEvent newDomainEvent( String name, String data )
+    public final DomainEvent newDomainEvent( Class<?> type, String data )
+    {
+        return newDomainEvent( type.getName(), data );
+    }
+
+    /**
+     * Create a new DomainEvent.
+     */
+    public final DomainEvent newDomainEvent( String type, String data )
     {
         try {
-            return newDomainEvent( name, new JSONObject( data ) );
+            return newDomainEvent( type, new JSONObject( data ) );
         } catch ( JSONException ex ) {
             throw new IllegalArgumentException( "Event data is not valid JSON", ex );
         }
@@ -42,19 +50,35 @@ public class DomainEventFactory
     /**
      * Create a new DomainEvent.
      */
-    public final DomainEvent newDomainEvent( String name, Map<String, String> data )
+    public final DomainEvent newDomainEvent( String type, Map<String, String> data )
     {
-        return newDomainEvent( name, new JSONObject( data ) );
+        return newDomainEvent( type, new JSONObject( data ) );
     }
 
     /**
      * Create a new DomainEvent.
      */
-    public final DomainEvent newDomainEvent( String name, JSONObject data )
+    public final DomainEvent newDomainEvent( Class<?> type, Map<String, String> data )
     {
-        NullArgumentException.ensureNotEmpty( "name", name );
+        return newDomainEvent( type, new JSONObject( data ) );
+    }
+
+    /**
+     * Create a new DomainEvent.
+     */
+    public final DomainEvent newDomainEvent( Class<?> type, JSONObject data )
+    {
+        return newDomainEvent( type.getName(), data );
+    }
+
+    /**
+     * Create a new DomainEvent.
+     */
+    public final DomainEvent newDomainEvent( String type, JSONObject data )
+    {
+        NullArgumentException.ensureNotEmpty( "type", type );
         NullArgumentException.ensureNotNull( "data", data );
-        return new DomainEventImpl( localIdGen.newIdentity(), name, data );
+        return new DomainEventImpl( localIdGen.newIdentity(), type, data );
     }
 
     /**

@@ -11,31 +11,20 @@
  * limitations under the License.
  *
  */
-package org.qibud.eventstore;
+package org.qibud.eventstore.test;
 
-import org.json.JSONObject;
+import org.qibud.eventstore.EventStore;
+import org.qibud.eventstore.InMemoryEventStore;
 
-/**
- * DomainEvent.
- * 
- * A DomainEvent occurs in a DomainEventsSequence.
- */
-public interface DomainEvent
+public class InMemoryEventStoreTest
+        extends AbstractEventStoreTest
 {
 
-    /**
-     * Identity of the DomainEvent, local to its DomainEventSequence.
-     */
-    String localIdentity();
-
-    /**
-     * Name of the DomainEvent.
-     */
-    String type();
-
-    /**
-     * DomainEvent data.
-     */
-    JSONObject data();
+    @Override
+    protected EventStore newEventStore()
+            throws Exception
+    {
+        return new InMemoryEventStore();
+    }
 
 }

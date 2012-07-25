@@ -41,6 +41,26 @@ public abstract class AbstractEventStoreTest
     protected abstract EventStore newEventStore()
             throws Exception;
 
+    interface FirstEvent
+    {
+    }
+
+    interface SecondEvent
+    {
+    }
+
+    interface ThirdEvent
+    {
+    }
+
+    interface FourthEvent
+    {
+    }
+
+    interface MyEvent
+    {
+    }
+
     @Test
     public void globalTestWithoutAttachments()
             throws Exception
@@ -68,8 +88,8 @@ public abstract class AbstractEventStoreTest
 
             DomainEventsSequence events = new DomainEventsSequenceBuilder().withUsecase( "EventStore unit test" ).
                     withUser( "Build System" ).
-                    withEvents( eventFactory.newDomainEvent( "First Event", testData ),
-                                eventFactory.newDomainEvent( "Second Event", testData ) ).
+                    withEvents( eventFactory.newDomainEvent( FirstEvent.class, testData ),
+                                eventFactory.newDomainEvent( SecondEvent.class, testData ) ).
                     build();
 
             eventStore.storeEvents( events );
@@ -81,8 +101,8 @@ public abstract class AbstractEventStoreTest
 
             events = new DomainEventsSequenceBuilder().withUsecase( "EventStore unit test" ).
                     withUser( "Build System" ).
-                    withEvents( eventFactory.newDomainEvent( "Third Event", testData ),
-                                eventFactory.newDomainEvent( "Fourth Event", testData ) ).
+                    withEvents( eventFactory.newDomainEvent( ThirdEvent.class, testData ),
+                                eventFactory.newDomainEvent( FourthEvent.class, testData ) ).
                     build();
 
             eventStore.storeEvents( events );
@@ -149,7 +169,7 @@ public abstract class AbstractEventStoreTest
 
             } );
 
-            DomainEvent event = eventFactory.newDomainEvent( "My event", testData );
+            DomainEvent event = eventFactory.newDomainEvent( MyEvent.class, testData );
             event.data().put( "single-attachment", attachment.localIdentity() );
 
             DomainEventsSequence sequence = new DomainEventsSequenceBuilder().withUsecase( "EventStore attachments test" ).
@@ -166,14 +186,14 @@ public abstract class AbstractEventStoreTest
 
             DomainEventsSequence fetchedSequence = eventStore.eventsSequence( 0 );
             assertFalse( "fetched sequence attachments empty", fetchedSequence.attachments().isEmpty() );
-            assertEquals( "fetched seq att size", 1, fetchedSequence.attachments().size() );
+            assertEquals( "fetched sequence attachments size", 1, fetchedSequence.attachments().size() );
 
             DomainEventAttachment fetchedAttachment = fetchedSequence.attachments().get( 0 );
             StringWriter writer = new StringWriter();
             InputStreamReader reader = new InputStreamReader( fetchedAttachment.data() );
             IO.copy( reader, writer );
             String readAttachment = writer.toString();
-            assertEquals( "fetched att data is correct", "TEST DATA", readAttachment );
+            assertEquals( "fetched attachment data is correct", "TEST DATA", readAttachment );
         } finally {
             if ( eventStore != null ) {
                 eventStore.clear();

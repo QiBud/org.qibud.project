@@ -102,7 +102,7 @@ import org.qibud.eventstore.DomainEventAttachment.DataProviderLocator;
                 for ( DomainEvent event : events ) {
                     JSONObject eventJson = new JSONObject();
                     eventJson.put( "local_identity", event.localIdentity() );
-                    eventJson.put( "name", event.name() );
+                    eventJson.put( "type", event.type() );
                     eventJson.put( "data", event.data() );
                     eventsJson.put( eventJson );
                 }
@@ -125,35 +125,40 @@ import org.qibud.eventstore.DomainEventAttachment.DataProviderLocator;
     }
 
     /* package */ static DomainEventsSequence fromJSON( JSONObject json, DataLocator dataLocator )
-            throws JSONException
     {
-        // Base data
-        long timestamp = json.getLong( "timestamp" );
-        String usecase = json.getString( "usecase" );
-        String user = json.optString( "user" );
+        try {
 
-        // Events
-        JSONArray eventsArray = json.getJSONArray( "events" );
-        List<DomainEvent> events = new ArrayList<DomainEvent>();
-        for ( int index = 0; index < eventsArray.length(); index++ ) {
-            JSONObject eventJson = eventsArray.getJSONObject( index );
-            String localIdentity = eventJson.getString( "local_identity" );
-            String name = eventJson.getString( "name" );
-            JSONObject data = eventJson.getJSONObject( "data" );
-            events.add( new DomainEventImpl( localIdentity, name, data ) );
+            // Base data
+            long timestamp = json.getLong( "timestamp" );
+            String usecase = json.getString( "usecase" );
+            String user = json.optString( "user" );
+
+            // Events
+            JSONArray eventsArray = json.getJSONArray( "events" );
+            List<DomainEvent> events = new ArrayList<DomainEvent>();
+            for ( int index = 0; index < eventsArray.length(); index++ ) {
+                JSONObject eventJson = eventsArray.getJSONObject( index );
+                String localIdentity = eventJson.getString( "local_identity" );
+                String type = eventJson.getString( "type" );
+                JSONObject data = eventJson.getJSONObject( "data" );
+                events.add( new DomainEventImpl( localIdentity, type, data ) );
+            }
+
+            // Attachments
+            JSONArray attachmentsArray = json.getJSONArray( "attachments" );
+            List<DomainEventAttachment> attachments = new ArrayList<DomainEventAttachment>();
+            for ( int index = 0; index < attachmentsArray.length(); index++ ) {
+                String attachmentLocalIdentity = attachmentsArray.getString( index );
+                DataProvider dataProvider = new DataProviderLocator( attachmentLocalIdentity, dataLocator );
+                DomainEventAttachment attachment = new DomainEventAttachment( attachmentLocalIdentity, dataProvider );
+                attachments.add( attachment );
+            }
+
+            return new DomainEventsSequenceImpl( timestamp, usecase, Strings.isEmpty( user ) ? null : user, events, attachments );
+
+        } catch ( JSONException ex ) {
+            throw new EventStoreException( "Wrong event data: " + ex.getMessage(), ex );
         }
-
-        // Attachments
-        JSONArray attachmentsArray = json.getJSONArray( "attachments" );
-        List<DomainEventAttachment> attachments = new ArrayList<DomainEventAttachment>();
-        for ( int index = 0; index < attachmentsArray.length(); index++ ) {
-            String attachmentLocalIdentity = attachmentsArray.getString( index );
-            DataProvider dataProvider = new DataProviderLocator( attachmentLocalIdentity, dataLocator );
-            DomainEventAttachment attachment = new DomainEventAttachment( attachmentLocalIdentity, dataProvider );
-            attachments.add( attachment );
-        }
-
-        return new DomainEventsSequenceImpl( timestamp, usecase, Strings.isEmpty( user ) ? null : user, events, attachments );
     }
 
 }

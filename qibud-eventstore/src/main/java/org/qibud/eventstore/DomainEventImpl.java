@@ -21,15 +21,15 @@ import org.json.JSONObject;
 
     private final String localIdentity;
 
-    private final String name;
+    private final String type;
 
     private final JSONObject data;
 
 
-    /* package */ DomainEventImpl( String localIdentity, String name, JSONObject data )
+    /* package */ DomainEventImpl( String localIdentity, String type, JSONObject data )
     {
         this.localIdentity = localIdentity;
-        this.name = name;
+        this.type = type;
         this.data = data;
     }
 
@@ -40,9 +40,9 @@ import org.json.JSONObject;
     }
 
     @Override
-    public String name()
+    public String type()
     {
-        return name;
+        return type;
     }
 
     @Override

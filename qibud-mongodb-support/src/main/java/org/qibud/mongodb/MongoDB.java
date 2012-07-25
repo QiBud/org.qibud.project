@@ -33,7 +33,9 @@ public class MongoDB
     public static Mongo connectToMongoDB( String host, Integer port )
     {
         try {
-            return new Mongo( host, port );
+            Mongo mongo = new Mongo( host, port );
+            LOGGER.info( "Connected to MongoDB on {}:{}", host, port );
+            return mongo;
         } catch ( UnknownHostException ex ) {
             throw new MongoException( ex.getMessage(), ex );
         }
@@ -58,9 +60,9 @@ public class MongoDB
         if ( cursor.count() < 1 ) {
             domainEventCounter.put( "count", 0L );
             collection.insert( domainEventCounter );
-            LOGGER.info( "Inserted initial DomainEvent counter with a 0 value." );
+            LOGGER.info( "Inserted initial counter with a 0 value." );
         } else {
-            LOGGER.info( "DomainEvent counter already exists (" + cursor.next().get( "count" ) + "), doing nothing." );
+            LOGGER.info( "Counter already exists ({}), doing nothing.", cursor.next().get( "count" ) );
         }
     }
 
@@ -87,7 +89,7 @@ public class MongoDB
         DBObject query = new BasicDBObject();
         query.put( "_id", counterName );
         collection.remove( query, WriteConcern.FSYNC_SAFE );
-        LOGGER.info( "Removed DomainEvent counter!" );
+        LOGGER.info( "Removed counter '{}' from '{}' collection!", counterName, collectionName );
     }
 
     private MongoDB()

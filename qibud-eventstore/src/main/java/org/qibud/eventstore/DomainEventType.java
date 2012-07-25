@@ -18,6 +18,8 @@ import org.json.JSONObject;
 public interface DomainEventType
 {
 
-    JSONObject data();
+    String eventType();
+
+    JSONObject eventData();
 
 }

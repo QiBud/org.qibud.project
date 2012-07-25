@@ -32,7 +32,7 @@ public class DomainEventFactory
      */
     public final DomainEvent newDomainEvent( DomainEventType domainEvent )
     {
-        return newDomainEvent( domainEvent.getClass(), domainEvent.data() );
+        return newDomainEvent( domainEvent.eventType(), domainEvent.eventData() );
     }
 
     /**

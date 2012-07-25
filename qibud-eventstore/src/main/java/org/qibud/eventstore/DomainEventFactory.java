@@ -30,6 +30,14 @@ public class DomainEventFactory
     /**
      * Create a new DomainEvent.
      */
+    public final DomainEvent newDomainEvent( DomainEventType domainEvent )
+    {
+        return newDomainEvent( domainEvent.getClass(), domainEvent.data() );
+    }
+
+    /**
+     * Create a new DomainEvent.
+     */
     public final DomainEvent newDomainEvent( Class<?> type, String data )
     {
         return newDomainEvent( type.getName(), data );

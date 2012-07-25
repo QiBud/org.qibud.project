@@ -11,26 +11,13 @@
  * limitations under the License.
  *
  */
-package controllers;
+package org.qibud.eventstore;
 
-import play.mvc.Action;
-import play.mvc.Http.Context;
-import play.mvc.Result;
+import org.json.JSONObject;
 
-/**
- * Compose EventStore handling.
- * 
- * Compose your Actions with this Aspect to record domain events in EventStore.
- */
-public class EventStoreHttpAspect
-        extends Action.Simple
+public interface DomainEventType
 {
 
-    @Override
-    public Result call( Context ctx )
-            throws Throwable
-    {
-        return delegate.call( ctx );
-    }
+    JSONObject data();
 
 }

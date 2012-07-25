@@ -8,3 +8,4 @@ dist
 lib
 
 qibud-server/graphdb
+/qibud-server/.settings/

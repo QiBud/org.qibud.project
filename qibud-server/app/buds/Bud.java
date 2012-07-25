@@ -1,13 +1,24 @@
+/*
+ * Copyright (c) 2012, Paul Merlin. All Rights Reserved.
+ * Copyright (c) 2012, Samuel Loup. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package buds;
 
+import com.mongodb.gridfs.GridFSDBFile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.mongodb.gridfs.GridFSDBFile;
-
 import org.neo4j.graphdb.Node;
-
 import roles.Role;
 import storage.AttachmentsDB;
 import storage.GraphDB;
@@ -43,7 +54,7 @@ public class Bud
 
     public BudNode graphNode()
     {
-        synchronized ( this ) {
+        synchronized( this ) {
             if ( node == null ) {
                 Node underlyingNode = GraphDB.getInstance().getBudNode( entity.identity );
                 node = new BudNode( underlyingNode );
@@ -54,7 +65,7 @@ public class Bud
 
     public List<BudAttachment> attachments()
     {
-        synchronized ( this ) {
+        synchronized( this ) {
             if ( attachments == null ) {
                 List<GridFSDBFile> budDBFiles = AttachmentsDB.getInstance().getBudDBFiles( entity.identity );
                 List<BudAttachment> budAttachments = new ArrayList<BudAttachment>();

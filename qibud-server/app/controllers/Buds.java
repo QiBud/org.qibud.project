@@ -1,30 +1,40 @@
+/*
+ * Copyright (c) 2012, Paul Merlin. All Rights Reserved.
+ * Copyright (c) 2012, Samuel Loup. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package controllers;
-
-import java.util.List;
-
-import play.data.Form;
-import play.mvc.Controller;
-import play.mvc.Result;
-
-import com.mongodb.DBObject;
-import com.mongodb.gridfs.GridFSDBFile;
 
 import buds.Bud;
 import buds.BudEntity;
 import buds.BudsRepository;
+import com.mongodb.DBObject;
+import com.mongodb.gridfs.GridFSDBFile;
 import forms.BudForm;
+import java.util.List;
+import play.data.Form;
+import play.mvc.Controller;
+import play.mvc.Result;
 import storage.AttachmentsDB;
 import views.html.buds.all_buds;
-import views.html.buds.show_bud;
 import views.html.buds.edit_bud;
-
+import views.html.buds.show_bud;
 
 public class Buds
         extends Controller
 {
 
-    final static Form<BudForm> budForm = form(BudForm.class);
-    
+    final static Form<BudForm> budForm = form( BudForm.class );
+
     public static Result buds()
     {
         List<Bud> allBuds = BudsRepository.getInstance().findAll();
@@ -87,36 +97,36 @@ public class Buds
     {
         // Sam, see https://github.com/playframework/Play20/blob/master/samples/java/forms/app/controllers/Contacts.java
         Bud bud = BudsRepository.getInstance().findByIdentity( identity );
-        
-        
+
+
         if ( bud == null ) {
             return notFound();
         }
-        
-        
-        return ok( edit_bud.render( bud, form(BudForm.class).fill(BudForm.filledWith(bud))) );
+
+
+        return ok( edit_bud.render( bud, form( BudForm.class ).fill( BudForm.filledWith( bud ) ) ) );
     }
 
-    public static Result saveBud(String identity)
+    public static Result saveBud( String identity )
     {
         Bud bud = BudsRepository.getInstance().findByIdentity( identity );
 
         if ( bud == null ) {
             return notFound();
         }
-        
+
         Form<BudForm> filledForm = budForm.bindFromRequest();
-        
-        if(filledForm.hasErrors()) {
-            return badRequest(edit_bud.render(bud,filledForm));
+
+        if ( filledForm.hasErrors() ) {
+            return badRequest( edit_bud.render( bud, filledForm ) );
         } else {
             BudForm updated = filledForm.get();
             bud.entity().title = updated.title;
             bud.entity().content = updated.content;
-            BudEntity.save(bud.entity());
+            BudEntity.save( bud.entity() );
             return redirect( routes.Buds.bud( bud.identity() ) );
         }
-        
+
     }
 
     public static Result deleteBud( String identity )

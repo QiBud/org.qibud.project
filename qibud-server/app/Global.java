@@ -34,36 +34,51 @@ public class Global
 
     private static final Logger LOGGER = LoggerFactory.getLogger( "org.qibud.server" );
 
+    private boolean started = false;
+
     @Override
     public void onStart( Application aplctn )
     {
         super.onStart( aplctn );
-        LOGGER.info( "QiBud Server starting ..." );
+        ensureStarted();
+    }
 
-        EntitiesDB.getInstance().start();
-        GraphDB.getInstance().start();
-        AttachmentsDB.getInstance().start();
+    private synchronized void ensureStarted()
+    {
+        if ( !started ) {
 
-        Bud rootBud = BudsRepository.getInstance().findRootBud();
-        if ( rootBud == null ) {
-            rootBud = BudsFactory.getInstance().createRootBud();
+            LOGGER.info( "QiBud Server starting ..." );
+
+            EntitiesDB.getInstance().start();
+            GraphDB.getInstance().start();
+            AttachmentsDB.getInstance().start();
+
+            Bud rootBud = BudsRepository.getInstance().findRootBud();
+            if ( rootBud == null ) {
+                rootBud = BudsFactory.getInstance().createRootBud();
+            }
+
+            started = true;
+            LOGGER.info( "QiBud Server Started with Root Bud: {}", rootBud );
+
         }
-
-        LOGGER.info( "QiBud Server Started with Root Bud: {}", rootBud );
     }
 
     @Override
     public void onStop( Application aplctn )
     {
-        GraphDB.getInstance().shutdown();
-        AttachmentsDB.getInstance().shutdown();
-        EntitiesDB.getInstance().shutdown();
+        if ( started ) {
+            GraphDB.getInstance().shutdown();
+            AttachmentsDB.getInstance().shutdown();
+            EntitiesDB.getInstance().shutdown();
+        }
         super.onStop( aplctn );
     }
 
     @Override
     public Action onRequest( Http.Request request, Method actionMethod )
     {
+        ensureStarted();
         Usecase annotation = actionMethod.getAnnotation( Usecase.class );
         final String usecase;
         if ( annotation == null ) {

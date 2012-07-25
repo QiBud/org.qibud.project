@@ -16,7 +16,8 @@ import buds.Bud;
 import buds.BudsFactory;
 import buds.BudsRepository;
 import java.lang.reflect.Method;
-import org.qibud.eventstore.EventStore;
+import org.qibud.eventstore.DomainEventsSequence;
+import org.qibud.eventstore.DomainEventsSequenceBuilder;
 import org.qibud.eventstore.Usecase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,10 +85,14 @@ public class Global
         super.onStop( aplctn );
     }
 
+    public static final String DOMAIN_EVENTS_SEQ_BUILDER_ARG = "domain-events-sequence-builder";
+
     @Override
     public Action onRequest( Http.Request request, Method actionMethod )
     {
         ensureStarted();
+
+        // Gather Usecase from controller methods annotation or create a generic one
         Usecase annotation = actionMethod.getAnnotation( Usecase.class );
         final String usecase;
         if ( annotation == null ) {
@@ -95,6 +100,8 @@ public class Global
         } else {
             usecase = annotation.value();
         }
+
+        // Wrap controller action to handle domain events
         return new Action.Simple()
         {
 
@@ -103,15 +110,31 @@ public class Global
                     throws Throwable
             {
                 LOGGER.debug( "Before request with Usecase '{}'", usecase );
+
+                DomainEventsSequenceBuilder eventsSequenceBuilder = new DomainEventsSequenceBuilder().withUsecase( usecase ).withUser( "QiBud System" );
+                ctx.args.put( DOMAIN_EVENTS_SEQ_BUILDER_ARG, eventsSequenceBuilder );
+
                 try {
+
                     Result result = delegate.call( ctx );
                     LOGGER.debug( "After request with Usecase '{}'", usecase );
+
+                    DomainEventsSequence eventsSequence = eventsSequenceBuilder.build();
+                    if ( !eventsSequence.events().isEmpty() ) {
+                        EventSourcingDB.getInstance().eventStore().storeEvents( eventsSequence );
+                    }
+
                     return result;
+
                 } catch ( Throwable ex ) {
+
                     LOGGER.debug( "Error after request with Usecase '{}'", usecase, ex );
                     throw ex;
+
                 } finally {
+
                     LOGGER.debug( "Finally after request with Usecase '{}'", usecase );
+
                 }
             }
 

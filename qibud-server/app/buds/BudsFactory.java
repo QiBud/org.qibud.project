@@ -43,6 +43,10 @@ public class BudsFactory
         return instance;
     }
 
+    private BudsFactory()
+    {
+    }
+
     // FIXME This is a naïve implementation
     public Bud createNewBud( Bud creationBud, String title, String content )
     {
@@ -121,10 +125,6 @@ public class BudsFactory
 
             throw ex;
         }
-    }
-
-    private BudsFactory()
-    {
     }
 
 }

@@ -15,6 +15,7 @@ package org.qibud.eventstore;
 
 import java.util.Map;
 import org.codeartisans.java.toolbox.exceptions.NullArgumentException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.qibud.eventstore.DomainEventAttachment.DataProvider;
 
@@ -25,6 +26,18 @@ public class DomainEventFactory
 {
 
     private final DomainEventIdentityGenerator localIdGen = new DomainEventIdentityGenerator();
+
+    /**
+     * Create a new DomainEvent.
+     */
+    public final DomainEvent newDomainEvent( String name, String data )
+    {
+        try {
+            return newDomainEvent( name, new JSONObject( data ) );
+        } catch ( JSONException ex ) {
+            throw new IllegalArgumentException( "Event data is not valid JSON", ex );
+        }
+    }
 
     /**
      * Create a new DomainEvent.

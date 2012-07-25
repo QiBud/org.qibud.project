@@ -19,6 +19,10 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import java.net.UnknownHostException;
 import org.apache.commons.lang.StringUtils;
+import org.qibud.eventstore.DomainEventsSequence;
+import org.qibud.eventstore.EventStream;
+import org.qibud.eventstore.EventStreamListener;
+import org.qibud.eventstore.EventStreamRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.Play;
@@ -46,6 +50,7 @@ import utils.Threads;
  * https://github.com/vznet/play-mongo-jackson-mapper/blob/master/src/main/scala/play/modules/mongodb/jackson/MongoDB.scala
  */
 public class EntitiesDB
+        implements EventStreamListener
 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger( EntitiesDB.class );
@@ -70,7 +75,7 @@ public class EntitiesDB
     {
     }
 
-    public void start()
+    public void start( EventStream eventStream )
     {
         String servers = Play.application().configuration().getString( CONFIG_SERVERS );
         String credentials = Play.application().configuration().getString( CONFIG_CREDENTIALS );
@@ -79,9 +84,10 @@ public class EntitiesDB
             throw new QiBudException( "EntitiesDB servers is empty, check your configuration (" + CONFIG_SERVERS + ")" );
         }
         if ( StringUtils.isEmpty( database ) ) {
-            throw new QiBudException( "EntitiesDB database name is empty, check your configuration (" + CONFIG_SERVERS + ")" );
+            throw new QiBudException( "EntitiesDB database name is empty, check your configuration (" + CONFIG_DB + ")" );
         }
-        registerShutdownHook( servers, credentials, database, !Play.isProd() );
+        EventStreamRegistration registration = eventStream.registerEventStreamListener( this );
+        registerShutdownHook( servers, credentials, database, registration, !Play.isProd() );
         LOGGER.info( "EntitiesDB started" );
     }
 
@@ -90,7 +96,7 @@ public class EntitiesDB
         LOGGER.info( "EntitiesDB stopped" );
     }
 
-    private void registerShutdownHook( final String servers, final String credentials, final String dbName, final boolean clear )
+    private void registerShutdownHook( final String servers, final String credentials, final String dbName, final EventStreamRegistration registration, final boolean clear )
     {
         if ( !Threads.isThreadRegisteredAsShutdownHook( "entitiesdb-shutdown" ) ) {
             Runtime.getRuntime().addShutdownHook( new Thread( new Runnable()
@@ -101,7 +107,7 @@ public class EntitiesDB
                 {
                     shutdown();
                     if ( clear ) {
-                        clear( servers, credentials, dbName );
+                        clear( servers, credentials, dbName, registration );
                     }
                 }
 
@@ -109,9 +115,10 @@ public class EntitiesDB
         }
     }
 
-    private void clear( String servers, String credentials, String dbName )
+    private void clear( String servers, String credentials, String dbName, EventStreamRegistration registration )
     {
         try {
+            registration.unregister();
             Mongo mongoInstance = new Mongo( servers );
             DB entitiesDBInstance = mongoInstance.getDB( dbName );
             entitiesDBInstance.dropDatabase();
@@ -123,6 +130,12 @@ public class EntitiesDB
             throw new QiBudException( ex );
         }
 
+    }
+
+    @Override
+    public void onDomainEventsSequence( DomainEventsSequence events )
+    {
+        // Handle Domain Events to update current state
     }
 
 }

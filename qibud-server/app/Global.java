@@ -16,6 +16,7 @@ import buds.Bud;
 import buds.BudsFactory;
 import buds.BudsRepository;
 import java.lang.reflect.Method;
+import org.qibud.eventstore.EventStore;
 import org.qibud.eventstore.Usecase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +51,15 @@ public class Global
 
             LOGGER.info( "QiBud Server starting ..." );
 
-            EventSourcingDB.getInstance().start();
-            EntitiesDB.getInstance().start();
-            GraphDB.getInstance().start();
-            AttachmentsDB.getInstance().start();
+            EventSourcingDB eventSourcing = EventSourcingDB.getInstance();
+            EntitiesDB entities = EntitiesDB.getInstance();
+            AttachmentsDB attachments = AttachmentsDB.getInstance();
+            GraphDB graph = GraphDB.getInstance();
+
+            eventSourcing.start();
+            entities.start( eventSourcing.eventStore() );
+            attachments.start();
+            graph.start();
 
             Bud rootBud = BudsRepository.getInstance().findRootBud();
             if ( rootBud == null ) {

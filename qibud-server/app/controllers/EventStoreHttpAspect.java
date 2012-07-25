@@ -20,7 +20,7 @@ import play.mvc.Result;
 /**
  * Compose EventStore handling.
  * 
- * Compose your Actions with this Aspect and record 
+ * Compose your Actions with this Aspect to record domain events in EventStore.
  */
 public class EventStoreHttpAspect
         extends Action.Simple

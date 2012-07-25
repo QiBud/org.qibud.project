@@ -26,6 +26,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import storage.AttachmentsDB;
 import storage.EntitiesDB;
+import storage.EventSourcingDB;
 import storage.GraphDB;
 
 public class Global
@@ -49,6 +50,7 @@ public class Global
 
             LOGGER.info( "QiBud Server starting ..." );
 
+            EventSourcingDB.getInstance().start();
             EntitiesDB.getInstance().start();
             GraphDB.getInstance().start();
             AttachmentsDB.getInstance().start();
@@ -71,6 +73,7 @@ public class Global
             GraphDB.getInstance().shutdown();
             AttachmentsDB.getInstance().shutdown();
             EntitiesDB.getInstance().shutdown();
+            EventSourcingDB.getInstance().shutdown();
         }
         super.onStop( aplctn );
     }

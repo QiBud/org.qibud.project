@@ -31,7 +31,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.tika.Tika;
 import org.apache.tika.metadata.Metadata;
 import org.bson.types.ObjectId;
-import org.codeartisans.java.toolbox.Couple;
 import org.qibud.mongodb.MongoDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,9 +96,8 @@ public class AttachmentsDB
 
             registerShutdownHook( host, port, dbName, !Play.isProd() );
 
-            Couple<Mongo, DB> mongoCouple = MongoDB.connectToMongoDB( host, port, dbName );
-            mongo = mongoCouple.left();
-            attachmentsDB = mongoCouple.right();
+            mongo = MongoDB.connectToMongoDB( host, port );
+            attachmentsDB = mongo.getDB( dbName );
 
             LOGGER.info( "AttachmentsDB started" );
         }
@@ -136,9 +134,10 @@ public class AttachmentsDB
 
     private void clear( String host, Integer port, String dbName )
     {
-        Couple<Mongo, DB> mongoCouple = MongoDB.connectToMongoDB( host, port, dbName );
-        mongoCouple.right().dropDatabase();
-        mongoCouple.left().close();
+        Mongo mongo = MongoDB.connectToMongoDB( host, port );
+        DB db = mongo.getDB( dbName );
+        db.dropDatabase();
+        mongo.close();
         LOGGER.warn( "AttachmentsDB cleared!" );
     }
 

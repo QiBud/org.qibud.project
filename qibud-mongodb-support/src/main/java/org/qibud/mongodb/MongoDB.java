@@ -22,7 +22,6 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import java.net.UnknownHostException;
-import org.codeartisans.java.toolbox.Couple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,12 +30,10 @@ public class MongoDB
 
     private static final Logger LOGGER = LoggerFactory.getLogger( "org.qibud.mongodb" );
 
-    public static Couple<Mongo, DB> connectToMongoDB( String host, Integer port, String dbName )
+    public static Mongo connectToMongoDB( String host, Integer port )
     {
         try {
-            Mongo mongoInstance = new Mongo( host, port );
-            DB attachmentsDBInstance = mongoInstance.getDB( dbName );
-            return new Couple<Mongo, DB>( mongoInstance, attachmentsDBInstance );
+            return new Mongo( host, port );
         } catch ( UnknownHostException ex ) {
             throw new MongoException( ex.getMessage(), ex );
         }

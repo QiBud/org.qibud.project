@@ -61,7 +61,7 @@ public class BudAttachment
         return gridFSFile.getLength();
     }
 
-    public Map<String, ?> metadata()
+    public Map<String, Object> metadata()
     {
         return gridFSFile.getMetaData().toMap();
     }

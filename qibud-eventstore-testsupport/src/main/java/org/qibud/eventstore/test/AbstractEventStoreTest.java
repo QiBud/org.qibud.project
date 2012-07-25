@@ -137,7 +137,6 @@ public abstract class AbstractEventStoreTest
             Map<String, String> testData = new HashMap<String, String>();
             testData.put( "foo", "bar" );
 
-
             DomainEventAttachment attachment = eventFactory.newDomainEventAttachment( new DomainEventAttachment.DataProvider()
             {
 

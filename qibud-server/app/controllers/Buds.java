@@ -95,15 +95,10 @@ public class Buds
 
     public static Result budEditForm( String identity )
     {
-        // Sam, see https://github.com/playframework/Play20/blob/master/samples/java/forms/app/controllers/Contacts.java
         Bud bud = BudsRepository.getInstance().findByIdentity( identity );
-
-
         if ( bud == null ) {
             return notFound();
         }
-
-
         return ok( edit_bud.render( bud, form( BudForm.class ).fill( BudForm.filledWith( bud ) ) ) );
     }
 

@@ -13,9 +13,14 @@
  */
 
 import buds.Bud;
-import buds.BudsFactory;
 import buds.BudsRepository;
+import domain.bootstrap.QiBudDomainAssemblies;
+import domain.events.BudEventFactory;
 import java.lang.reflect.Method;
+import org.qi4j.api.structure.Module;
+import org.qi4j.bootstrap.AssemblyException;
+import org.qi4j.bootstrap.ModuleAssembly;
+import org.qi4j.bootstrap.SingletonAssembler;
 import org.qibud.eventstore.DomainEventsSequence;
 import org.qibud.eventstore.DomainEventsSequenceBuilder;
 import org.qibud.eventstore.Usecase;
@@ -59,12 +64,31 @@ public class Global
 
             eventSourcing.start();
             entities.start( eventSourcing.eventStore() );
-            attachments.start();
-            graph.start();
+            attachments.start( eventSourcing.eventStore() );
+            graph.start( eventSourcing.eventStore() );
+
+            SingletonAssembler qi4jSingleton = new SingletonAssembler()
+            {
+
+                @Override
+                public void assemble( ModuleAssembly module )
+                        throws AssemblyException
+                {
+                    QiBudDomainAssemblies.eventsAssembler().assemble( module );
+                }
+
+            };
+            Module domainEventsModule = qi4jSingleton.module();
 
             Bud rootBud = BudsRepository.getInstance().findRootBud();
             if ( rootBud == null ) {
-                rootBud = BudsFactory.getInstance().createRootBud();
+                //rootBud = BudsFactory.getInstance().createRootBud();
+
+                // EventSourcing
+                DomainEventsSequenceBuilder eventsBuilder = new DomainEventsSequenceBuilder().withUsecase( "Root Bud Creation" ).withUser( "QiBud System" );
+                BudEventFactory budEventFactory = domainEventsModule.findService( BudEventFactory.class ).get();
+                eventsBuilder = budEventFactory.createRootBud( eventsBuilder );
+                eventSourcing.eventStore().storeEvents( eventsBuilder.build() );
             }
 
             started = true;
@@ -84,8 +108,6 @@ public class Global
         }
         super.onStop( aplctn );
     }
-
-    public static final String DOMAIN_EVENTS_SEQ_BUILDER_ARG = "domain-events-sequence-builder";
 
     @Override
     public Action onRequest( Http.Request request, Method actionMethod )
@@ -112,7 +134,7 @@ public class Global
                 LOGGER.debug( "Before request with Usecase '{}'", usecase );
 
                 DomainEventsSequenceBuilder eventsSequenceBuilder = new DomainEventsSequenceBuilder().withUsecase( usecase ).withUser( "QiBud System" );
-                ctx.args.put( DOMAIN_EVENTS_SEQ_BUILDER_ARG, eventsSequenceBuilder );
+                ctx.args.put( QiBud.DOMAIN_EVENTS_SEQ_BUILDER_ARG, eventsSequenceBuilder );
 
                 try {
 

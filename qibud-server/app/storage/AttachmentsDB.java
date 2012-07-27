@@ -31,6 +31,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.tika.Tika;
 import org.apache.tika.metadata.Metadata;
 import org.bson.types.ObjectId;
+import org.qibud.eventstore.DomainEventAttachment;
+import org.qibud.eventstore.DomainEventsSequence;
+import org.qibud.eventstore.EventStream;
+import org.qibud.eventstore.EventStreamListener;
+import org.qibud.eventstore.EventStreamRegistration;
 import org.qibud.mongodb.MongoDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +55,7 @@ import utils.Threads;
  * TODO Allow the use of MongoDB replicas sets
  */
 public class AttachmentsDB
+        implements EventStreamListener
 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger( AttachmentsDB.class );
@@ -78,7 +84,7 @@ public class AttachmentsDB
 
     private DB attachmentsDB;
 
-    public synchronized void start()
+    public synchronized void start( EventStream eventStream )
     {
         if ( mongo == null ) {
             String host = Play.application().configuration().getString( CONFIG_HOST );
@@ -94,7 +100,8 @@ public class AttachmentsDB
                 throw new QiBudException( "AttachmentsDB database name is empty, check your configuration (" + CONFIG_DB + ")" );
             }
 
-            registerShutdownHook( host, port, dbName, !Play.isProd() );
+            EventStreamRegistration registration = eventStream.registerEventStreamListener( this );
+            registerShutdownHook( host, port, dbName, registration, !Play.isProd() );
 
             mongo = MongoDB.connectToMongoDB( host, port );
             attachmentsDB = mongo.getDB( dbName );
@@ -113,7 +120,7 @@ public class AttachmentsDB
         }
     }
 
-    private void registerShutdownHook( final String host, final Integer port, final String dbName, final boolean clear )
+    private void registerShutdownHook( final String host, final Integer port, final String dbName, final EventStreamRegistration registration, final boolean clear )
     {
         if ( !Threads.isThreadRegisteredAsShutdownHook( "attachmentsdb-shutdown" ) ) {
             Runtime.getRuntime().addShutdownHook( new Thread( new Runnable()
@@ -124,7 +131,7 @@ public class AttachmentsDB
                 {
                     shutdown();
                     if ( clear ) {
-                        clear( host, port, dbName );
+                        clear( host, port, dbName, registration );
                     }
                 }
 
@@ -132,8 +139,9 @@ public class AttachmentsDB
         }
     }
 
-    private void clear( String host, Integer port, String dbName )
+    private void clear( String host, Integer port, String dbName, EventStreamRegistration registration )
     {
+        registration.unregister();
         Mongo mongo = MongoDB.connectToMongoDB( host, port );
         DB db = mongo.getDB( dbName );
         db.dropDatabase();
@@ -235,6 +243,19 @@ public class AttachmentsDB
         List<GridFSDBFile> budDBFiles = gridFS.find( query );
         for ( GridFSDBFile eachDBFile : budDBFiles ) {
             gridFS.remove( eachDBFile.getFilename() );
+        }
+    }
+
+    @Override
+    public void onDomainEventsSequence( DomainEventsSequence events )
+    {
+        LOGGER.info( "Applying '{}' usecase requested by the '{}' user.", events.usecase(), events.user() );
+        try {
+            for ( DomainEventAttachment attachment : events.attachments() ) {
+                storeAttachment( "root", "whats.a.bud.svg", attachment.data() ); // FIXME Hardcoded Root Bud Identity!!
+            }
+        } catch ( IOException ex ) {
+            throw new QiBudException( "Unable to apply domain events: " + ex.getMessage(), ex );
         }
     }
 

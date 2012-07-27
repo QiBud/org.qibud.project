@@ -80,6 +80,30 @@ public final class DomainEventsSequenceBuilder
     }
 
     /**
+     * @param eventsStates DomainEventStates to add to the new builder instance.
+     * @return A new builder instance with given DomainEvents added.
+     */
+    public DomainEventsSequenceBuilder withEventsStates( DomainEventType... eventsStates )
+    {
+        List<DomainEvent> newEventList = new ArrayList<DomainEvent>( this.events );
+        DomainEventFactory domainEventFactory = new DomainEventFactory();
+        for ( DomainEventType eventState : eventsStates ) {
+            newEventList.add( domainEventFactory.newDomainEvent( eventState ) );
+        }
+        return new DomainEventsSequenceBuilder( usecase, user, newEventList, attachments );
+    }
+
+    public DomainEventsSequenceBuilder withEventsStates( Iterable<? extends DomainEventType> eventsStates )
+    {
+        List<DomainEvent> newEventList = new ArrayList<DomainEvent>( this.events );
+        DomainEventFactory domainEventFactory = new DomainEventFactory();
+        for ( DomainEventType eventState : eventsStates ) {
+            newEventList.add( domainEventFactory.newDomainEvent( eventState ) );
+        }
+        return new DomainEventsSequenceBuilder( usecase, user, newEventList, attachments );
+    }
+
+    /**
      * @param events DomainEventAttachments to add to the new builder instance.
      * @return A new builder instance with given DomainEventAttachments added.
      */

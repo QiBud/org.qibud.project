@@ -14,11 +14,17 @@
  */
 package storage;
 
+import buds.Bud;
+import buds.BudEntity;
 import buds.BudNode;
+import domain.events.RootBudCreatedEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -27,6 +33,11 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.helpers.collection.Iterables;
+import org.qibud.eventstore.DomainEvent;
+import org.qibud.eventstore.DomainEventsSequence;
+import org.qibud.eventstore.EventStream;
+import org.qibud.eventstore.EventStreamListener;
+import org.qibud.eventstore.EventStreamRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.Play;
@@ -40,6 +51,7 @@ import utils.Threads;
  *                                        --IS_ROOT_BUD-->
  */
 public class GraphDB
+        implements EventStreamListener
 {
 
     public static enum RelTypes
@@ -70,7 +82,7 @@ public class GraphDB
 
     private GraphDatabaseService graphDatabase;
 
-    public synchronized void start()
+    public synchronized void start( EventStream eventStream )
     {
         if ( graphDatabase == null ) {
 
@@ -79,7 +91,8 @@ public class GraphDB
                 throw new QiBudException( "Neo4J Database Storage Path is empty, check your configuration" );
             }
 
-            registerShutdownHook( graphDatabasePath, !Play.isProd() );
+            EventStreamRegistration registration = eventStream.registerEventStreamListener( this );
+            registerShutdownHook( graphDatabasePath, registration, !Play.isProd() );
 
             graphDatabase = new GraphDatabaseFactory().newEmbeddedDatabase( graphDatabasePath );
             LOGGER.info( "GraphDB Started" );
@@ -100,7 +113,7 @@ public class GraphDB
         }
     }
 
-    private void registerShutdownHook( final String graphDatabasePath, final boolean clear )
+    private void registerShutdownHook( final String graphDatabasePath, final EventStreamRegistration registration, final boolean clear )
     {
         if ( !Threads.isThreadRegisteredAsShutdownHook( "graphdb-shutdown" ) ) {
             Runtime.getRuntime().addShutdownHook( new Thread( new Runnable()
@@ -111,7 +124,7 @@ public class GraphDB
                 {
                     shutdown();
                     if ( clear ) {
-                        clear( graphDatabasePath );
+                        clear( graphDatabasePath, registration );
                     }
                 }
 
@@ -128,8 +141,9 @@ public class GraphDB
         }
     }
 
-    private void clear( String graphDatabasePath )
+    private void clear( String graphDatabasePath, EventStreamRegistration registration )
     {
+        registration.unregister();
         // Delete database
         File graphDatabaseDir = new File( graphDatabasePath );
         if ( graphDatabaseDir.exists() ) {
@@ -213,6 +227,19 @@ public class GraphDB
 
         } finally {
             tx.finish();
+        }
+    }
+
+    @Override
+    public void onDomainEventsSequence( DomainEventsSequence events )
+    {
+        LOGGER.info( "Applying '{}' usecase requested by the '{}' user.", events.usecase(), events.user() );
+        for ( DomainEvent event : events.events() ) {
+            LOGGER.info( "Applying event: {}", event );
+            if ( RootBudCreatedEvent.class.getName().equals( event.type() ) ) {
+                createBudNode( "root" ); // FIXME Hardcoded Root Bud Identity!!
+                setAsRootBud( "root" ); // FIXME Hardcoded Root Bud Identity!!
+            }
         }
     }
 

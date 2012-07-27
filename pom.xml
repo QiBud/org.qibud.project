@@ -28,6 +28,10 @@
             <id>typesafe</id>
             <url>http://repo.typesafe.com/typesafe/releases/</url>
         </repository>
+        <repository>
+            <id>ops4j</id>
+            <url>http://repository.ops4j.org/maven2/</url>
+        </repository>
     </repositories>
 
     <dependencyManagement>

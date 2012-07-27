@@ -14,11 +14,17 @@
  */
 package storage;
 
+import buds.BudEntity;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
+import domain.events.RootBudCreatedEvent;
 import java.net.UnknownHostException;
+import java.util.Date;
 import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.qibud.eventstore.DomainEvent;
 import org.qibud.eventstore.DomainEventsSequence;
 import org.qibud.eventstore.EventStream;
 import org.qibud.eventstore.EventStreamListener;
@@ -135,7 +141,23 @@ public class EntitiesDB
     @Override
     public void onDomainEventsSequence( DomainEventsSequence events )
     {
-        // Handle Domain Events to update current state
+        LOGGER.info( "Applying '{}' usecase requested by the '{}' user.", events.usecase(), events.user() );
+        try {
+            for ( DomainEvent event : events.events() ) {
+                LOGGER.info( "Applying event: {}", event );
+                if ( RootBudCreatedEvent.class.getName().equals( event.type() ) ) {
+                    JSONObject data = event.data();
+                    BudEntity rootBudEntity = new BudEntity();
+                    rootBudEntity.identity = data.getString( "identity" );
+                    rootBudEntity.title = data.getString( "title" );
+                    rootBudEntity.postedAt = new Date();
+                    rootBudEntity.content = data.getString( "content" );
+                    BudEntity.save( rootBudEntity );
+                }
+            }
+        } catch ( JSONException ex ) {
+            throw new QiBudException( "Unable to apply domain events: " + ex.getMessage(), ex );
+        }
     }
 
 }

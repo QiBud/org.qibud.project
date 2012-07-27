@@ -75,4 +75,10 @@ import org.json.JSONObject;
         return hash;
     }
 
+    @Override
+    public String toString()
+    {
+        return "DomainEvent{" + "localIdentity=" + localIdentity + ", type=" + type + ", data=" + data + '}';
+    }
+
 }

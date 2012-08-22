@@ -1,4 +1,5 @@
 package org.qibud;
 
-public class Dummy {
+public class Dummy
+{
 }

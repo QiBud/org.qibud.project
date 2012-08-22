@@ -1,5 +1,7 @@
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -21,6 +23,18 @@
             <artifactId>org.qibud.api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.qibud.eventstore-mongodb</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- Qi4j -->
+        <dependency>
+            <groupId>org.qi4j.core</groupId>
+            <artifactId>org.qi4j.core.runtime</artifactId>
+            <version>2.0-alpha-4</version>
+        </dependency>
         
         <!-- Views -->
         <dependency>
@@ -39,11 +53,6 @@
             <groupId>net.vz.mongodb.jackson</groupId>
             <artifactId>play-mongo-jackson-mapper_2.9.1</artifactId>
             <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongo-java-driver</artifactId>
-            <version>2.7.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.tika</groupId>

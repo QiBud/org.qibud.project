@@ -1,33 +1,46 @@
+/*
+ * Copyright (c) 2012, Paul Merlin. All Rights Reserved.
+ * Copyright (c) 2012, Samuel Loup. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 package storage;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.UnknownHostException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import play.Play;
-import play.libs.Akka;
-
+import akka.util.Duration;
+import buds.BudAttachment;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
-import com.mongodb.MongoException;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
 import org.apache.tika.Tika;
 import org.apache.tika.metadata.Metadata;
 import org.bson.types.ObjectId;
-import org.codeartisans.java.toolbox.Couple;
+import org.qibud.eventstore.DomainEventAttachment;
+import org.qibud.eventstore.DomainEventsSequence;
+import org.qibud.eventstore.EventStream;
+import org.qibud.eventstore.EventStreamListener;
+import org.qibud.eventstore.EventStreamRegistration;
+import org.qibud.mongodb.MongoDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import akka.util.Duration;
-import buds.BudAttachment;
+import play.Play;
+import play.libs.Akka;
 import utils.QiBudException;
 import utils.Threads;
 
@@ -42,6 +55,7 @@ import utils.Threads;
  * TODO Allow the use of MongoDB replicas sets
  */
 public class AttachmentsDB
+        implements EventStreamListener
 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger( AttachmentsDB.class );
@@ -70,7 +84,7 @@ public class AttachmentsDB
 
     private DB attachmentsDB;
 
-    public synchronized void start()
+    public synchronized void start( EventStream eventStream )
     {
         if ( mongo == null ) {
             String host = Play.application().configuration().getString( CONFIG_HOST );
@@ -86,11 +100,11 @@ public class AttachmentsDB
                 throw new QiBudException( "AttachmentsDB database name is empty, check your configuration (" + CONFIG_DB + ")" );
             }
 
-            registerShutdownHook( host, port, dbName, !Play.isProd() );
+            EventStreamRegistration registration = eventStream.registerEventStreamListener( this );
+            registerShutdownHook( host, port, dbName, registration, !Play.isProd() );
 
-            Couple<Mongo, DB> mongoCouple = connectToMongoDB( host, port, dbName );
-            mongo = mongoCouple.left();
-            attachmentsDB = mongoCouple.right();
+            mongo = MongoDB.connectToMongoDB( host, port );
+            attachmentsDB = mongo.getDB( dbName );
 
             LOGGER.info( "AttachmentsDB started" );
         }
@@ -106,7 +120,7 @@ public class AttachmentsDB
         }
     }
 
-    private void registerShutdownHook( final String host, final Integer port, final String dbName, final boolean clear )
+    private void registerShutdownHook( final String host, final Integer port, final String dbName, final EventStreamRegistration registration, final boolean clear )
     {
         if ( !Threads.isThreadRegisteredAsShutdownHook( "attachmentsdb-shutdown" ) ) {
             Runtime.getRuntime().addShutdownHook( new Thread( new Runnable()
@@ -117,7 +131,7 @@ public class AttachmentsDB
                 {
                     shutdown();
                     if ( clear ) {
-                        clear( host, port, dbName );
+                        clear( host, port, dbName, registration );
                     }
                 }
 
@@ -125,11 +139,13 @@ public class AttachmentsDB
         }
     }
 
-    private void clear( String host, Integer port, String dbName )
+    private void clear( String host, Integer port, String dbName, EventStreamRegistration registration )
     {
-        Couple<Mongo, DB> mongoCouple = connectToMongoDB( host, port, dbName );
-        mongoCouple.right().dropDatabase();
-        mongoCouple.left().close();
+        registration.unregister();
+        Mongo mongo = MongoDB.connectToMongoDB( host, port );
+        DB db = mongo.getDB( dbName );
+        db.dropDatabase();
+        mongo.close();
         LOGGER.warn( "AttachmentsDB cleared!" );
     }
 
@@ -230,16 +246,16 @@ public class AttachmentsDB
         }
     }
 
-    private Couple<Mongo, DB> connectToMongoDB( String host, Integer port, String dbName )
+    @Override
+    public void onDomainEventsSequence( DomainEventsSequence events )
     {
+        LOGGER.info( "Applying '{}' usecase requested by the '{}' user.", events.usecase(), events.user() );
         try {
-            Mongo mongoInstance = new Mongo( host, port );
-            DB attachmentsDBInstance = mongoInstance.getDB( dbName );
-            return new Couple<Mongo, DB>( mongoInstance, attachmentsDBInstance );
-        } catch ( UnknownHostException ex ) {
-            throw new QiBudException( ex );
-        } catch ( MongoException ex ) {
-            throw new QiBudException( ex );
+            for ( DomainEventAttachment attachment : events.attachments() ) {
+                storeAttachment( "root", "whats.a.bud.svg", attachment.data() ); // FIXME Hardcoded Root Bud Identity!!
+            }
+        } catch ( IOException ex ) {
+            throw new QiBudException( "Unable to apply domain events: " + ex.getMessage(), ex );
         }
     }
 

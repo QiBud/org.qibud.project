@@ -14,21 +14,11 @@
  */
 package storage;
 
-import buds.BudEntity;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
-import domain.events.RootBudCreatedEvent;
 import java.net.UnknownHostException;
-import java.util.Date;
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.qibud.eventstore.DomainEvent;
-import org.qibud.eventstore.DomainEventsSequence;
-import org.qibud.eventstore.EventStream;
-import org.qibud.eventstore.EventStreamListener;
-import org.qibud.eventstore.EventStreamRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.Play;
@@ -56,7 +46,6 @@ import utils.Threads;
  * https://github.com/vznet/play-mongo-jackson-mapper/blob/master/src/main/scala/play/modules/mongodb/jackson/MongoDB.scala
  */
 public class EntitiesDB
-        implements EventStreamListener
 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger( EntitiesDB.class );
@@ -81,7 +70,7 @@ public class EntitiesDB
     {
     }
 
-    public void start( EventStream eventStream )
+    public void start()
     {
         String servers = Play.application().configuration().getString( CONFIG_SERVERS );
         String credentials = Play.application().configuration().getString( CONFIG_CREDENTIALS );
@@ -92,8 +81,7 @@ public class EntitiesDB
         if ( StringUtils.isEmpty( database ) ) {
             throw new QiBudException( "EntitiesDB database name is empty, check your configuration (" + CONFIG_DB + ")" );
         }
-        EventStreamRegistration registration = eventStream.registerEventStreamListener( this );
-        registerShutdownHook( servers, credentials, database, registration, !Play.isProd() );
+        registerShutdownHook( servers, credentials, database, !Play.isProd() );
         LOGGER.info( "EntitiesDB started" );
     }
 
@@ -102,7 +90,7 @@ public class EntitiesDB
         LOGGER.info( "EntitiesDB stopped" );
     }
 
-    private void registerShutdownHook( final String servers, final String credentials, final String dbName, final EventStreamRegistration registration, final boolean clear )
+    private void registerShutdownHook( final String servers, final String credentials, final String dbName, final boolean clear )
     {
         if ( !Threads.isThreadRegisteredAsShutdownHook( "entitiesdb-shutdown" ) ) {
             Runtime.getRuntime().addShutdownHook( new Thread( new Runnable()
@@ -113,7 +101,7 @@ public class EntitiesDB
                 {
                     shutdown();
                     if ( clear ) {
-                        clear( servers, credentials, dbName, registration );
+                        clear( servers, credentials, dbName );
                     }
                 }
 
@@ -121,10 +109,9 @@ public class EntitiesDB
         }
     }
 
-    private void clear( String servers, String credentials, String dbName, EventStreamRegistration registration )
+    private void clear( String servers, String credentials, String dbName )
     {
         try {
-            registration.unregister();
             Mongo mongoInstance = new Mongo( servers );
             DB entitiesDBInstance = mongoInstance.getDB( dbName );
             entitiesDBInstance.dropDatabase();
@@ -136,28 +123,6 @@ public class EntitiesDB
             throw new QiBudException( ex );
         }
 
-    }
-
-    @Override
-    public void onDomainEventsSequence( DomainEventsSequence events )
-    {
-        LOGGER.info( "Applying '{}' usecase requested by the '{}' user.", events.usecase(), events.user() );
-        try {
-            for ( DomainEvent event : events.events() ) {
-                LOGGER.info( "Applying event: {}", event );
-                if ( RootBudCreatedEvent.class.getName().equals( event.type() ) ) {
-                    JSONObject data = event.data();
-                    BudEntity rootBudEntity = new BudEntity();
-                    rootBudEntity.identity = data.getString( "identity" );
-                    rootBudEntity.title = data.getString( "title" );
-                    rootBudEntity.postedAt = new Date();
-                    rootBudEntity.content = data.getString( "content" );
-                    BudEntity.save( rootBudEntity );
-                }
-            }
-        } catch ( JSONException ex ) {
-            throw new QiBudException( "Unable to apply domain events: " + ex.getMessage(), ex );
-        }
     }
 
 }

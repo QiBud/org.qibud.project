@@ -1,4 +1,4 @@
-@(bud: _root_.buds.Bud)
+@(bud: _root_.domain.buds.Bud)
 
 @import tags._
 @import _root_.views.tools._
@@ -7,24 +7,24 @@
     @show_bud_sidebar( bud )
 }
 
-@main( bud.entity().title, "buds" ) {
+@main( bud.title().get(), "buds" ) {
 
-    @layout_fluid(right_sidebar = sidebar) {
+    @layout_fluid( right_sidebar = sidebar ) {
     
-        @page_header(bud.entity().title)
+        @page_header( bud.title().get() )
         
         <p>
-            <a href="@routes.Buds.budCreateForm( bud.identity() )" class="btn btn-mini btn-primary"><i class="icon-plus"></i> New</a>
-            <a href="@routes.Buds.budEditForm( bud.identity() )" class="btn btn-mini btn-primary"><i class="icon-edit"></i> Edit</a>
+            <a href="@routes.Buds.budCreateForm( bud.identity().get() )" class="btn btn-mini btn-primary"><i class="icon-plus"></i> New</a>
+            <a href="@routes.Buds.budEditForm( bud.identity().get() )" class="btn btn-mini btn-primary"><i class="icon-edit"></i> Edit</a>
             @if( bud.isRoot() ) {
                 <a class="btn btn-mini btn-danger disabled" title="You cannot delete the root Bud"><i class="icon-trash"></i> Delete</a>
             }
             @if( ! bud.isRoot() ) {
-                <a href="@routes.Buds.deleteBud( bud.identity() )" class="btn btn-mini btn-danger">Delete</a>
+                <a href="@routes.Buds.deleteBud( bud.identity().get() )" class="btn btn-mini btn-danger">Delete</a>
             }
         </p>
 
-        @markdown( bud.entity().content )
+        @markdown( bud.content().get() )
  
     }
     

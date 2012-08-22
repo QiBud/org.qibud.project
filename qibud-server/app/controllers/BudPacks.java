@@ -13,8 +13,8 @@
  */
 package controllers;
 
-import buds.BudPack;
-import buds.BudPacksRepository;
+import domain.budpacks.BudPack;
+import domain.budpacks.BudPacksRepository;
 import java.util.List;
 import play.mvc.Controller;
 import play.mvc.Result;

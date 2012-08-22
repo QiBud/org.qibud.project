@@ -11,8 +11,10 @@
  * limitations under the License.
  *
  */
+package application.bootstrap;
 
 import domain.bootstrap.QiBudDomainAssemblies;
+import infrastructure.bootstrap.QiBudInfraAssemblies;
 import org.qi4j.bootstrap.ApplicationAssembler;
 import org.qi4j.bootstrap.ApplicationAssembly;
 import org.qi4j.bootstrap.ApplicationAssemblyFactory;
@@ -24,14 +26,28 @@ public class QiBudAssembler
         implements ApplicationAssembler
 {
 
+    public static final String LAYER_DOMAIN = "domain";
+
+    public static final String MODULE_BUDS = "buds";
+
     @Override
     public ApplicationAssembly assemble( ApplicationAssemblyFactory aaf )
             throws AssemblyException
     {
         ApplicationAssembly appAss = aaf.newApplicationAssembly();
+
+        // Domain
         LayerAssembly domainLayer = appAss.layer( "domain" );
-        ModuleAssembly eventsModule = domainLayer.module( "events" );
-        QiBudDomainAssemblies.eventsAssembler().assemble( eventsModule );
+        ModuleAssembly buds = domainLayer.module( "buds" );
+        QiBudDomainAssemblies.buds().assemble( buds );
+
+        // Infrastructure
+        LayerAssembly infraLayer = appAss.layer( "infra" );
+        ModuleAssembly persistence = infraLayer.module( "persistence" );
+        QiBudInfraAssemblies.persistence().assemble( persistence );
+
+        domainLayer.uses( infraLayer );
+
         return appAss;
     }
 

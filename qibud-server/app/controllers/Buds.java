@@ -14,14 +14,15 @@
  */
 package controllers;
 
-import buds.Bud;
-import buds.BudEntity;
-import buds.BudsFactory;
-import buds.BudsRepository;
+import application.QiBud;
 import com.mongodb.DBObject;
 import com.mongodb.gridfs.GridFSDBFile;
+import domain.buds.Bud;
 import forms.BudForm;
-import java.util.List;
+import org.neo4j.helpers.collection.Iterables;
+import org.qi4j.api.query.Query;
+import org.qi4j.api.unitofwork.UnitOfWork;
+import org.qi4j.api.unitofwork.UnitOfWorkCompletionException;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -32,7 +33,7 @@ import views.html.buds.create_bud;
 import views.html.buds.edit_bud;
 import views.html.buds.show_bud;
 
-@With(RootBudContext.class)
+@With( RootBudContext.class )
 public class Buds
         extends Controller
 {
@@ -41,108 +42,147 @@ public class Buds
 
     public static Result buds()
     {
-        List<Bud> allBuds = BudsRepository.getInstance().findAll();
-        return ok( all_buds.render( allBuds ) );
+        UnitOfWork uow = QiBud.budsDomainModule().newUnitOfWork();
+        try {
+            Query<Bud> allBuds = QiBud.budsRepository().findAll();
+            return ok( all_buds.render( Iterables.toList( allBuds ) ) );
+        } finally {
+            uow.discard();
+        }
     }
 
     static final Form<BudForm> budEntityForm = form( BudForm.class );
 
     public static Result budCreateForm( String identity )
     {
-        Bud parent = BudsRepository.getInstance().findByIdentity( identity );
-        if ( parent == null ) {
-            return notFound();
+        UnitOfWork uow = QiBud.budsDomainModule().newUnitOfWork();
+        try {
+            Bud parent = QiBud.budsRepository().findByIdentity( identity );
+            if ( parent == null ) {
+                return notFound();
+            }
+            return ok( create_bud.render( parent, form( BudForm.class ) ) );
+        } finally {
+            uow.discard();
         }
-        return ok( create_bud.render(parent, form(BudForm.class)) );     
     }
 
-    public static Result saveNewBud(String identity)
+    public static Result saveNewBud( String identity )
+            throws UnitOfWorkCompletionException
     {
-        Bud parent = BudsRepository.getInstance().findByIdentity( identity );
-        if ( parent == null ) {
-            return notFound();
-        }
-        Form<BudForm> filledForm = budForm.bindFromRequest();
-        
-        if(filledForm.hasErrors()) {
-            return badRequest(create_bud.render(parent,filledForm));
-        } else {
-            BudForm newBud = filledForm.get();
-            Bud createdBud = BudsFactory.getInstance().createNewBud(parent, newBud.title, newBud.content);
-            
-            return redirect( routes.Buds.bud( createdBud.identity() ) );
+        UnitOfWork uow = QiBud.budsDomainModule().newUnitOfWork();
+        try {
+            Bud parent = QiBud.budsRepository().findByIdentity( identity );
+            if ( parent == null ) {
+                return notFound();
+            }
+            Form<BudForm> filledForm = budForm.bindFromRequest();
+
+            if ( filledForm.hasErrors() ) {
+                return badRequest( create_bud.render( parent, filledForm ) );
+            } else {
+                BudForm newBud = filledForm.get();
+                Bud createdBud = QiBud.budsFactory().createNewBud( parent, newBud.title, newBud.content );
+
+                return redirect( routes.Buds.bud( createdBud.identity().get() ) );
+            }
+        } finally {
+            uow.complete();
         }
     }
 
     public static Result bud( String identity )
     {
-        Bud bud = BudsRepository.getInstance().findByIdentity( identity );
-        if ( bud == null ) {
-            return notFound();
+        UnitOfWork uow = QiBud.budsDomainModule().newUnitOfWork();
+        try {
+            Bud bud = QiBud.budsRepository().findByIdentity( identity );
+            if ( bud == null ) {
+                return notFound();
+            }
+            return ok( show_bud.render( bud ) );
+        } finally {
+            uow.discard();
         }
-        return ok( show_bud.render( bud ) );
     }
 
     public static Result attachment( String identity, String attachment_id )
     {
-        Bud bud = BudsRepository.getInstance().findByIdentity( identity );
-        if ( bud == null ) {
-            return notFound();
+        UnitOfWork uow = QiBud.budsDomainModule().newUnitOfWork();
+        try {
+            Bud bud = QiBud.budsRepository().findByIdentity( identity );
+            if ( bud == null ) {
+                return notFound();
+            }
+            GridFSDBFile dbFile = AttachmentsDB.getInstance().getDBFile( attachment_id );
+            if ( dbFile == null ) {
+                return notFound();
+            }
+            if ( dbFile.getContentType() != null ) {
+                return ok( dbFile.getInputStream() ).as( dbFile.getContentType() );
+            }
+            return ok( dbFile.getInputStream() );
+        } finally {
+            uow.discard();
         }
-        GridFSDBFile dbFile = AttachmentsDB.getInstance().getDBFile( attachment_id );
-        if ( dbFile == null ) {
-            return notFound();
-        }
-        if ( dbFile.getContentType() != null ) {
-            return ok( dbFile.getInputStream() ).as( dbFile.getContentType() );
-        }
-        return ok( dbFile.getInputStream() );
     }
 
     public static Result attachmentMetadata( String identity, String attachment_id )
     {
-        Bud bud = BudsRepository.getInstance().findByIdentity( identity );
-        if ( bud == null ) {
-            return notFound();
+        UnitOfWork uow = QiBud.budsDomainModule().newUnitOfWork();
+        try {
+            Bud bud = QiBud.budsRepository().findByIdentity( identity );
+            if ( bud == null ) {
+                return notFound();
+            }
+            GridFSDBFile dbFile = AttachmentsDB.getInstance().getDBFile( attachment_id );
+            if ( dbFile == null ) {
+                return notFound();
+            }
+            DBObject metaData = dbFile.getMetaData();
+            String json = metaData == null ? "{}" : metaData.toString();
+            return ok( json ).as( "application/json" );
+        } finally {
+            uow.discard();
         }
-        GridFSDBFile dbFile = AttachmentsDB.getInstance().getDBFile( attachment_id );
-        if ( dbFile == null ) {
-            return notFound();
-        }
-        DBObject metaData = dbFile.getMetaData();
-        String json = metaData == null ? "{}" : metaData.toString();
-        return ok( json ).as( "application/json" );
     }
 
     public static Result budEditForm( String identity )
     {
-        Bud bud = BudsRepository.getInstance().findByIdentity( identity );
-        if ( bud == null ) {
-            return notFound();
+        UnitOfWork uow = QiBud.budsDomainModule().newUnitOfWork();
+        try {
+            Bud bud = QiBud.budsRepository().findByIdentity( identity );
+            if ( bud == null ) {
+                return notFound();
+            }
+            return ok( edit_bud.render( bud, form( BudForm.class ).fill( BudForm.filledWith( bud ) ) ) );
+        } finally {
+            uow.discard();
         }
-        return ok( edit_bud.render( bud, form( BudForm.class ).fill( BudForm.filledWith( bud ) ) ) );
     }
 
     public static Result saveBud( String identity )
+            throws UnitOfWorkCompletionException
     {
-        Bud bud = BudsRepository.getInstance().findByIdentity( identity );
+        UnitOfWork uow = QiBud.budsDomainModule().newUnitOfWork();
+        try {
+            Bud bud = QiBud.budsRepository().findByIdentity( identity );
+            if ( bud == null ) {
+                return notFound();
+            }
 
-        if ( bud == null ) {
-            return notFound();
+            Form<BudForm> filledForm = budForm.bindFromRequest();
+
+            if ( filledForm.hasErrors() ) {
+                return badRequest( edit_bud.render( bud, filledForm ) );
+            } else {
+                BudForm updated = filledForm.get();
+                bud.title().set( updated.title );
+                bud.content().set( updated.content );
+                return redirect( routes.Buds.bud( bud.identity().get() ) );
+            }
+        } finally {
+            uow.complete();
         }
-
-        Form<BudForm> filledForm = budForm.bindFromRequest();
-
-        if ( filledForm.hasErrors() ) {
-            return badRequest( edit_bud.render( bud, filledForm ) );
-        } else {
-            BudForm updated = filledForm.get();
-            bud.entity().title = updated.title;
-            bud.entity().content = updated.content;
-            BudEntity.save( bud.entity() );
-            return redirect( routes.Buds.bud( bud.identity() ) );
-        }
-
     }
 
     public static Result deleteBud( String identity )

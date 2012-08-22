@@ -1,6 +1,6 @@
 package controllers;
 
-import buds.Bud;
+import domain.buds.Bud;
 import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;

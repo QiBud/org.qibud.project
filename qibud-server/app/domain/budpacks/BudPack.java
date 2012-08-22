@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012, Paul Merlin. All Rights Reserved.
+ * Copyright (c) 2012, Samuel Loup. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,14 +12,24 @@
  * limitations under the License.
  *
  */
-package domain.events;
+package domain.budpacks;
 
+import java.util.List;
+import org.qi4j.api.entity.EntityComposite;
 import org.qi4j.api.property.Property;
+import roles.RoleDescriptor;
 
-public interface BudTitleChangedEvent
-        extends BudEvent
+public interface BudPack
+        extends EntityComposite
 {
 
-    Property<String> title();
+    Property<String> name();
 
+    Property<String> description();
+
+    Property<String> version();
+
+    Property<List<RoleDescriptor>> roles();
+
+    // TODO Add Dependencies
 }

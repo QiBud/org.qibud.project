@@ -13,7 +13,7 @@
  */
 package forms;
 
-import buds.Bud;
+import domain.buds.Bud;
 import play.data.validation.Constraints;
 
 public class BudForm
@@ -27,8 +27,8 @@ public class BudForm
     public static BudForm filledWith( Bud bud )
     {
         BudForm budForm = new BudForm();
-        budForm.title = bud.entity().title;
-        budForm.content = bud.entity().content;
+        budForm.title = bud.title().get();
+        budForm.content = bud.content().get();
         return budForm;
     }
 

@@ -12,7 +12,7 @@
  * limitations under the License.
  *
  */
-package buds;
+package domain.buds;
 
 import org.neo4j.graphdb.Node;
 

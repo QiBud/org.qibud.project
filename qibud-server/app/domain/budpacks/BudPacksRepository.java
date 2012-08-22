@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012, Paul Merlin. All Rights Reserved.
+ * Copyright (c) 2012, Samuel Loup. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,22 +12,36 @@
  * limitations under the License.
  *
  */
+package domain.budpacks;
 
-import org.qibud.eventstore.DomainEventsSequenceBuilder;
-import play.mvc.Http;
+import java.util.Collections;
+import java.util.List;
 
-public final class QiBud
+public class BudPacksRepository
 {
 
-    public static final String DOMAIN_EVENTS_SEQ_BUILDER_ARG = "domain-events-sequence-builder";
+    private static BudPacksRepository instance;
 
-    private QiBud()
+    public static synchronized BudPacksRepository getInstance()
     {
+        if ( instance == null ) {
+            instance = new BudPacksRepository();
+        }
+        return instance;
     }
 
-    public static DomainEventsSequenceBuilder domainEventsSequenceBuilder( Http.Context ctx )
+    public List<BudPack> findAll()
     {
-        return ( DomainEventsSequenceBuilder ) ctx.args.get( QiBud.DOMAIN_EVENTS_SEQ_BUILDER_ARG );
+        return Collections.emptyList();
+    }
+
+    public BudPack findByName( String packName )
+    {
+        return null;
+    }
+
+    private BudPacksRepository()
+    {
     }
 
 }

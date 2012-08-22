@@ -12,21 +12,36 @@
  * limitations under the License.
  *
  */
-package buds;
+package domain.budpacks;
 
+import java.util.Collections;
 import java.util.List;
-import roles.RoleDescriptor;
 
-public interface BudPack
+public class BudPacksFactory
 {
 
-    String name();
+    private static BudPacksFactory instance;
 
-    String description();
+    public static synchronized BudPacksFactory getInstance()
+    {
+        if ( instance == null ) {
+            instance = new BudPacksFactory();
+        }
+        return instance;
+    }
 
-    String version();
+    public List<BudPack> findAll()
+    {
+        return Collections.emptyList();
+    }
 
-    List<RoleDescriptor> roles();
+    public BudPack findByIdentity( String identity )
+    {
+        return null;
+    }
 
-    // TODO Add Dependencies
+    private BudPacksFactory()
+    {
+    }
+
 }

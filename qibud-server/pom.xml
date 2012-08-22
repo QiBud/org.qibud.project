@@ -33,7 +33,12 @@
         <dependency>
             <groupId>org.qi4j.core</groupId>
             <artifactId>org.qi4j.core.runtime</artifactId>
-            <version>2.0-alpha-4</version>
+            <version>${qi4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.qi4j.extension</groupId>
+            <artifactId>org.qi4j.extension.indexing-rdf</artifactId>
+            <version>${qi4j.version}</version>
         </dependency>
         
         <!-- Views -->

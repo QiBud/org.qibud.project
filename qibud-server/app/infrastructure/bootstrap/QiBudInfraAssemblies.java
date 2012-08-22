@@ -11,40 +11,38 @@
  * limitations under the License.
  *
  */
-package domain.bootstrap;
+package infrastructure.bootstrap;
 
-import domain.buds.Bud;
-import domain.buds.BudsFactory;
-import domain.buds.BudsRepository;
 import org.qi4j.bootstrap.Assembler;
 import org.qi4j.bootstrap.AssemblyException;
 import org.qi4j.bootstrap.ModuleAssembly;
+import org.qi4j.entitystore.memory.MemoryEntityStoreService;
+import org.qi4j.index.rdf.assembly.RdfMemoryStoreAssembler;
+import org.qi4j.spi.uuid.UuidIdentityGeneratorService;
 
 import static org.qi4j.api.common.Visibility.application;
 
-public final class QiBudDomainAssemblies
+public final class QiBudInfraAssemblies
 {
 
-    public static Assembler buds()
+    public static Assembler persistence()
     {
         return new Assembler()
         {
 
             @Override
-            public void assemble( ModuleAssembly ma )
+            public void assemble( ModuleAssembly module )
                     throws AssemblyException
             {
-                ma.entities( Bud.class );
-
-                ma.services( BudsRepository.class,
-                             BudsFactory.class ).
-                        visibleIn( application );
+                module.services( UuidIdentityGeneratorService.class ).visibleIn( application );
+                module.services( MemoryEntityStoreService.class ).visibleIn( application );
+                new RdfMemoryStoreAssembler().assemble( module );
             }
 
         };
     }
 
-    private QiBudDomainAssemblies()
+    private QiBudInfraAssemblies()
     {
     }
 

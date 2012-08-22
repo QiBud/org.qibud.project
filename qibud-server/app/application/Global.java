@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012, Paul Merlin. All Rights Reserved.
+ * Copyright (c) 2012, Samuel Loup. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,18 +12,19 @@
  * limitations under the License.
  *
  */
+package application;
 
-import buds.Bud;
-import buds.BudsRepository;
-import domain.bootstrap.QiBudDomainAssemblies;
-import domain.events.BudEventFactory;
+import application.bootstrap.QiBudAssembler;
+import domain.buds.Bud;
+import domain.buds.BudsFactory;
+import domain.buds.BudsRepository;
 import java.lang.reflect.Method;
 import org.qi4j.api.structure.Module;
+import org.qi4j.api.unitofwork.NoSuchEntityException;
+import org.qi4j.api.unitofwork.UnitOfWork;
+import org.qi4j.api.unitofwork.UnitOfWorkCompletionException;
 import org.qi4j.bootstrap.AssemblyException;
-import org.qi4j.bootstrap.ModuleAssembly;
-import org.qi4j.bootstrap.SingletonAssembler;
-import org.qibud.eventstore.DomainEventsSequence;
-import org.qibud.eventstore.DomainEventsSequenceBuilder;
+import org.qi4j.bootstrap.Energy4Java;
 import org.qibud.eventstore.Usecase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,14 +35,18 @@ import play.mvc.Http;
 import play.mvc.Result;
 import storage.AttachmentsDB;
 import storage.EntitiesDB;
-import storage.EventSourcingDB;
 import storage.GraphDB;
+import utils.QiBudException;
 
 public class Global
         extends GlobalSettings
 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger( "org.qibud.server" );
+
+    private Energy4Java qi4j;
+
+    private org.qi4j.api.structure.Application qi4jApp;
 
     private boolean started = false;
 
@@ -54,46 +60,44 @@ public class Global
     private synchronized void ensureStarted()
     {
         if ( !started ) {
+            try {
 
-            LOGGER.info( "QiBud Server starting ..." );
+                LOGGER.info( "QiBud Server starting ..." );
 
-            EventSourcingDB eventSourcing = EventSourcingDB.getInstance();
-            EntitiesDB entities = EntitiesDB.getInstance();
-            AttachmentsDB attachments = AttachmentsDB.getInstance();
-            GraphDB graph = GraphDB.getInstance();
+                EntitiesDB.getInstance().start();
+                AttachmentsDB.getInstance().start();
+                GraphDB.getInstance().start();
 
-            eventSourcing.start();
-            entities.start( eventSourcing.eventStore() );
-            attachments.start( eventSourcing.eventStore() );
-            graph.start( eventSourcing.eventStore() );
+                qi4j = new Energy4Java();
+                qi4jApp = qi4j.newApplication( new QiBudAssembler() );
+                qi4jApp.activate();
 
-            SingletonAssembler qi4jSingleton = new SingletonAssembler()
-            {
+                Module budsModule = qi4jApp.findModule( QiBudAssembler.LAYER_DOMAIN, QiBudAssembler.MODULE_BUDS );
+                BudsRepository budsRepository = budsModule.findService( BudsRepository.class ).get();
+                BudsFactory budsFactory = budsModule.findService( BudsFactory.class ).get();
 
-                @Override
-                public void assemble( ModuleAssembly module )
-                        throws AssemblyException
-                {
-                    QiBudDomainAssemblies.eventsAssembler().assemble( module );
+                UnitOfWork uow = budsModule.newUnitOfWork();
+                Bud rootBud;
+                try {
+                    rootBud = budsRepository.findRootBud();
+                    uow.discard();
+                } catch ( NoSuchEntityException ex ) {
+                    rootBud = budsFactory.createRootBud();
+                    uow.complete();
                 }
 
-            };
-            Module domainEventsModule = qi4jSingleton.module();
+                QiBud.setQi4jApplication( qi4jApp );
 
-            Bud rootBud = BudsRepository.getInstance().findRootBud();
-            if ( rootBud == null ) {
-                //rootBud = BudsFactory.getInstance().createRootBud();
+                started = true;
+                LOGGER.info( "QiBud Server Started with Root Bud: {}", rootBud );
 
-                // EventSourcing
-                DomainEventsSequenceBuilder eventsBuilder = new DomainEventsSequenceBuilder().withUsecase( "Root Bud Creation" ).withUser( "QiBud System" );
-                BudEventFactory budEventFactory = domainEventsModule.findService( BudEventFactory.class ).get();
-                eventsBuilder = budEventFactory.createRootBud( eventsBuilder );
-                eventSourcing.eventStore().storeEvents( eventsBuilder.build() );
+            } catch ( AssemblyException ex ) {
+                throw new QiBudException( "Unable to assemble Qi4j application: " + ex.getMessage(), ex );
+            } catch ( UnitOfWorkCompletionException ex ) {
+                throw new QiBudException( "Unable to create Root Bud: " + ex.getMessage(), ex );
+            } catch ( Exception ex ) {
+                throw new QiBudException( "Unable to activate Qi4j application: " + ex.getMessage(), ex );
             }
-
-            started = true;
-            LOGGER.info( "QiBud Server Started with Root Bud: {}", rootBud );
-
         }
     }
 
@@ -101,10 +105,15 @@ public class Global
     public void onStop( Application aplctn )
     {
         if ( started ) {
+            try {
+                qi4jApp.passivate();
+                QiBud.setQi4jApplication( null );
+            } catch ( Exception ex ) {
+                throw new QiBudException( "Unable to passivate Qi4j application: " + ex.getMessage(), ex );
+            }
             GraphDB.getInstance().shutdown();
             AttachmentsDB.getInstance().shutdown();
             EntitiesDB.getInstance().shutdown();
-            EventSourcingDB.getInstance().shutdown();
         }
         super.onStop( aplctn );
     }
@@ -133,19 +142,10 @@ public class Global
             {
                 LOGGER.debug( "Before request with Usecase '{}'", usecase );
 
-                DomainEventsSequenceBuilder eventsSequenceBuilder = new DomainEventsSequenceBuilder().withUsecase( usecase ).withUser( "QiBud System" );
-                ctx.args.put( QiBud.DOMAIN_EVENTS_SEQ_BUILDER_ARG, eventsSequenceBuilder );
-
                 try {
 
                     Result result = delegate.call( ctx );
                     LOGGER.debug( "After request with Usecase '{}'", usecase );
-
-                    DomainEventsSequence eventsSequence = eventsSequenceBuilder.build();
-                    if ( !eventsSequence.events().isEmpty() ) {
-                        EventSourcingDB.getInstance().eventStore().storeEvents( eventsSequence );
-                    }
-
                     return result;
 
                 } catch ( Throwable ex ) {

@@ -1,6 +1,8 @@
-@(bud: _root_.buds.Bud)
+@(bud: _root_.domain.buds.Bud)
+
 @import tags._
 @import _root_.views.tools._
+
 <h3 class="pull-left" style="padding-right: 1em; font-weight: bold">Qi</h3>
 <div class="progress progress-striped active" style="margin-top:0.4em">
 <div class="bar" style='width: 50%;'>@bud.graphNode().getQi()</div>
@@ -13,7 +15,7 @@
 @for( eachAttachment <- bud.attachments() ) {
     <p style="font-weight: bold">@eachAttachment.filename()</p>
     <p class="pull-left"><small>@eachAttachment.md5()</small></p>
-    <p style="text-align:right"><a href="@routes.Buds.attachment( bud.identity(), eachAttachment.id() )" target="_blank" class="btn btn-mini"><i class="icon-download-alt"></i> Download</a></p>
+    <p style="text-align:right"><a href="@routes.Buds.attachment( bud.identity().get(), eachAttachment.id() )" target="_blank" class="btn btn-mini"><i class="icon-download-alt"></i> Download</a></p>
     @if( eachAttachment.contentType() == null ) {
         <div class="progress progress-danger progress-striped active">
             <div class="bar" style='width: 100%;'>Gathering metadata</div>
@@ -27,7 +29,7 @@
                 </div>
                 <div id="attachment-@eachAttachment.id()-preview" class="accordion-body collapse in">
                     <div class="accordion-inner">
-                        @img( routes.Buds.attachment( bud.identity(), eachAttachment.id() ).toString() )
+                        @img( routes.Buds.attachment( bud.identity().get(), eachAttachment.id() ).toString() )
                     </div>
                 </div>
             </div>
@@ -53,7 +55,7 @@
                                 }
                             </tbody>
                         </table>
-                        <p style="text-align:right"><a href="@routes.Buds.attachmentMetadata( bud.identity(), eachAttachment.id() )" target="_blank" class="btn btn-mini">As JSON</a></p>
+                        <p style="text-align:right"><a href="@routes.Buds.attachmentMetadata( bud.identity().get(), eachAttachment.id() )" target="_blank" class="btn btn-mini">As JSON</a></p>
                     </div>
                 </div>
             </div>

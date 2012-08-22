@@ -12,7 +12,7 @@
  * limitations under the License.
  *
  */
-package buds;
+package domain.buds;
 
 import com.mongodb.gridfs.GridFSDBFile;
 import java.io.IOException;

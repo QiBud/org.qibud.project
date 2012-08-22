@@ -1,4 +1,4 @@
-@(budpacks: List[_root_.buds.BudPack])
+@(budpacks: List[_root_.domain.budpacks.BudPack])
 
 @import tags._
 
@@ -14,7 +14,7 @@
         @if( ! budpacks.isEmpty() ) {
             <ul>
                 @for( budpack <- budpacks ) {
-                    <li><a href="@routes.BudPacks.pack( budpack.name() )">@budpack.name()</a></li>
+                    <li><a href="@routes.BudPacks.pack( budpack.name().get() )">@budpack.name()</a></li>
                 }
             </ul>
         }

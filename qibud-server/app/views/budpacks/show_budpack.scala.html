@@ -1,16 +1,16 @@
-@(budpack: _root_.buds.BudPack)
+@(budpack: _root_.domain.budpacks.BudPack)
 
 @import tags._
 @import _root_.views.tools._
 
-@main( budpack.name(), "budpacks" ) {
+@main( budpack.name().get(), "budpacks" ) {
 
     @layout_fluid() {
     
-        @page_header( budpack.name() )
+        @page_header( budpack.name().get() )
         
         <div class="well">
-            @markdown( budpack.description() )
+            @markdown( budpack.description().get() )
         </div>
 
     }

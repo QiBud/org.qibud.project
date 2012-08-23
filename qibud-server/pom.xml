@@ -55,11 +55,6 @@
             <version>1.7.2</version>
         </dependency>
         <dependency>
-            <groupId>net.vz.mongodb.jackson</groupId>
-            <artifactId>play-mongo-jackson-mapper_2.9.1</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-core</artifactId>
             <version>1.1</version>
@@ -89,7 +84,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.3</version>
+            <version>2.4</version>
         </dependency>
         
     </dependencies>

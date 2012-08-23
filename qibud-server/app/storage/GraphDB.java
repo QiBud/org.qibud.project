@@ -36,7 +36,7 @@ import utils.Threads;
 /**
  * Bud Graph Holder.
  * 
- * (refNode) --IS_BUD_REF--> (budRefNode) ----IS_BUD----->  (budNode)
+ * (refNode) --IS_BUD_REF--> (budRefNode) ----IS_BUD----->  (budNode)  --IS_CHILD_BUD --> (budNode)
  *                                        --IS_ROOT_BUD-->
  */
 public class GraphDB
@@ -48,7 +48,8 @@ public class GraphDB
 
         IS_BUD_REF,
         IS_BUD,
-        IS_ROOT_BUD
+        IS_ROOT_BUD,
+        IS_CHILD_BUD
 
     }
 
@@ -70,33 +71,37 @@ public class GraphDB
 
     private GraphDatabaseService graphDatabase;
 
-    public synchronized void start()
+    public void start()
     {
-        if ( graphDatabase == null ) {
+        synchronized( this ) {
 
-            String graphDatabasePath = Play.application().configuration().getString( "qibud.graphdb.path" );
-            if ( StringUtils.isEmpty( graphDatabasePath ) ) {
-                throw new QiBudException( "Neo4J Database Storage Path is empty, check your configuration" );
+            if ( graphDatabase == null ) {
+
+                String graphDatabasePath = Play.application().configuration().getString( "qibud.graphdb.path" );
+                if ( StringUtils.isEmpty( graphDatabasePath ) ) {
+                    throw new QiBudException( "Neo4J Database Storage Path is empty, check your configuration" );
+                }
+
+                registerShutdownHook( graphDatabasePath, !Play.isProd() );
+
+                graphDatabase = new GraphDatabaseFactory().newEmbeddedDatabase( graphDatabasePath );
+                LOGGER.info( "GraphDB Started" );
             }
 
-            registerShutdownHook( graphDatabasePath, !Play.isProd() );
-
-            graphDatabase = new GraphDatabaseFactory().newEmbeddedDatabase( graphDatabasePath );
-            LOGGER.info( "GraphDB Started" );
-        }
-
-        // BudReferenceNode creation if needed
-        Iterable<Relationship> relationships = graphDatabase.getReferenceNode().getRelationships( Direction.OUTGOING, RelTypes.IS_BUD_REF );
-        if ( Iterables.count( relationships ) <= 0 ) {
-            Transaction tx = graphDatabase.beginTx();
-            try {
-                Node budRefNode = graphDatabase.createNode();
-                graphDatabase.getReferenceNode().createRelationshipTo( budRefNode, RelTypes.IS_BUD_REF );
-                tx.success();
-                LOGGER.info( "Bud Ref Node created" );
-            } finally {
-                tx.finish();
+            // BudReferenceNode creation if needed
+            Iterable<Relationship> relationships = graphDatabase.getReferenceNode().getRelationships( Direction.OUTGOING, RelTypes.IS_BUD_REF );
+            if ( Iterables.count( relationships ) <= 0 ) {
+                Transaction tx = graphDatabase.beginTx();
+                try {
+                    Node budRefNode = graphDatabase.createNode();
+                    graphDatabase.getReferenceNode().createRelationshipTo( budRefNode, RelTypes.IS_BUD_REF );
+                    tx.success();
+                    LOGGER.info( "Bud Ref Node created" );
+                } finally {
+                    tx.finish();
+                }
             }
+
         }
     }
 
@@ -119,12 +124,14 @@ public class GraphDB
         }
     }
 
-    public synchronized void shutdown()
+    public void shutdown()
     {
-        if ( graphDatabase != null ) {
-            graphDatabase.shutdown();
-            graphDatabase = null;
-            LOGGER.info( "GraphD stopped" );
+        synchronized( this ) {
+            if ( graphDatabase != null ) {
+                graphDatabase.shutdown();
+                graphDatabase = null;
+                LOGGER.info( "GraphDB stopped" );
+            }
         }
     }
 
@@ -155,21 +162,26 @@ public class GraphDB
         return null;
     }
 
-    public Node createBudNode( String identity )
+    public Node createBudNode( String parentIdentity, String identity )
     {
-        return createBudNode( identity, 0L );
+        return createBudNode( parentIdentity, identity, 0L );
     }
 
-    public Node createBudNode( String identity, Long qi )
+    public Node createBudNode( String parentIdentity, String identity, Long qi )
     {
         Transaction tx = graphDatabase.beginTx();
         try {
 
+            Node parentNode = getBudNode( parentIdentity );
+            if ( parentNode == null ) {
+                throw new IllegalArgumentException( "Parent Bud Node '" + parentIdentity + "' do not exists in GraphDB." );
+            }
             Node budNode = graphDatabase.createNode();
             budNode.setProperty( BudNode.IDENTITY, identity );
             budNode.setProperty( BudNode.QI, qi );
 
             getBudRefNode().createRelationshipTo( budNode, RelTypes.IS_BUD );
+            parentNode.createRelationshipTo( budNode, RelTypes.IS_CHILD_BUD );
 
             tx.success();
 
@@ -180,16 +192,25 @@ public class GraphDB
         }
     }
 
-    public void setAsRootBud( String identity )
+    public Node createRootBudNode( String identity )
     {
         if ( Iterables.count( getBudRefNode().getRelationships( Direction.OUTGOING, RelTypes.IS_ROOT_BUD ) ) > 0 ) {
             throw new IllegalStateException( "The Root Bud already exists, check your code" );
         }
         Transaction tx = graphDatabase.beginTx();
         try {
-            Node budNode = getBudNode( identity );
+
+            Node budNode = graphDatabase.createNode();
+            budNode.setProperty( BudNode.IDENTITY, identity );
+            budNode.setProperty( BudNode.QI, 0L );
+
+            getBudRefNode().createRelationshipTo( budNode, RelTypes.IS_BUD );
             getBudRefNode().createRelationshipTo( budNode, RelTypes.IS_ROOT_BUD );
+
             tx.success();
+
+            return budNode;
+
         } finally {
             tx.finish();
         }
@@ -218,7 +239,13 @@ public class GraphDB
 
     private Node getBudRefNode()
     {
-        return Iterables.first( graphDatabase.getReferenceNode().getRelationships( Direction.OUTGOING, RelTypes.IS_BUD_REF ) ).getEndNode();
+        System.out.println( ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" );
+        System.out.println( graphDatabase );
+        System.out.println( ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" );
+        Node referenceNode = graphDatabase.getReferenceNode();
+        Iterable<Relationship> budRefs = referenceNode.getRelationships( Direction.OUTGOING, RelTypes.IS_BUD_REF );
+        Relationship budRef = Iterables.first( budRefs );
+        return budRef.getEndNode();
     }
 
 }

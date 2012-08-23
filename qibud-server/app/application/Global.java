@@ -34,7 +34,6 @@ import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
 import storage.AttachmentsDB;
-import storage.EntitiesDB;
 import storage.GraphDB;
 import utils.QiBudException;
 
@@ -64,13 +63,13 @@ public class Global
 
                 LOGGER.info( "QiBud Server starting ..." );
 
-                EntitiesDB.getInstance().start();
                 AttachmentsDB.getInstance().start();
                 GraphDB.getInstance().start();
 
                 qi4j = new Energy4Java();
                 qi4jApp = qi4j.newApplication( new QiBudAssembler() );
                 qi4jApp.activate();
+                LOGGER.info( "Qi4j Application Activated" );
 
                 Module budsModule = qi4jApp.findModule( QiBudAssembler.LAYER_DOMAIN, QiBudAssembler.MODULE_BUDS );
                 BudsRepository budsRepository = budsModule.findService( BudsRepository.class ).get();
@@ -97,6 +96,18 @@ public class Global
                 throw new QiBudException( "Unable to create Root Bud: " + ex.getMessage(), ex );
             } catch ( Exception ex ) {
                 throw new QiBudException( "Unable to activate Qi4j application: " + ex.getMessage(), ex );
+            } finally {
+                if ( !started ) {
+                    try {
+                        qi4jApp.passivate();
+                        QiBud.setQi4jApplication( null );
+                        LOGGER.info( "Qi4j Application Passivated" );
+                    } catch ( Exception ex ) {
+                        LOGGER.error( "Unable to passivate Qi4j application: " + ex.getMessage(), ex );
+                    }
+                    GraphDB.getInstance().shutdown();
+                    AttachmentsDB.getInstance().shutdown();
+                }
             }
         }
     }
@@ -108,12 +119,12 @@ public class Global
             try {
                 qi4jApp.passivate();
                 QiBud.setQi4jApplication( null );
+                LOGGER.info( "Qi4j Application Passivated" );
             } catch ( Exception ex ) {
-                throw new QiBudException( "Unable to passivate Qi4j application: " + ex.getMessage(), ex );
+                LOGGER.error( "Unable to passivate Qi4j application: " + ex.getMessage(), ex );
             }
             GraphDB.getInstance().shutdown();
             AttachmentsDB.getInstance().shutdown();
-            EntitiesDB.getInstance().shutdown();
         }
         super.onStop( aplctn );
     }

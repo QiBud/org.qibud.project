@@ -70,8 +70,7 @@ public interface BudsFactory
 
             // Create ROOT BudNode
             GraphDB graphDatabase = GraphDB.getInstance();
-            graphDatabase.createBudNode( Bud.ROOT_BUD_IDENTITY );
-            graphDatabase.setAsRootBud( Bud.ROOT_BUD_IDENTITY );
+            graphDatabase.createRootBudNode( Bud.ROOT_BUD_IDENTITY );
 
             // Create ROOT BudAttachment
             String filename = "whats.a.bud.svg";
@@ -139,9 +138,7 @@ public interface BudsFactory
             bud = builder.newInstance();
 
             // Create BudNode
-            GraphDB graphDatabase = GraphDB.getInstance();
-            Node creationBudNode = graphDatabase.getBudNode( creationBud.identity().get() );
-            graphDatabase.createBudNode( bud.identity().get() ); // TODO Bud create new Bud
+            GraphDB.getInstance().createBudNode( creationBud.identity().get(), bud.identity().get() );
 
             return bud;
         }

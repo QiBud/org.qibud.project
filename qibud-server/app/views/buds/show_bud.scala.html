@@ -12,6 +12,9 @@
     @layout_fluid( right_sidebar = sidebar ) {
     
         @page_header( bud.title().get() )
+
+        <h3 style="padding-right: 1em; font-weight: bold">Graph</h3>
+        <div id="bud-graph-@bud.identity()"></div>
         
         <p>
             <a href="@routes.Buds.budCreateForm( bud.identity().get() )" class="btn btn-mini btn-primary"><i class="icon-plus"></i> New</a>

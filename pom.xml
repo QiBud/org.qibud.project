@@ -20,7 +20,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <play2.version>2.0.2</play2.version>
+        <play2.version>2.0.3</play2.version>
         <qi4j.version>2.0-SNAPSHOT</qi4j.version>
     </properties>
 

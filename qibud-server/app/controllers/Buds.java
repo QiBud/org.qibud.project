@@ -27,7 +27,6 @@ import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
-import storage.AttachmentsDB;
 import views.html.buds.all_buds;
 import views.html.buds.create_bud;
 import views.html.buds.edit_bud;
@@ -113,7 +112,7 @@ public class Buds
             if ( bud == null ) {
                 return notFound();
             }
-            GridFSDBFile dbFile = AttachmentsDB.getInstance().getDBFile( attachment_id );
+            GridFSDBFile dbFile = QiBud.attachmentsDB().getDBFile( attachment_id );
             if ( dbFile == null ) {
                 return notFound();
             }
@@ -134,7 +133,7 @@ public class Buds
             if ( bud == null ) {
                 return notFound();
             }
-            GridFSDBFile dbFile = AttachmentsDB.getInstance().getDBFile( attachment_id );
+            GridFSDBFile dbFile = QiBud.attachmentsDB().getDBFile( attachment_id );
             if ( dbFile == null ) {
                 return notFound();
             }

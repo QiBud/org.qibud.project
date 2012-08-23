@@ -12,10 +12,9 @@
  * limitations under the License.
  *
  */
-package storage;
+package infrastructure.binarydb;
 
 import akka.util.Duration;
-import domain.buds.BudAttachment;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBObject;
@@ -23,6 +22,7 @@ import com.mongodb.Mongo;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
+import domain.buds.BudAttachment;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -31,25 +31,16 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.tika.Tika;
 import org.apache.tika.metadata.Metadata;
 import org.bson.types.ObjectId;
+import org.qi4j.api.service.ServiceActivation;
 import org.qibud.mongodb.MongoDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.Play;
 import play.libs.Akka;
 import utils.QiBudException;
-import utils.Threads;
 
-/**
- * Hold binary content attached to Buds.
- * 
- * Uploaded files are added as MongoDB GridFS files.
- * An async Akka task extract attachment metadata and store it as a Mongo
- * document alongside the GridFS file.
- * A Controller Action output attachment metadata as a json resource.
- * 
- * TODO Allow the use of MongoDB replicas sets
- */
-public class AttachmentsDB
+public class AttachmentsDBImpl
+        implements AttachmentsDB, ServiceActivation
 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger( AttachmentsDB.class );
@@ -60,99 +51,62 @@ public class AttachmentsDB
 
     private static final String CONFIG_DB = "qibud.attachmentsdb.db";
 
-    private static AttachmentsDB instance;
+    private String host;
 
-    public static synchronized AttachmentsDB getInstance()
-    {
-        if ( instance == null ) {
-            instance = new AttachmentsDB();
-        }
-        return instance;
-    }
+    private Integer port;
 
-    private AttachmentsDB()
-    {
-    }
+    private String dbName;
 
     private Mongo mongo;
 
     private DB attachmentsDB;
 
-    public synchronized void start()
+    @Override
+    public void activateService()
+            throws Exception
     {
-        if ( mongo == null ) {
-            String host = Play.application().configuration().getString( CONFIG_HOST );
-            Integer port = Play.application().configuration().getInt( CONFIG_PORT );
-            String dbName = Play.application().configuration().getString( CONFIG_DB );
-            if ( StringUtils.isEmpty( host ) ) {
-                throw new QiBudException( "AttachmentsDB host is empty, check your configuration (" + CONFIG_HOST + ")" );
-            }
-            if ( port == null ) {
-                throw new QiBudException( "AttachmentsDB port is empty, check your configuration (" + CONFIG_PORT + ")" );
-            }
-            if ( StringUtils.isEmpty( dbName ) ) {
-                throw new QiBudException( "AttachmentsDB database name is empty, check your configuration (" + CONFIG_DB + ")" );
-            }
-
-            registerShutdownHook( host, port, dbName, !Play.isProd() );
-
-            mongo = MongoDB.connectToMongoDB( host, port );
-            attachmentsDB = mongo.getDB( dbName );
-
-            LOGGER.info( "AttachmentsDB started" );
+        host = Play.application().configuration().getString( CONFIG_HOST );
+        port = Play.application().configuration().getInt( CONFIG_PORT );
+        dbName = Play.application().configuration().getString( CONFIG_DB );
+        if ( StringUtils.isEmpty( host ) ) {
+            throw new QiBudException( "AttachmentsDB host is empty, check your configuration (" + CONFIG_HOST + ")" );
         }
+        if ( port == null ) {
+            throw new QiBudException( "AttachmentsDB port is empty, check your configuration (" + CONFIG_PORT + ")" );
+        }
+        if ( StringUtils.isEmpty( dbName ) ) {
+            throw new QiBudException( "AttachmentsDB database name is empty, check your configuration (" + CONFIG_DB + ")" );
+        }
+
+        mongo = MongoDB.connectToMongoDB( host, port );
+        attachmentsDB = mongo.getDB( dbName );
+
+        LOGGER.info( "AttachmentsDB started" );
     }
 
-    public synchronized void shutdown()
+    @Override
+    public void passivateService()
+            throws Exception
     {
-        if ( mongo != null ) {
-            mongo.close();
-            mongo = null;
-            attachmentsDB = null;
-            LOGGER.info( "AttachmentsDB stopped" );
-        }
-    }
-
-    private void registerShutdownHook( final String host, final Integer port, final String dbName, final boolean clear )
-    {
-        if ( !Threads.isThreadRegisteredAsShutdownHook( "attachmentsdb-shutdown" ) ) {
-            Runtime.getRuntime().addShutdownHook( new Thread( new Runnable()
-            {
-
-                @Override
-                public void run()
-                {
-                    shutdown();
-                    if ( clear ) {
-                        clear( host, port, dbName );
-                    }
-                }
-
-            }, "attachmentsdb-shutdown" ) );
-        }
-    }
-
-    private void clear( String host, Integer port, String dbName )
-    {
-        Mongo mongo = MongoDB.connectToMongoDB( host, port );
-        DB db = mongo.getDB( dbName );
-        db.dropDatabase();
         mongo.close();
-        LOGGER.warn( "AttachmentsDB cleared!" );
+        mongo = null;
+        attachmentsDB = null;
+        LOGGER.info( "AttachmentsDB stopped" );
+        if ( !Play.isProd() ) {
+            Mongo mongo = MongoDB.connectToMongoDB( host, port );
+            DB db = mongo.getDB( dbName );
+            db.dropDatabase();
+            mongo.close();
+            LOGGER.warn( "AttachmentsDB cleared!" );
+        }
+        host = null;
+        port = null;
+        dbName = null;
     }
 
+    @Override
     public void storeAttachment( String budIdentity, String baseName, InputStream inputStream )
     {
-        if ( StringUtils.isEmpty( budIdentity ) ) {
-            throw new IllegalArgumentException( "Bud identity is null" );
-        }
-        if ( StringUtils.isEmpty( baseName ) ) {
-            throw new IllegalArgumentException( "Base name is null" );
-        }
-        if ( inputStream == null ) {
-            throw new IllegalArgumentException( "InputStream is null" );
-        }
-
         final String filename = budIdentity + "/" + baseName;
 
         // Save minimal data
@@ -213,14 +167,13 @@ public class AttachmentsDB
         }
     }
 
-    /**
-     * @param attachmentId This is not the Bud identity but the BudAttachemnt id!
-     */
+    @Override
     public GridFSDBFile getDBFile( String attachmentId )
     {
         return new GridFS( attachmentsDB ).findOne( new ObjectId( attachmentId ) );
     }
 
+    @Override
     public List<GridFSDBFile> getBudDBFiles( String identity )
     {
         DBObject query = new BasicDBObject( BudAttachment.IDENTITY, identity );
@@ -228,6 +181,7 @@ public class AttachmentsDB
         return gridFS.find( query );
     }
 
+    @Override
     public void deleteBudDBFiles( String identity )
     {
         DBObject query = new BasicDBObject( BudAttachment.IDENTITY, identity );

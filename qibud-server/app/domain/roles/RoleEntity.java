@@ -11,14 +11,8 @@
  * limitations under the License.
  *
  */
-package roles;
+package domain.roles;
 
-public interface RoleAction<ParamType extends Object, ResultType extends Object, ThrowableType extends Throwable>
+public interface RoleEntity
 {
-
-    String actionName();
-
-    ResultType invokeAction( ParamType params )
-            throws ThrowableType;
-
 }

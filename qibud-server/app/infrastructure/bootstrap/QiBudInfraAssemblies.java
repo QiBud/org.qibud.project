@@ -13,6 +13,8 @@
  */
 package infrastructure.bootstrap;
 
+import infrastructure.binarydb.AttachmentsDBService;
+import infrastructure.graphdb.GraphDBService;
 import org.qi4j.bootstrap.Assembler;
 import org.qi4j.bootstrap.AssemblyException;
 import org.qi4j.bootstrap.ModuleAssembly;
@@ -34,9 +36,23 @@ public final class QiBudInfraAssemblies
             public void assemble( ModuleAssembly module )
                     throws AssemblyException
             {
-                module.services( UuidIdentityGeneratorService.class ).visibleIn( application );
-                module.services( MemoryEntityStoreService.class ).visibleIn( application );
+                // Entities
+                module.services( UuidIdentityGeneratorService.class,
+                                 MemoryEntityStoreService.class ).
+                        visibleIn( application ).
+                        instantiateOnStartup();
                 new RdfMemoryStoreAssembler().assemble( module );
+
+                // Attachments
+                module.services( AttachmentsDBService.class ).
+                        visibleIn( application ).
+                        instantiateOnStartup();
+
+                // Graph
+                module.services( GraphDBService.class ).
+                        visibleIn( application ).
+                        instantiateOnStartup();
+
             }
 
         };

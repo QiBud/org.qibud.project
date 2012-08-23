@@ -16,6 +16,8 @@ package application;
 import application.bootstrap.QiBudAssembler;
 import domain.buds.BudsFactory;
 import domain.buds.BudsRepository;
+import infrastructure.binarydb.AttachmentsDB;
+import infrastructure.graphdb.GraphDB;
 import org.qi4j.api.structure.Application;
 import org.qi4j.api.structure.Module;
 
@@ -42,6 +44,16 @@ public final class QiBud
     public static BudsFactory budsFactory()
     {
         return budsDomainModule().findService( BudsFactory.class ).get();
+    }
+
+    public static GraphDB graphDB()
+    {
+        return budsDomainModule().findService( GraphDB.class ).get();
+    }
+
+    public static AttachmentsDB attachmentsDB()
+    {
+        return budsDomainModule().findService( AttachmentsDB.class ).get();
     }
 
     /* package */ static void setQi4jApplication( Application application )

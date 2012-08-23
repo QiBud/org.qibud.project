@@ -11,19 +11,11 @@
  * limitations under the License.
  *
  */
-package roles;
+package domain.roles;
 
-import java.util.List;
-import play.db.ebean.Model;
-
-public interface RoleDescriptor
+public interface RoleActionDescriptor
 {
 
     String name();
 
-    List<RoleActionDescriptor> actions();
-
-    Class<? extends Model> roleEntity();
-
-    // extensions de vues etc..
 }

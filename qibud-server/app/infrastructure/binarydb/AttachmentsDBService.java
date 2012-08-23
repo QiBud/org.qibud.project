@@ -12,14 +12,15 @@
  * limitations under the License.
  *
  */
-package samples.basebuds;
+package infrastructure.binarydb;
 
-import roles.RoleEntity;
+import org.qi4j.api.mixin.Mixins;
+import org.qi4j.api.service.ServiceActivation;
+import org.qi4j.api.service.ServiceComposite;
 
-public class PersonEntity
-        implements RoleEntity
+@Mixins( AttachmentsDBImpl.class )
+public interface AttachmentsDBService
+        extends AttachmentsDB, ServiceComposite, ServiceActivation
 {
-
-    public String identity;
-
+    
 }

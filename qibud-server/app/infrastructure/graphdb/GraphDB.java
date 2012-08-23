@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012, Paul Merlin. All Rights Reserved.
+ * Copyright (c) 2012, Samuel Loup. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,11 +12,27 @@
  * limitations under the License.
  *
  */
-package roles;
+package infrastructure.graphdb;
 
-public interface RoleActionDescriptor
+import org.neo4j.graphdb.Node;
+
+/**
+ * Bud Graph Holder.
+ * 
+ * (refNode) --IS_BUD_REF--> (budRefNode) ----IS_BUD----->  (budNode)  --IS_CHILD_BUD --> (budNode)
+ *                                        --IS_ROOT_BUD-->
+ */
+public interface GraphDB
 {
 
-    String name();
+    Node getBudNode( String identity );
+
+    Node createRootBudNode( String identity );
+
+    Node createBudNode( String parentIdentity, String identity );
+
+    Node createBudNode( String parentIdentity, String identity, Long qi );
+
+    void deleteBudNode( String identity );
 
 }

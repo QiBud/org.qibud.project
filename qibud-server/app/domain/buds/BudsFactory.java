@@ -13,10 +13,12 @@
  */
 package domain.buds;
 
+import infrastructure.binarydb.AttachmentsDB;
+import infrastructure.graphdb.GraphDB;
 import java.io.InputStream;
 import org.joda.time.DateTime;
-import org.neo4j.graphdb.Node;
 import org.qi4j.api.entity.EntityBuilder;
+import org.qi4j.api.injection.scope.Service;
 import org.qi4j.api.injection.scope.Structure;
 import org.qi4j.api.mixin.Mixins;
 import org.qi4j.api.service.ServiceComposite;
@@ -29,8 +31,6 @@ import org.qi4j.api.unitofwork.UnitOfWorkCompletionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.Play;
-import storage.AttachmentsDB;
-import storage.GraphDB;
 
 @Mixins( BudsFactory.Mixin.class )
 public interface BudsFactory
@@ -49,6 +49,12 @@ public interface BudsFactory
 
         @Structure
         private Module module;
+
+        @Service
+        private GraphDB graphDB;
+
+        @Service
+        private AttachmentsDB attachmentsDB;
 
         @Override
         public Bud createRootBud()
@@ -69,13 +75,12 @@ public interface BudsFactory
             root = builder.newInstance();
 
             // Create ROOT BudNode
-            GraphDB graphDatabase = GraphDB.getInstance();
-            graphDatabase.createRootBudNode( Bud.ROOT_BUD_IDENTITY );
+            graphDB.createRootBudNode( Bud.ROOT_BUD_IDENTITY );
 
             // Create ROOT BudAttachment
             String filename = "whats.a.bud.svg";
             InputStream attachmentInputStream = Play.application().resourceAsStream( filename );
-            AttachmentsDB.getInstance().storeAttachment( Bud.ROOT_BUD_IDENTITY, filename, attachmentInputStream );
+            attachmentsDB.storeAttachment( Bud.ROOT_BUD_IDENTITY, filename, attachmentInputStream );
 
             // Eventual rollback
             uow.addUnitOfWorkCallback( new UnitOfWorkCallback()
@@ -97,12 +102,12 @@ public interface BudsFactory
                             Bud rootBud = uow.get( Bud.class, Bud.ROOT_BUD_IDENTITY );
                             if ( rootBud != null ) {
                                 try {
-                                    AttachmentsDB.getInstance().deleteBudDBFiles( Bud.ROOT_BUD_IDENTITY );
+                                    attachmentsDB.deleteBudDBFiles( Bud.ROOT_BUD_IDENTITY );
                                 } catch ( RuntimeException attachEx ) {
                                     LOGGER.warn( "Unable to cleanup RootBud attachments after creation failure", attachEx );
                                 }
                                 try {
-                                    GraphDB.getInstance().deleteBudNode( Bud.ROOT_BUD_IDENTITY );
+                                    graphDB.deleteBudNode( Bud.ROOT_BUD_IDENTITY );
                                 } catch ( RuntimeException graphEx ) {
                                     LOGGER.warn( "Unable to cleanup RootBud node after creation failure", graphEx );
                                 }
@@ -138,7 +143,7 @@ public interface BudsFactory
             bud = builder.newInstance();
 
             // Create BudNode
-            GraphDB.getInstance().createBudNode( creationBud.identity().get(), bud.identity().get() );
+            graphDB.createBudNode( creationBud.identity().get(), bud.identity().get() );
 
             return bud;
         }

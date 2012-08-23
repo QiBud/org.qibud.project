@@ -12,7 +12,7 @@
  * limitations under the License.
  *
  */
-package storage;
+package infrastructure.graphdb;
 
 import domain.buds.BudNode;
 import java.io.File;
@@ -27,19 +27,14 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.helpers.collection.Iterables;
+import org.qi4j.api.service.ServiceActivation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.Play;
 import utils.QiBudException;
-import utils.Threads;
 
-/**
- * Bud Graph Holder.
- * 
- * (refNode) --IS_BUD_REF--> (budRefNode) ----IS_BUD----->  (budNode)  --IS_CHILD_BUD --> (budNode)
- *                                        --IS_ROOT_BUD-->
- */
-public class GraphDB
+public class GraphDBImpl
+        implements GraphDB, ServiceActivation
 {
 
     public static enum RelTypes
@@ -55,100 +50,60 @@ public class GraphDB
 
     private static final Logger LOGGER = LoggerFactory.getLogger( GraphDB.class );
 
-    private static GraphDB instance;
-
-    public static synchronized GraphDB getInstance()
-    {
-        if ( instance == null ) {
-            instance = new GraphDB();
-        }
-        return instance;
-    }
-
-    private GraphDB()
-    {
-    }
+    private String graphDatabasePath;
 
     private GraphDatabaseService graphDatabase;
 
-    public void start()
+    @Override
+    public void activateService()
+            throws Exception
     {
-        synchronized( this ) {
-
-            if ( graphDatabase == null ) {
-
-                String graphDatabasePath = Play.application().configuration().getString( "qibud.graphdb.path" );
-                if ( StringUtils.isEmpty( graphDatabasePath ) ) {
-                    throw new QiBudException( "Neo4J Database Storage Path is empty, check your configuration" );
-                }
-
-                registerShutdownHook( graphDatabasePath, !Play.isProd() );
-
-                graphDatabase = new GraphDatabaseFactory().newEmbeddedDatabase( graphDatabasePath );
-                LOGGER.info( "GraphDB Started" );
-            }
-
-            // BudReferenceNode creation if needed
-            Iterable<Relationship> relationships = graphDatabase.getReferenceNode().getRelationships( Direction.OUTGOING, RelTypes.IS_BUD_REF );
-            if ( Iterables.count( relationships ) <= 0 ) {
-                Transaction tx = graphDatabase.beginTx();
-                try {
-                    Node budRefNode = graphDatabase.createNode();
-                    graphDatabase.getReferenceNode().createRelationshipTo( budRefNode, RelTypes.IS_BUD_REF );
-                    tx.success();
-                    LOGGER.info( "Bud Ref Node created" );
-                } finally {
-                    tx.finish();
-                }
-            }
-
+        graphDatabasePath = Play.application().configuration().getString( "qibud.graphdb.path" );
+        if ( StringUtils.isEmpty( graphDatabasePath ) ) {
+            throw new QiBudException( "Neo4J Database Storage Path is empty, check your configuration" );
         }
-    }
 
-    private void registerShutdownHook( final String graphDatabasePath, final boolean clear )
-    {
-        if ( !Threads.isThreadRegisteredAsShutdownHook( "graphdb-shutdown" ) ) {
-            Runtime.getRuntime().addShutdownHook( new Thread( new Runnable()
-            {
+        graphDatabase = new GraphDatabaseFactory().newEmbeddedDatabase( graphDatabasePath );
+        LOGGER.info( "GraphDB Started" );
 
-                @Override
-                public void run()
-                {
-                    shutdown();
-                    if ( clear ) {
-                        clear( graphDatabasePath );
-                    }
-                }
-
-            }, "graphdb-shutdown" ) );
-        }
-    }
-
-    public void shutdown()
-    {
-        synchronized( this ) {
-            if ( graphDatabase != null ) {
-                graphDatabase.shutdown();
-                graphDatabase = null;
-                LOGGER.info( "GraphDB stopped" );
-            }
-        }
-    }
-
-    private void clear( String graphDatabasePath )
-    {
-        // Delete database
-        File graphDatabaseDir = new File( graphDatabasePath );
-        if ( graphDatabaseDir.exists() ) {
+        // BudReferenceNode creation if needed
+        Iterable<Relationship> relationships = graphDatabase.getReferenceNode().getRelationships( Direction.OUTGOING, RelTypes.IS_BUD_REF );
+        if ( Iterables.count( relationships ) <= 0 ) {
+            Transaction tx = graphDatabase.beginTx();
             try {
-                FileUtils.deleteDirectory( graphDatabaseDir );
-                LOGGER.warn( "GraphDB cleared!" );
-            } catch ( IOException ex ) {
-                throw new QiBudException( ex );
+                Node budRefNode = graphDatabase.createNode();
+                graphDatabase.getReferenceNode().createRelationshipTo( budRefNode, RelTypes.IS_BUD_REF );
+                tx.success();
+                LOGGER.info( "Bud Ref Node created" );
+            } finally {
+                tx.finish();
             }
         }
     }
 
+    @Override
+    public void passivateService()
+            throws Exception
+    {
+        graphDatabase.shutdown();
+        graphDatabase = null;
+        LOGGER.info( "GraphDB stopped" );
+        if ( !Play.isProd() ) {
+            // Delete database
+            File graphDatabaseDir = new File( graphDatabasePath );
+            if ( graphDatabaseDir.exists() ) {
+                try {
+                    FileUtils.deleteDirectory( graphDatabaseDir );
+                    LOGGER.warn( "GraphDB cleared!" );
+                } catch ( IOException ex ) {
+                    throw new QiBudException( ex );
+                }
+            }
+        }
+        graphDatabasePath = null;
+    }
+
+    @Override
     public Node getBudNode( String identity )
     {
         Iterable<Relationship> isBudsRelationships = getBudRefNode().getRelationships( Direction.OUTGOING, RelTypes.IS_BUD );
@@ -162,11 +117,38 @@ public class GraphDB
         return null;
     }
 
+    @Override
+    public Node createRootBudNode( String identity )
+    {
+        if ( Iterables.count( getBudRefNode().getRelationships( Direction.OUTGOING, RelTypes.IS_ROOT_BUD ) ) > 0 ) {
+            throw new IllegalStateException( "The Root Bud already exists, check your code" );
+        }
+        Transaction tx = graphDatabase.beginTx();
+        try {
+
+            Node budNode = graphDatabase.createNode();
+            budNode.setProperty( BudNode.IDENTITY, identity );
+            budNode.setProperty( BudNode.QI, 0L );
+
+            getBudRefNode().createRelationshipTo( budNode, RelTypes.IS_BUD );
+            getBudRefNode().createRelationshipTo( budNode, RelTypes.IS_ROOT_BUD );
+
+            tx.success();
+
+            return budNode;
+
+        } finally {
+            tx.finish();
+        }
+    }
+
+    @Override
     public Node createBudNode( String parentIdentity, String identity )
     {
         return createBudNode( parentIdentity, identity, 0L );
     }
 
+    @Override
     public Node createBudNode( String parentIdentity, String identity, Long qi )
     {
         Transaction tx = graphDatabase.beginTx();
@@ -192,30 +174,7 @@ public class GraphDB
         }
     }
 
-    public Node createRootBudNode( String identity )
-    {
-        if ( Iterables.count( getBudRefNode().getRelationships( Direction.OUTGOING, RelTypes.IS_ROOT_BUD ) ) > 0 ) {
-            throw new IllegalStateException( "The Root Bud already exists, check your code" );
-        }
-        Transaction tx = graphDatabase.beginTx();
-        try {
-
-            Node budNode = graphDatabase.createNode();
-            budNode.setProperty( BudNode.IDENTITY, identity );
-            budNode.setProperty( BudNode.QI, 0L );
-
-            getBudRefNode().createRelationshipTo( budNode, RelTypes.IS_BUD );
-            getBudRefNode().createRelationshipTo( budNode, RelTypes.IS_ROOT_BUD );
-
-            tx.success();
-
-            return budNode;
-
-        } finally {
-            tx.finish();
-        }
-    }
-
+    @Override
     public void deleteBudNode( String identity )
     {
         Transaction tx = graphDatabase.beginTx();

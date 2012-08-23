@@ -11,17 +11,21 @@
  * limitations under the License.
  *
  */
-package roles;
+package domain.roles;
 
-import utils.QiBudException;
+import java.util.List;
 
-public class RoleActionNotFound
-        extends QiBudException
+public interface Role<EntityType extends RoleEntity>
 {
 
-    public RoleActionNotFound( String string )
-    {
-        super( string );
-    }
+    String roleName();
+
+    boolean hasActionNamed( String name );
+
+    RoleAction actionNamed( String name );
+
+    List<RoleAction> actions();
+
+    EntityType roleEntity();
 
 }

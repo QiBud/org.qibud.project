@@ -15,6 +15,8 @@
 package domain.buds;
 
 import com.mongodb.gridfs.GridFSDBFile;
+import infrastructure.binarydb.AttachmentsDB;
+import infrastructure.graphdb.GraphDB;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,12 +24,11 @@ import org.joda.time.DateTime;
 import org.neo4j.graphdb.Node;
 import org.qi4j.api.common.UseDefaults;
 import org.qi4j.api.entity.EntityComposite;
+import org.qi4j.api.injection.scope.Service;
 import org.qi4j.api.injection.scope.This;
 import org.qi4j.api.mixin.Mixins;
 import org.qi4j.api.property.Property;
-import roles.Role;
-import storage.AttachmentsDB;
-import storage.GraphDB;
+import domain.roles.Role;
 
 @Mixins( Bud.Mixin.class )
 public interface Bud
@@ -55,6 +56,12 @@ public interface Bud
             implements Bud
     {
 
+        @Service
+        private GraphDB graphDB;
+
+        @Service
+        private AttachmentsDB attachmentsDB;
+
         @This
         private Bud bud;
 
@@ -67,7 +74,7 @@ public interface Bud
         {
             synchronized( this ) {
                 if ( node == null ) {
-                    Node underlyingNode = GraphDB.getInstance().getBudNode( bud.identity().get() );
+                    Node underlyingNode = graphDB.getBudNode( bud.identity().get() );
                     node = new BudNode( underlyingNode );
                 }
             }
@@ -79,7 +86,7 @@ public interface Bud
         {
             synchronized( this ) {
                 if ( attachments == null ) {
-                    List<GridFSDBFile> budDBFiles = AttachmentsDB.getInstance().getBudDBFiles( bud.identity().get() );
+                    List<GridFSDBFile> budDBFiles = attachmentsDB.getBudDBFiles( bud.identity().get() );
                     List<BudAttachment> budAttachments = new ArrayList<BudAttachment>();
                     for ( GridFSDBFile eachDBFile : budDBFiles ) {
                         budAttachments.add( new BudAttachment( eachDBFile ) );

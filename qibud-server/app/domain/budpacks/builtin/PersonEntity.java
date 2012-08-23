@@ -12,24 +12,14 @@
  * limitations under the License.
  *
  */
-package domain.budpacks;
+package domain.budpacks.builtin;
 
-import java.util.List;
-import org.qi4j.api.entity.EntityComposite;
-import org.qi4j.api.property.Property;
-import domain.roles.RoleDescriptor;
+import domain.roles.RoleEntity;
 
-public interface BudPack
-        extends EntityComposite
+public class PersonEntity
+        implements RoleEntity
 {
 
-    Property<String> name();
+    public String identity;
 
-    Property<String> description();
-
-    Property<String> version();
-
-    Property<List<RoleDescriptor>> roles();
-
-    // TODO Add Dependencies
 }

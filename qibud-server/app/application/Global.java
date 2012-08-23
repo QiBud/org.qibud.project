@@ -33,8 +33,6 @@ import play.GlobalSettings;
 import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
-import storage.AttachmentsDB;
-import storage.GraphDB;
 import utils.QiBudException;
 
 public class Global
@@ -62,9 +60,6 @@ public class Global
             try {
 
                 LOGGER.info( "QiBud Server starting ..." );
-
-                AttachmentsDB.getInstance().start();
-                GraphDB.getInstance().start();
 
                 qi4j = new Energy4Java();
                 qi4jApp = qi4j.newApplication( new QiBudAssembler() );
@@ -105,8 +100,6 @@ public class Global
                     } catch ( Exception ex ) {
                         LOGGER.error( "Unable to passivate Qi4j application: " + ex.getMessage(), ex );
                     }
-                    GraphDB.getInstance().shutdown();
-                    AttachmentsDB.getInstance().shutdown();
                 }
             }
         }
@@ -123,8 +116,6 @@ public class Global
             } catch ( Exception ex ) {
                 LOGGER.error( "Unable to passivate Qi4j application: " + ex.getMessage(), ex );
             }
-            GraphDB.getInstance().shutdown();
-            AttachmentsDB.getInstance().shutdown();
         }
         super.onStop( aplctn );
     }

@@ -12,13 +12,13 @@
  * limitations under the License.
  *
  */
-package samples.basebuds;
+package domain.budpacks.builtin;
 
 import java.util.Collections;
 import java.util.List;
-import roles.Role;
-import roles.RoleAction;
-import roles.RoleActionNotFound;
+import domain.roles.Role;
+import domain.roles.RoleAction;
+import domain.roles.RoleActionNotFound;
 
 public class PersonRole
         implements Role<PersonEntity>

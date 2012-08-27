@@ -16,7 +16,7 @@ package domain.buds;
 
 import com.mongodb.gridfs.GridFSDBFile;
 import domain.roles.Role;
-import infrastructure.binarydb.AttachmentsDB;
+import infrastructure.attachmentsdb.AttachmentsDB;
 import infrastructure.graphdb.GraphDB;
 import java.util.ArrayList;
 import java.util.Collections;

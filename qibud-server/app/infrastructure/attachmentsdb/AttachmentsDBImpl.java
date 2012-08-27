@@ -12,7 +12,7 @@
  * limitations under the License.
  *
  */
-package infrastructure.binarydb;
+package infrastructure.attachmentsdb;
 
 import akka.util.Duration;
 import com.mongodb.BasicDBObject;

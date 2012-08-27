@@ -37,6 +37,11 @@
         </dependency>
         <dependency>
             <groupId>org.qi4j.extension</groupId>
+            <artifactId>org.qi4j.extension.entitystore-mongodb</artifactId>
+            <version>${qi4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.qi4j.extension</groupId>
             <artifactId>org.qi4j.extension.indexing-rdf</artifactId>
             <version>${qi4j.version}</version>
         </dependency>

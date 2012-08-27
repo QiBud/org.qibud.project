@@ -12,7 +12,7 @@
  * limitations under the License.
  *
  */
-package infrastructure.binarydb;
+package infrastructure.attachmentsdb;
 
 import com.mongodb.gridfs.GridFSDBFile;
 import java.io.InputStream;

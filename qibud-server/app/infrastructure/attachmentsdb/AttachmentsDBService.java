@@ -12,7 +12,7 @@
  * limitations under the License.
  *
  */
-package infrastructure.binarydb;
+package infrastructure.attachmentsdb;
 
 import org.qi4j.api.mixin.Mixins;
 import org.qi4j.api.service.ServiceActivation;

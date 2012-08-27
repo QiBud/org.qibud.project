@@ -16,7 +16,7 @@ package application;
 import application.bootstrap.QiBudAssembler;
 import domain.buds.BudsFactory;
 import domain.buds.BudsRepository;
-import infrastructure.binarydb.AttachmentsDB;
+import infrastructure.attachmentsdb.AttachmentsDB;
 import infrastructure.graphdb.GraphDB;
 import org.qi4j.api.structure.Application;
 import org.qi4j.api.structure.Module;

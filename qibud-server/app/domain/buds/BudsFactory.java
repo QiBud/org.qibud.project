@@ -13,7 +13,7 @@
  */
 package domain.buds;
 
-import infrastructure.binarydb.AttachmentsDB;
+import infrastructure.attachmentsdb.AttachmentsDB;
 import infrastructure.graphdb.GraphDB;
 import java.io.InputStream;
 import org.joda.time.DateTime;

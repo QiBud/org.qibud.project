@@ -13,8 +13,10 @@
  */
 package application.bootstrap;
 
+import config.bootstrap.QiBudConfigAssemblies;
 import domain.bootstrap.QiBudDomainAssemblies;
 import infrastructure.bootstrap.QiBudInfraAssemblies;
+import org.qi4j.api.structure.Application.Mode;
 import org.qi4j.bootstrap.ApplicationAssembler;
 import org.qi4j.bootstrap.ApplicationAssembly;
 import org.qi4j.bootstrap.ApplicationAssemblyFactory;
@@ -30,23 +32,63 @@ public class QiBudAssembler
 
     public static final String MODULE_BUDS = "buds";
 
+    public static final String LAYER_INFRASTRUCTURE = "infrastructure";
+
+    public static final String MODULE_PERSISTENCE = "persistence";
+
+    private final Mode mode;
+
+    private final String mongoHostname;
+
+    private final int mongoPort;
+
+    private final String mongoUsername;
+
+    private final String mongoPassword;
+
+    private final String mongoDatabase;
+
+    private final String mongoCollection;
+
+    public QiBudAssembler( Mode mode, String mongoHostname, int mongoPort, String mongoUsername, String mongoPassword, String mongoDatabase, String mongoCollection )
+    {
+        this.mode = mode;
+        this.mongoHostname = mongoHostname;
+        this.mongoPort = mongoPort;
+        this.mongoUsername = mongoUsername;
+        this.mongoPassword = mongoPassword;
+        this.mongoDatabase = mongoDatabase;
+        this.mongoCollection = mongoCollection;
+    }
+
     @Override
     public ApplicationAssembly assemble( ApplicationAssemblyFactory aaf )
             throws AssemblyException
     {
         ApplicationAssembly appAss = aaf.newApplicationAssembly();
+        appAss.setMode( mode );
+
+        // Config
+        LayerAssembly configLayer = appAss.layer( "config" );
+        ModuleAssembly config = configLayer.module( "config" );
+        QiBudConfigAssemblies.config().assemble( config );
 
         // Domain
-        LayerAssembly domainLayer = appAss.layer( "domain" );
-        ModuleAssembly buds = domainLayer.module( "buds" );
+        LayerAssembly domainLayer = appAss.layer( LAYER_DOMAIN );
+        ModuleAssembly buds = domainLayer.module( MODULE_BUDS );
         QiBudDomainAssemblies.buds().assemble( buds );
 
         // Infrastructure
-        LayerAssembly infraLayer = appAss.layer( "infra" );
-        ModuleAssembly persistence = infraLayer.module( "persistence" );
-        QiBudInfraAssemblies.persistence().assemble( persistence );
+        LayerAssembly infraLayer = appAss.layer( LAYER_INFRASTRUCTURE );
+        ModuleAssembly persistence = infraLayer.module( MODULE_PERSISTENCE );
+        QiBudInfraAssemblies.persistence( config,
+                                          mongoHostname, mongoPort,
+                                          mongoUsername, mongoPassword,
+                                          mongoDatabase, mongoCollection ).
+                assemble( persistence );
 
-        domainLayer.uses( infraLayer );
+        domainLayer.uses( infraLayer, configLayer );
+        infraLayer.uses( configLayer );
 
         return appAss;
     }

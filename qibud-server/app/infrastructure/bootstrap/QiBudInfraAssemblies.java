@@ -13,46 +13,58 @@
  */
 package infrastructure.bootstrap;
 
-import infrastructure.binarydb.AttachmentsDBService;
+import infrastructure.attachmentsdb.AttachmentsDBService;
 import infrastructure.graphdb.GraphDBService;
 import org.qi4j.bootstrap.Assembler;
 import org.qi4j.bootstrap.AssemblyException;
 import org.qi4j.bootstrap.ModuleAssembly;
-import org.qi4j.entitystore.memory.MemoryEntityStoreService;
+import org.qi4j.entitystore.mongodb.MongoEntityStoreConfiguration;
+import org.qi4j.entitystore.mongodb.MongoMapEntityStoreAssembler;
 import org.qi4j.index.rdf.assembly.RdfMemoryStoreAssembler;
-import org.qi4j.spi.uuid.UuidIdentityGeneratorService;
 
 import static org.qi4j.api.common.Visibility.application;
 
 public final class QiBudInfraAssemblies
 {
 
-    public static Assembler persistence()
+    public static Assembler persistence( final ModuleAssembly configModule,
+                                         final String mongoHostname, final int mongoPort,
+                                         final String mongoUsername, final String mongoPassword,
+                                         final String mongoDatabase, final String mongoCollection )
     {
         return new Assembler()
         {
 
             @Override
-            public void assemble( ModuleAssembly module )
+            public void assemble( ModuleAssembly ma )
                     throws AssemblyException
             {
-                // Entities
-                module.services( UuidIdentityGeneratorService.class,
-                                 MemoryEntityStoreService.class ).
-                        visibleIn( application ).
-                        instantiateOnStartup();
-                new RdfMemoryStoreAssembler().assemble( module );
+                // Entities Storage
+                new MongoMapEntityStoreAssembler().withVisibility( application ).
+                        withConfigModule( configModule ).
+                        withConfigVisibility( application ).
+                        assemble( ma );
+                MongoEntityStoreConfiguration mongoESConf = ma.forMixin( MongoEntityStoreConfiguration.class ).
+                        declareDefaults();
+                mongoESConf.hostname().set( mongoHostname );
+                mongoESConf.port().set( mongoPort );
+                mongoESConf.username().set( mongoUsername );
+                mongoESConf.password().set( mongoPassword );
+                mongoESConf.database().set( mongoDatabase );
+                mongoESConf.collection().set( mongoCollection );
+
+                // Entities Indexing & Query
+                new RdfMemoryStoreAssembler().assemble( ma );
 
                 // Attachments
-                module.services( AttachmentsDBService.class ).
+                ma.services( AttachmentsDBService.class ).
                         visibleIn( application ).
                         instantiateOnStartup();
 
                 // Graph
-                module.services( GraphDBService.class ).
+                ma.services( GraphDBService.class ).
                         visibleIn( application ).
                         instantiateOnStartup();
-
             }
 
         };

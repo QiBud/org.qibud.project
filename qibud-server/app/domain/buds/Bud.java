@@ -19,15 +19,19 @@ import domain.roles.Role;
 import infrastructure.attachmentsdb.AttachmentsDB;
 import infrastructure.graphdb.GraphDB;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.joda.time.DateTime;
 import org.neo4j.graphdb.Node;
+import org.qi4j.api.association.Association;
+import org.qi4j.api.association.ManyAssociation;
+import org.qi4j.api.common.Optional;
 import org.qi4j.api.common.UseDefaults;
+import org.qi4j.api.entity.Aggregated;
 import org.qi4j.api.entity.EntityComposite;
 import org.qi4j.api.injection.scope.Service;
 import org.qi4j.api.injection.scope.This;
 import org.qi4j.api.mixin.Mixins;
+import org.qi4j.api.property.Immutable;
 import org.qi4j.api.property.Property;
 
 @Mixins( Bud.Mixin.class )
@@ -37,8 +41,12 @@ public interface Bud
 
     String ROOT_BUD_IDENTITY = "root";
 
+    @Optional
+    Association<Bud> parent();
+
     Property<String> title();
 
+    @Immutable
     Property<DateTime> postedAt();
 
     @UseDefaults
@@ -50,7 +58,8 @@ public interface Bud
 
     boolean isRoot();
 
-    List<Role> roles();
+    @Aggregated
+    ManyAssociation<Role> roles();
 
     abstract class Mixin
             implements Bud
@@ -101,13 +110,6 @@ public interface Bud
         public boolean isRoot()
         {
             return ROOT_BUD_IDENTITY.equals( bud.identity().get() );
-        }
-
-        @Override
-        public List<Role> roles()
-        {
-            // TODO
-            return Collections.emptyList();
         }
 
     }

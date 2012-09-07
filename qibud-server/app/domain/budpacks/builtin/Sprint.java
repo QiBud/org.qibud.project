@@ -11,17 +11,11 @@
  * limitations under the License.
  *
  */
-package domain.roles;
+package domain.budpacks.builtin;
 
-import utils.QiBudException;
+import domain.roles.Role;
 
-public class RoleActionNotFound
-        extends QiBudException
+public interface Sprint
+        extends Role
 {
-
-    public RoleActionNotFound( String actionName )
-    {
-        super( "Action named '" + actionName + "' not found." );
-    }
-
 }

@@ -16,6 +16,8 @@ package domain.bootstrap;
 import domain.buds.Bud;
 import domain.buds.BudsFactory;
 import domain.buds.BudsRepository;
+import domain.roles.Role;
+import domain.roles.RoleAction;
 import org.qi4j.bootstrap.Assembler;
 import org.qi4j.bootstrap.AssemblyException;
 import org.qi4j.bootstrap.ModuleAssembly;
@@ -34,7 +36,10 @@ public final class QiBudDomainAssemblies
             public void assemble( ModuleAssembly ma )
                     throws AssemblyException
             {
-                ma.entities( Bud.class );
+                ma.entities( Bud.class,
+                             Role.class );
+
+                ma.values( RoleAction.class );
 
                 ma.services( BudsRepository.class,
                              BudsFactory.class ).

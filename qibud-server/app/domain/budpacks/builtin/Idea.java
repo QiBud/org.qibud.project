@@ -11,8 +11,12 @@
  * limitations under the License.
  *
  */
-package domain.roles;
+package domain.budpacks.builtin;
 
-public interface RoleEntity
+import domain.buds.Bud;
+
+public interface Idea
+        extends Bud
 {
+
 }

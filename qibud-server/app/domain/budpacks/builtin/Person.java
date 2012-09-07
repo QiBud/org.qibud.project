@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2012, Paul Merlin. All Rights Reserved.
- * Copyright (c) 2012, Samuel Loup. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +13,13 @@
  */
 package domain.budpacks.builtin;
 
-import domain.roles.RoleEntity;
+import domain.roles.Role;
+import org.qi4j.api.property.Property;
 
-public class PersonEntity
-        implements RoleEntity
+public interface Person
+        extends Role
 {
 
-    public String identity;
+    Property<String> fullName();
 
 }

@@ -10,9 +10,9 @@
 @main( bud.title().get(), "buds" ) {
 
     @layout_fluid(right_sidebar = sidebar) {
-    
+
         @page_header( bud.title().get() )
-        
+
         @helper.form( action = routes.Buds.saveBud( bud.identity().get() ) ) {
             <fieldset>
                 @html5_text(
@@ -26,11 +26,11 @@
                 )
                 <div id="editor-wrapper"></div>
             </fieldset>
+            <div class="form-actions">
+                <input id="save" type="submit" class="btn btn-primary btn-mini" value="Save" />
+                <a href="@routes.Buds.bud( bud.identity().get() )" class="btn btn-mini">Cancel</a>
+            </div>
         }
-        <div class="form-actions">
-            <input id="save" type="submit" class="btn btn-primary btn-mini" value="save" />
-            <a href="@routes.Buds.bud( bud.identity().get() )" class="btn btn-mini">cancel</a>
-        </div>
         @markdown_editor( "content", "save" )
     }
 }

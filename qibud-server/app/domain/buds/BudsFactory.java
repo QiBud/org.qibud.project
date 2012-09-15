@@ -21,6 +21,7 @@ import org.qi4j.api.entity.EntityBuilder;
 import org.qi4j.api.injection.scope.Service;
 import org.qi4j.api.injection.scope.Structure;
 import org.qi4j.api.mixin.Mixins;
+import org.qi4j.api.service.ServiceActivation;
 import org.qi4j.api.service.ServiceComposite;
 import org.qi4j.api.structure.Module;
 import org.qi4j.api.unitofwork.NoSuchEntityException;
@@ -34,10 +35,8 @@ import play.Play;
 
 @Mixins( BudsFactory.Mixin.class )
 public interface BudsFactory
-        extends ServiceComposite
+        extends ServiceComposite, ServiceActivation
 {
-
-    Bud createRootBud();
 
     Bud createNewBud( Bud creationBud, String title, String content );
 
@@ -57,76 +56,80 @@ public interface BudsFactory
         private AttachmentsDB attachmentsDB;
 
         @Override
-        public Bud createRootBud()
+        public void activateService()
+                throws Exception
         {
-            UnitOfWork uow = module.currentUnitOfWork();
+            UnitOfWork uow = module.newUnitOfWork();
             try {
                 uow.get( Bud.class, Bud.ROOT_BUD_IDENTITY );
-                throw new IllegalStateException( "The Root Bud already exists, check your code" );
-            } catch ( NoSuchEntityException ex ) {
-            }
+                uow.discard();
+            } catch ( NoSuchEntityException noRootBud ) {
+                // Create ROOT BudEntity
+                EntityBuilder<Bud> builder = uow.newEntityBuilder( Bud.class, Bud.ROOT_BUD_IDENTITY );
+                Bud root = builder.instance();
+                root.title().set( "Root Bud" );
+                root.postedAt().set( new DateTime() );
+                root.content().set( "## This is the Root Bud\nFor now this Bud has no Role and this sample content only." );
+                root = builder.newInstance();
 
-            // Create ROOT BudEntity
-            EntityBuilder<Bud> builder = uow.newEntityBuilder( Bud.class, Bud.ROOT_BUD_IDENTITY );
-            Bud root = builder.instance();
-            root.title().set( "Root Bud" );
-            root.postedAt().set( new DateTime() );
-            root.content().set( "## This is the Root Bud\nFor now this Bud has no Role and this sample content only." );
-            root = builder.newInstance();
+                // Create ROOT BudNode
+                graphDB.createRootBudNode( Bud.ROOT_BUD_IDENTITY );
 
-            // Create ROOT BudNode
-            graphDB.createRootBudNode( Bud.ROOT_BUD_IDENTITY );
+                // Create ROOT BudAttachment
+                String filename = "whats.a.bud.svg";
+                InputStream attachmentInputStream = Play.application().resourceAsStream( filename );
+                attachmentsDB.storeAttachment( Bud.ROOT_BUD_IDENTITY, filename, attachmentInputStream );
 
-            // Create ROOT BudAttachment
-            String filename = "whats.a.bud.svg";
-            InputStream attachmentInputStream = Play.application().resourceAsStream( filename );
-            attachmentsDB.storeAttachment( Bud.ROOT_BUD_IDENTITY, filename, attachmentInputStream );
-
-            // Eventual rollback
-            uow.addUnitOfWorkCallback( new UnitOfWorkCallback()
-            {
-
-                @Override
-                public void beforeCompletion()
-                        throws UnitOfWorkCompletionException
+                // Eventual rollback
+                uow.addUnitOfWorkCallback( new UnitOfWorkCallback()
                 {
-                }
 
-                @Override
-                public void afterCompletion( UnitOfWorkStatus status )
-                {
-                    if ( status == UnitOfWorkStatus.DISCARDED ) {
-                        // Manual Rollback
-                        UnitOfWork uow = module.newUnitOfWork();
-                        try {
-                            Bud rootBud = uow.get( Bud.class, Bud.ROOT_BUD_IDENTITY );
-                            if ( rootBud != null ) {
-                                try {
-                                    attachmentsDB.deleteBudDBFiles( Bud.ROOT_BUD_IDENTITY );
-                                } catch ( RuntimeException attachEx ) {
-                                    LOGGER.warn( "Unable to cleanup RootBud attachments after creation failure", attachEx );
+                    @Override
+                    public void beforeCompletion()
+                            throws UnitOfWorkCompletionException
+                    {
+                    }
+
+                    @Override
+                    public void afterCompletion( UnitOfWorkStatus status )
+                    {
+                        if ( status == UnitOfWorkStatus.DISCARDED ) {
+                            // Manual Rollback
+                            UnitOfWork uow = module.newUnitOfWork();
+                            try {
+                                Bud rootBud = uow.get( Bud.class, Bud.ROOT_BUD_IDENTITY );
+                                if ( rootBud != null ) {
+                                    try {
+                                        attachmentsDB.deleteBudDBFiles( Bud.ROOT_BUD_IDENTITY );
+                                    } catch ( RuntimeException attachEx ) {
+                                        LOGGER.warn( "Unable to cleanup RootBud attachments after creation failure", attachEx );
+                                    }
+                                    try {
+                                        graphDB.deleteBudNode( Bud.ROOT_BUD_IDENTITY );
+                                    } catch ( RuntimeException graphEx ) {
+                                        LOGGER.warn( "Unable to cleanup RootBud node after creation failure", graphEx );
+                                    }
+                                    try {
+                                        uow.remove( rootBud );
+                                        uow.complete();
+                                        LOGGER.error( "Something went wrong when creating Root Bud, changes have been manually rollbacked." );
+                                    } catch ( UnitOfWorkCompletionException ex ) {
+                                        LOGGER.error( "Something went wrong when creating Root Bud AND when manually rollbacking changes!", ex );
+                                    }
                                 }
-                                try {
-                                    graphDB.deleteBudNode( Bud.ROOT_BUD_IDENTITY );
-                                } catch ( RuntimeException graphEx ) {
-                                    LOGGER.warn( "Unable to cleanup RootBud node after creation failure", graphEx );
-                                }
-                                try {
-                                    uow.remove( rootBud );
-                                    uow.complete();
-                                    LOGGER.error( "Something went wrong when creating Root Bud, changes have been manually rollbacked." );
-                                } catch ( UnitOfWorkCompletionException ex ) {
-                                    LOGGER.error( "Something went wrong when creating Root Bud AND when manually rollbacking changes!", ex );
-                                }
+                            } catch ( NoSuchEntityException ex ) {
                             }
-                        } catch ( NoSuchEntityException ex ) {
                         }
                     }
-                }
 
-            } );
+                } );
+            }
+        }
 
-            return root;
+        @Override
+        public void passivateService()
+                throws Exception
+        {
         }
 
         @Override

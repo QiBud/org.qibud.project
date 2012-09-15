@@ -1,6 +1,6 @@
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,9 +14,9 @@
     <name>${project.artifactId}</name>
 
     <packaging>play2</packaging>
-    
+
     <dependencies>
-        
+
         <!-- QiBud -->
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -28,8 +28,13 @@
             <artifactId>org.qibud.eventstore-mongodb</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
+
         <!-- Qi4j -->
+        <dependency>
+            <groupId>org.codeartisans</groupId>
+            <artifactId>playqi</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>org.qi4j.core</groupId>
             <artifactId>org.qi4j.core.runtime</artifactId>
@@ -45,14 +50,14 @@
             <artifactId>org.qi4j.extension.indexing-rdf</artifactId>
             <version>${qi4j.version}</version>
         </dependency>
-        
+
         <!-- Views -->
         <dependency>
             <groupId>org.pegdown</groupId>
             <artifactId>pegdown</artifactId>
             <version>1.1.0</version>
         </dependency>
-        
+
         <!-- Storage -->
         <dependency>
             <groupId>org.neo4j</groupId>
@@ -69,7 +74,7 @@
             <artifactId>tika-parsers</artifactId>
             <version>1.1</version>
         </dependency>
-        
+
         <!-- Play -->
         <dependency>
             <groupId>play</groupId>
@@ -79,7 +84,7 @@
             <groupId>play</groupId>
             <artifactId>play-test_2.9.1</artifactId>
         </dependency>
-        
+
         <!-- Utils -->
         <dependency>
             <groupId>org.codeartisans</groupId>
@@ -91,7 +96,7 @@
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
         </dependency>
-        
+
     </dependencies>
 
     <build>

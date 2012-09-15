@@ -16,7 +16,6 @@ package application.bootstrap;
 import config.bootstrap.QiBudConfigAssemblies;
 import domain.bootstrap.QiBudDomainAssemblies;
 import infrastructure.bootstrap.QiBudInfraAssemblies;
-import org.qi4j.api.structure.Application.Mode;
 import org.qi4j.bootstrap.ApplicationAssembler;
 import org.qi4j.bootstrap.ApplicationAssembly;
 import org.qi4j.bootstrap.ApplicationAssemblyFactory;
@@ -36,8 +35,6 @@ public class QiBudAssembler
 
     public static final String MODULE_PERSISTENCE = "persistence";
 
-    private final Mode mode;
-
     private final String mongoHostname;
 
     private final int mongoPort;
@@ -50,9 +47,8 @@ public class QiBudAssembler
 
     private final String mongoCollection;
 
-    public QiBudAssembler( Mode mode, String mongoHostname, int mongoPort, String mongoUsername, String mongoPassword, String mongoDatabase, String mongoCollection )
+    public QiBudAssembler( String mongoHostname, int mongoPort, String mongoUsername, String mongoPassword, String mongoDatabase, String mongoCollection )
     {
-        this.mode = mode;
         this.mongoHostname = mongoHostname;
         this.mongoPort = mongoPort;
         this.mongoUsername = mongoUsername;
@@ -66,7 +62,6 @@ public class QiBudAssembler
             throws AssemblyException
     {
         ApplicationAssembly appAss = aaf.newApplicationAssembly();
-        appAss.setMode( mode );
 
         // Config
         LayerAssembly configLayer = appAss.layer( "config" );

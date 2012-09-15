@@ -8,7 +8,7 @@
     <name>${project.artifactId}</name>
 
     <packaging>pom</packaging>
-    
+
     <modules>
         <module>qibud-api</module>
         <module>qibud-mongodb-support</module>
@@ -36,6 +36,26 @@
         <repository>
             <id>openrdf</id>
             <url>http://repo.aduna-software.org/maven2/releases/</url>
+        </repository>
+        <repository>
+            <id>qi4j-snapshots</id>
+            <url>https://repository-qi4j.forge.cloudbees.com/snapshot/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>oss.snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
@@ -86,5 +106,5 @@
             </plugins>
         </pluginManagement>
     </build>
-    
+
 </project>

@@ -13,9 +13,44 @@
  */
 package domain.roles;
 
+import org.qi4j.api.common.UseDefaults;
+import org.qi4j.api.injection.scope.This;
+import org.qi4j.api.mixin.Mixins;
+import org.qi4j.api.property.Property;
+import org.qi4j.api.value.ValueComposite;
+import utils.QiBudException;
+
+@Mixins( RoleActionDescriptor.Mixin.class )
 public interface RoleActionDescriptor
+        extends ValueComposite
 {
 
-    String name();
+    Property<String> name();
+
+    Property<String> roleActionTypeName();
+
+    Class<? extends RoleAction> roleActionType();
+
+    @UseDefaults
+    Property<String> description();
+
+    abstract class Mixin
+            implements RoleActionDescriptor
+    {
+
+        @This
+        private RoleActionDescriptor state;
+
+        @Override
+        public Class<? extends RoleAction> roleActionType()
+        {
+            try {
+                return ( Class<? extends RoleAction> ) Class.forName( state.roleActionTypeName().get() );
+            } catch ( ClassNotFoundException ex ) {
+                throw new QiBudException( "Unable to find registered RoleAction class: " + ex.getMessage(), ex );
+            }
+        }
+
+    }
 
 }

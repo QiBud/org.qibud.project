@@ -14,16 +14,47 @@
 package domain.roles;
 
 import java.util.List;
-import play.db.ebean.Model;
+import org.qi4j.api.common.UseDefaults;
+import org.qi4j.api.injection.scope.This;
+import org.qi4j.api.mixin.Mixins;
+import org.qi4j.api.property.Property;
+import org.qi4j.api.value.ValueComposite;
+import utils.QiBudException;
 
+@Mixins( RoleDescriptor.Mixin.class )
 public interface RoleDescriptor
+        extends ValueComposite
 {
 
-    String name();
+    Property<String> name();
 
-    List<RoleActionDescriptor> actions();
+    Property<String> roleTypeName();
 
-    Class<? extends Model> roleEntity();
+    Class<? extends Role> roleType();
 
-    // extensions de vues etc..
+    @UseDefaults
+    Property<String> description();
+
+    @UseDefaults
+    Property<List<RoleActionDescriptor>> actions();
+
+    abstract class Mixin
+            implements RoleDescriptor
+    {
+
+        @This
+        private RoleDescriptor state;
+
+        @Override
+        public Class<? extends Role> roleType()
+        {
+            try {
+                return ( Class<? extends Role> ) Class.forName( state.roleTypeName().get() );
+            } catch ( ClassNotFoundException ex ) {
+                throw new QiBudException( "Unable to find registered Role class: " + ex.getMessage(), ex );
+            }
+        }
+
+    }
+
 }

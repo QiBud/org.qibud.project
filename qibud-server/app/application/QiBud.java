@@ -18,51 +18,36 @@ import domain.buds.BudsFactory;
 import domain.buds.BudsRepository;
 import infrastructure.attachmentsdb.AttachmentsDB;
 import infrastructure.graphdb.GraphDB;
-import org.qi4j.api.structure.Application;
+import org.codeartisans.playqi.PlayQi;
 import org.qi4j.api.structure.Module;
 
 public final class QiBud
+        extends PlayQi
 {
-
-    private static Application application;
-
-    public static Application application()
-    {
-        return application;
-    }
 
     public static Module budsDomainModule()
     {
-        return application.findModule( QiBudAssembler.LAYER_DOMAIN, QiBudAssembler.MODULE_BUDS );
+        return module( QiBudAssembler.LAYER_DOMAIN, QiBudAssembler.MODULE_BUDS );
     }
 
     public static BudsRepository budsRepository()
     {
-        return budsDomainModule().findService( BudsRepository.class ).get();
+        return service( QiBudAssembler.LAYER_DOMAIN, QiBudAssembler.MODULE_BUDS, BudsRepository.class );
     }
 
     public static BudsFactory budsFactory()
     {
-        return budsDomainModule().findService( BudsFactory.class ).get();
+        return service( QiBudAssembler.LAYER_DOMAIN, QiBudAssembler.MODULE_BUDS, BudsFactory.class );
     }
 
     public static GraphDB graphDB()
     {
-        return budsDomainModule().findService( GraphDB.class ).get();
+        return service( QiBudAssembler.LAYER_DOMAIN, QiBudAssembler.MODULE_BUDS, GraphDB.class );
     }
 
     public static AttachmentsDB attachmentsDB()
     {
-        return budsDomainModule().findService( AttachmentsDB.class ).get();
-    }
-
-    /* package */ static void setQi4jApplication( Application application )
-    {
-        QiBud.application = application;
-    }
-
-    private QiBud()
-    {
+        return service( QiBudAssembler.LAYER_DOMAIN, QiBudAssembler.MODULE_BUDS, AttachmentsDB.class );
     }
 
 }

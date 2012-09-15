@@ -18,5 +18,4 @@ import domain.buds.Bud;
 public interface Action
         extends Bud
 {
-
 }

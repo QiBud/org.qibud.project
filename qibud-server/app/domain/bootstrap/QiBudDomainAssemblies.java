@@ -13,11 +13,14 @@
  */
 package domain.bootstrap;
 
+import domain.aaa.User;
 import domain.buds.Bud;
 import domain.buds.BudsFactory;
 import domain.buds.BudsRepository;
-import domain.roles.Role;
 import domain.roles.RoleAction;
+import domain.roles.RoleActionDescriptor;
+import domain.roles.RoleDescriptor;
+import domain.roles.RoleRegistry;
 import org.qi4j.bootstrap.Assembler;
 import org.qi4j.bootstrap.AssemblyException;
 import org.qi4j.bootstrap.ModuleAssembly;
@@ -37,13 +40,19 @@ public final class QiBudDomainAssemblies
                     throws AssemblyException
             {
                 ma.entities( Bud.class,
-                             Role.class );
+                             User.class ).
+                        visibleIn( application );
 
-                ma.values( RoleAction.class );
+                ma.values( RoleDescriptor.class,
+                           RoleActionDescriptor.class,
+                           RoleAction.class ).
+                        visibleIn( application );
 
                 ma.services( BudsRepository.class,
-                             BudsFactory.class ).
-                        visibleIn( application );
+                             BudsFactory.class,
+                             RoleRegistry.class ).
+                        visibleIn( application ).
+                        instantiateOnStartup();
             }
 
         };

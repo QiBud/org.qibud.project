@@ -15,9 +15,6 @@
 package infrastructure.graphdb;
 
 import domain.buds.BudNode;
-import java.io.File;
-import java.io.IOException;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -88,18 +85,6 @@ public class GraphDBImpl
         graphDatabase.shutdown();
         graphDatabase = null;
         LOGGER.info( "GraphDB stopped" );
-        if ( !Play.isProd() ) {
-            // Delete database
-            File graphDatabaseDir = new File( graphDatabasePath );
-            if ( graphDatabaseDir.exists() ) {
-                try {
-                    FileUtils.deleteDirectory( graphDatabaseDir );
-                    LOGGER.warn( "GraphDB cleared!" );
-                } catch ( IOException ex ) {
-                    throw new QiBudException( ex );
-                }
-            }
-        }
         graphDatabasePath = null;
     }
 
@@ -198,9 +183,6 @@ public class GraphDBImpl
 
     private Node getBudRefNode()
     {
-        System.out.println( ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" );
-        System.out.println( graphDatabase );
-        System.out.println( ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" );
         Node referenceNode = graphDatabase.getReferenceNode();
         Iterable<Relationship> budRefs = referenceNode.getRelationships( Direction.OUTGOING, RelTypes.IS_BUD_REF );
         Relationship budRef = Iterables.first( budRefs );

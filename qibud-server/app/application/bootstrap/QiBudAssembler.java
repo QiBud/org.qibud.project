@@ -35,6 +35,8 @@ public class QiBudAssembler
 
     public static final String MODULE_PERSISTENCE = "persistence";
 
+    private final String[] budPackPackages;
+
     private final String mongoHostname;
 
     private final int mongoPort;
@@ -47,8 +49,9 @@ public class QiBudAssembler
 
     private final String mongoCollection;
 
-    public QiBudAssembler( String mongoHostname, int mongoPort, String mongoUsername, String mongoPassword, String mongoDatabase, String mongoCollection )
+    public QiBudAssembler( String[] budPackPackages, String mongoHostname, int mongoPort, String mongoUsername, String mongoPassword, String mongoDatabase, String mongoCollection )
     {
+        this.budPackPackages = budPackPackages;
         this.mongoHostname = mongoHostname;
         this.mongoPort = mongoPort;
         this.mongoUsername = mongoUsername;
@@ -71,7 +74,7 @@ public class QiBudAssembler
         // Domain
         LayerAssembly domainLayer = appAss.layer( LAYER_DOMAIN );
         ModuleAssembly buds = domainLayer.module( MODULE_BUDS );
-        QiBudDomainAssemblies.buds().assemble( buds );
+        QiBudDomainAssemblies.buds( budPackPackages ).assemble( buds );
 
         // Infrastructure
         LayerAssembly infraLayer = appAss.layer( LAYER_INFRASTRUCTURE );

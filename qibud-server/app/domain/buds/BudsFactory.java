@@ -26,8 +26,6 @@ import org.qi4j.api.service.ServiceComposite;
 import org.qi4j.api.structure.Module;
 import org.qi4j.api.unitofwork.NoSuchEntityException;
 import org.qi4j.api.unitofwork.UnitOfWork;
-import org.qi4j.api.unitofwork.UnitOfWorkCallback;
-import org.qi4j.api.unitofwork.UnitOfWorkCallback.UnitOfWorkStatus;
 import org.qi4j.api.unitofwork.UnitOfWorkCompletionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,9 +59,15 @@ public interface BudsFactory
         {
             UnitOfWork uow = module.newUnitOfWork();
             try {
+
                 uow.get( Bud.class, Bud.ROOT_BUD_IDENTITY );
                 uow.discard();
+                System.out.println( "ROOT BUD ALREADY EXIST!" );
+
             } catch ( NoSuchEntityException noRootBud ) {
+
+                System.out.println( "ROOT BUD DO NOT EXIST, WILL CREATE IT" );
+
                 // Create ROOT BudEntity
                 EntityBuilder<Bud> builder = uow.newEntityBuilder( Bud.class, Bud.ROOT_BUD_IDENTITY );
                 Bud root = builder.instance();
@@ -73,56 +77,46 @@ public interface BudsFactory
                 root = builder.newInstance();
 
                 // Create ROOT BudNode
-                graphDB.createRootBudNode( Bud.ROOT_BUD_IDENTITY );
+                graphDB.createRootBudNode( root.identity().get() );
 
                 // Create ROOT BudAttachment
                 String filename = "whats.a.bud.svg";
                 InputStream attachmentInputStream = Play.application().resourceAsStream( filename );
-                attachmentsDB.storeAttachment( Bud.ROOT_BUD_IDENTITY, filename, attachmentInputStream );
+                attachmentsDB.storeAttachment( root.identity().get(), filename, attachmentInputStream );
 
-                // Eventual rollback
-                uow.addUnitOfWorkCallback( new UnitOfWorkCallback()
-                {
+                try {
 
-                    @Override
-                    public void beforeCompletion()
-                            throws UnitOfWorkCompletionException
-                    {
-                    }
+                    uow.complete();
 
-                    @Override
-                    public void afterCompletion( UnitOfWorkStatus status )
-                    {
-                        if ( status == UnitOfWorkStatus.DISCARDED ) {
-                            // Manual Rollback
-                            UnitOfWork uow = module.newUnitOfWork();
+                } catch ( UnitOfWorkCompletionException ex ) {
+
+                    // Manual Rollback
+                    uow = module.newUnitOfWork();
+                    try {
+                        Bud rootBud = uow.get( Bud.class, Bud.ROOT_BUD_IDENTITY );
+                        if ( rootBud != null ) {
                             try {
-                                Bud rootBud = uow.get( Bud.class, Bud.ROOT_BUD_IDENTITY );
-                                if ( rootBud != null ) {
-                                    try {
-                                        attachmentsDB.deleteBudDBFiles( Bud.ROOT_BUD_IDENTITY );
-                                    } catch ( RuntimeException attachEx ) {
-                                        LOGGER.warn( "Unable to cleanup RootBud attachments after creation failure", attachEx );
-                                    }
-                                    try {
-                                        graphDB.deleteBudNode( Bud.ROOT_BUD_IDENTITY );
-                                    } catch ( RuntimeException graphEx ) {
-                                        LOGGER.warn( "Unable to cleanup RootBud node after creation failure", graphEx );
-                                    }
-                                    try {
-                                        uow.remove( rootBud );
-                                        uow.complete();
-                                        LOGGER.error( "Something went wrong when creating Root Bud, changes have been manually rollbacked." );
-                                    } catch ( UnitOfWorkCompletionException ex ) {
-                                        LOGGER.error( "Something went wrong when creating Root Bud AND when manually rollbacking changes!", ex );
-                                    }
-                                }
-                            } catch ( NoSuchEntityException ex ) {
+                                attachmentsDB.deleteBudDBFiles( Bud.ROOT_BUD_IDENTITY );
+                            } catch ( RuntimeException attachEx ) {
+                                LOGGER.warn( "Unable to cleanup RootBud attachments after creation failure", attachEx );
+                            }
+                            try {
+                                graphDB.deleteBudNode( Bud.ROOT_BUD_IDENTITY );
+                            } catch ( RuntimeException graphEx ) {
+                                LOGGER.warn( "Unable to cleanup RootBud node after creation failure", graphEx );
+                            }
+                            try {
+                                uow.remove( rootBud );
+                                uow.complete();
+                                LOGGER.error( "Something went wrong when creating Root Bud, changes have been manually rollbacked." );
+                            } catch ( UnitOfWorkCompletionException ex2 ) {
+                                LOGGER.error( "Something went wrong when creating Root Bud AND when manually rollbacking changes!", ex2 );
                             }
                         }
+                    } catch ( NoSuchEntityException ex2 ) {
                     }
 
-                } );
+                }
             }
         }
 

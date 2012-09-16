@@ -14,22 +14,19 @@
  */
 package application;
 
-import com.mongodb.Mongo;
+import java.io.File;
 import java.lang.reflect.Method;
-import org.codeartisans.playqi.PlayQi;
-import org.qi4j.entitystore.mongodb.MongoMapEntityStoreService;
+import org.apache.commons.io.FileUtils;
 import org.qibud.eventstore.Usecase;
+import org.qibud.mongodb.MongoDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.Application;
 import play.GlobalSettings;
-import play.Play;
 import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
-
-import static application.bootstrap.QiBudAssembler.LAYER_INFRASTRUCTURE;
-import static application.bootstrap.QiBudAssembler.MODULE_PERSISTENCE;
+import utils.Threads;
 
 public class Global
         extends GlobalSettings
@@ -37,22 +34,69 @@ public class Global
 
     private static final Logger LOGGER = LoggerFactory.getLogger( "org.qibud.server" );
 
+    private static final String SHUTDOWN_HOOK_THREAD_NAME = "QiBud.Shutdown";
+
     @Override
-    public void onStart( Application aplctn )
+    public void onStart( Application app )
     {
-        super.onStart( aplctn );
+        super.onStart( app );
+        if ( !app.isProd() && !Threads.isThreadRegisteredAsShutdownHook( SHUTDOWN_HOOK_THREAD_NAME ) ) {
+
+            // Entities
+            final String entitiesHost = app.configuration().getString( "qibud.entities.host" );
+            final int entitiesPort = app.configuration().getInt( "qibud.entities.port" );
+            final String entitiesDatabase = app.configuration().getString( "qibud.entities.database" );
+
+            // Attachments
+            final String attachmentsHost = app.configuration().getString( "qibud.attachmentsdb.host" );
+            final int attachmentsPort = app.configuration().getInt( "qibud.attachmentsdb.port" );
+            final String attachmentsDatabase = app.configuration().getString( "qibud.attachmentsdb.db" );
+
+            // Graph
+            final File graphPath = new File( app.configuration().getString( "qibud.graphdb.path" ) );
+
+            Runtime.getRuntime().addShutdownHook( new Thread( new Runnable()
+            {
+
+                @Override
+                @SuppressWarnings( "CallToThreadDumpStack" )
+                public void run()
+                {
+                    // Entities
+                    try {
+                        MongoDB.connectToMongoDB( entitiesHost, entitiesPort ).dropDatabase( entitiesDatabase );
+                        System.out.println( "Entities Database Cleared!" );
+                    } catch ( Exception ex ) {
+                        System.err.println( "Unable to delete entities" );
+                        ex.printStackTrace();
+                    }
+
+                    // Attachments
+                    try {
+                        MongoDB.connectToMongoDB( attachmentsHost, attachmentsPort ).dropDatabase( attachmentsDatabase );
+                        System.out.println( "Attachments Database Cleared!" );
+                    } catch ( Exception ex ) {
+                        System.err.println( "Unable to delete attachments" );
+                        ex.printStackTrace();
+                    }
+
+                    // Graph
+                    try {
+                        FileUtils.deleteDirectory( graphPath );
+                        System.out.println( "Graph Database Cleared!" );
+                    } catch ( Exception ex ) {
+                        System.err.println( "Unable to delete graph database from: " + graphPath );
+                        ex.printStackTrace();
+                    }
+                }
+
+            }, SHUTDOWN_HOOK_THREAD_NAME ) );
+        }
     }
 
     @Override
     public void onStop( Application aplctn )
     {
-        if ( !Play.isProd() ) {
-            // Delete data if dev or test mode
-            MongoMapEntityStoreService es = PlayQi.service( LAYER_INFRASTRUCTURE, MODULE_PERSISTENCE, MongoMapEntityStoreService.class );
-            Mongo mongo = es.mongoInstanceUsed();
-            String dbName = es.dbInstanceUsed().getName();
-            mongo.dropDatabase( dbName );
-        }
         super.onStop( aplctn );
     }
 

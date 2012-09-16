@@ -30,7 +30,6 @@ public class Application
     @Usecase( "QiBud Server Index" )
     public static Result index()
     {
-        // Dummy dummy = new Dummy();
         return ok( index.render() );
     }
 

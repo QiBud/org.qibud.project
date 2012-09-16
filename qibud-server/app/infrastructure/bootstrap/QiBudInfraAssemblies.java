@@ -54,7 +54,7 @@ public final class QiBudInfraAssemblies
                 mongoESConf.collection().set( mongoCollection );
 
                 // Entities Indexing & Query
-                new RdfMemoryStoreAssembler().assemble( ma );
+                new RdfMemoryStoreAssembler( application, application ).assemble( ma );
 
                 // Attachments
                 ma.services( AttachmentsDBService.class ).

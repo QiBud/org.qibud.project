@@ -20,7 +20,9 @@ import com.mongodb.gridfs.GridFSDBFile;
 import domain.buds.Bud;
 import forms.BudForm;
 import org.neo4j.helpers.collection.Iterables;
+import org.qi4j.api.injection.scope.Structure;
 import org.qi4j.api.query.Query;
+import org.qi4j.api.structure.Module;
 import org.qi4j.api.unitofwork.UnitOfWork;
 import org.qi4j.api.unitofwork.UnitOfWorkCompletionException;
 import play.data.Form;
@@ -39,9 +41,12 @@ public class Buds
 
     final static Form<BudForm> budForm = form( BudForm.class );
 
+    @Structure
+    public static Module module;
+
     public static Result buds()
     {
-        UnitOfWork uow = QiBud.budsDomainModule().newUnitOfWork();
+        UnitOfWork uow = module.newUnitOfWork();
         try {
             Query<Bud> allBuds = QiBud.budsRepository().findAll();
             return ok( all_buds.render( Iterables.toList( allBuds ) ) );

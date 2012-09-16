@@ -92,13 +92,6 @@ public class AttachmentsDBImpl
         mongo = null;
         attachmentsDB = null;
         LOGGER.info( "AttachmentsDB stopped" );
-        if ( !Play.isProd() ) {
-            Mongo mongo = MongoDB.connectToMongoDB( host, port );
-            DB db = mongo.getDB( dbName );
-            db.dropDatabase();
-            mongo.close();
-            LOGGER.warn( "AttachmentsDB cleared!" );
-        }
         host = null;
         port = null;
         dbName = null;

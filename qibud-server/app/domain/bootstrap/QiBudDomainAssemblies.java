@@ -13,24 +13,28 @@
  */
 package domain.bootstrap;
 
-import domain.aaa.User;
 import domain.buds.Bud;
 import domain.buds.BudsFactory;
 import domain.buds.BudsRepository;
+import domain.roles.BudRole;
 import domain.roles.RoleAction;
 import domain.roles.RoleActionDescriptor;
 import domain.roles.RoleDescriptor;
 import domain.roles.RoleRegistry;
+import java.util.ArrayList;
+import java.util.List;
 import org.qi4j.bootstrap.Assembler;
 import org.qi4j.bootstrap.AssemblyException;
 import org.qi4j.bootstrap.ModuleAssembly;
+import play.Play;
+import utils.ClassFinder;
 
 import static org.qi4j.api.common.Visibility.application;
 
 public final class QiBudDomainAssemblies
 {
 
-    public static Assembler buds()
+    public static Assembler buds( final String[] budPackPackages )
     {
         return new Assembler()
         {
@@ -39,9 +43,22 @@ public final class QiBudDomainAssemblies
             public void assemble( ModuleAssembly ma )
                     throws AssemblyException
             {
-                ma.entities( Bud.class,
-                             User.class ).
+                ma.entities( Bud.class ).
                         visibleIn( application );
+
+                List<Class<?>> roles = new ArrayList<Class<?>>();
+                for ( String budPackPackage : budPackPackages ) {
+                    Class<?>[] candidates = ClassFinder.getClasses( budPackPackage, Play.application().classloader() );
+                    for ( Class<?> candidate : candidates ) {
+                        if ( candidate.isAnnotationPresent( BudRole.class ) ) {
+                            roles.add( candidate );
+                        }
+                    }
+                }
+                if ( !roles.isEmpty() ) {
+                    ma.entities( Bud.class ).
+                            withTypes( roles.toArray( new Class<?>[ roles.size() ] ) );
+                }
 
                 ma.values( RoleDescriptor.class,
                            RoleActionDescriptor.class,

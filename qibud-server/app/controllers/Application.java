@@ -13,6 +13,11 @@
  */
 package controllers;
 
+import domain.buds.BudsRepository;
+import org.qi4j.api.injection.scope.Service;
+import org.qi4j.api.injection.scope.Structure;
+import org.qi4j.api.structure.Module;
+import org.qi4j.api.unitofwork.UnitOfWork;
 import org.qibud.eventstore.Usecase;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -27,11 +32,21 @@ public class Application
         extends Controller
 {
 
+    @Structure
+    public static Module module;
+
+    @Service
+    public static BudsRepository budsRepository;
+
     @Usecase( "QiBud Server Index" )
     public static Result index()
     {
-        // Dummy dummy = new Dummy();
-        return ok( index.render() );
+        UnitOfWork uow = module.newUnitOfWork();
+        try {
+            return ok( index.render( budsRepository.findRootBud() ) );
+        } finally {
+            uow.discard();
+        }
     }
 
 }

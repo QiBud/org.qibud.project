@@ -8,4 +8,5 @@ dist
 lib
 
 qibud-server/graphdb
+qibud-server/rdf-index
 /qibud-server/.settings/

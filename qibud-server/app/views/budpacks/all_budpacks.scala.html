@@ -1,24 +1,24 @@
-@(budpacks: List[_root_.buds.BudPack])
+@(budpacks: Collection[_root_.application.bootstrap.BudPackDescriptor])
 
 @import tags._
 
 @main( "BudPacks", "budpacks" ) {
 
     @layout_fluid() {
-    
+
         @page_header( "BudPacks" )
-        
+
         @if( budpacks.isEmpty() ) {
             <p>No BudPack found.</p>
         }
         @if( ! budpacks.isEmpty() ) {
             <ul>
                 @for( budpack <- budpacks ) {
-                    <li><a href="@routes.BudPacks.pack( budpack.name() )">@budpack.name()</a></li>
+                    <li><a href="@routes.BudPacks.pack( budpack.name() )">@budpack.name()</a> <small>(@budpack.description())</small></li>
                 }
             </ul>
         }
-    
+
     }
 
 }

@@ -13,23 +13,33 @@
  */
 package domain.bootstrap;
 
-import domain.events.BudContentChangedEvent;
-import domain.events.BudCreatedEvent;
-import domain.events.BudEventFactoryService;
-import domain.events.BudTitleChangedEvent;
-import domain.events.RootBudCreatedEvent;
-import org.qi4j.api.service.importer.InstanceImporter;
+import application.bootstrap.BudPackDescriptor;
+import application.bootstrap.RoleActionDescriptor;
+import application.bootstrap.RoleDescriptor;
+import domain.buds.Bud;
+import domain.buds.BudsFactory;
+import domain.buds.BudsRepository;
+import domain.roles.Role;
+import domain.roles.RoleAction;
+import domain.budpacks.BudPacksService;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import org.qi4j.bootstrap.Assembler;
 import org.qi4j.bootstrap.AssemblyException;
 import org.qi4j.bootstrap.ModuleAssembly;
-import org.qibud.eventstore.DomainEventFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.qi4j.api.common.Visibility.application;
 
-public class QiBudDomainAssemblies
+public final class QiBudDomainAssemblies
 {
 
-    public static Assembler eventsAssembler()
+    private static final Logger LOGGER = LoggerFactory.getLogger( "org.qibud.domain.buds" );
+
+    public static Assembler buds( final Map<String, BudPackDescriptor> budPacks )
     {
         return new Assembler()
         {
@@ -38,22 +48,48 @@ public class QiBudDomainAssemblies
             public void assemble( ModuleAssembly ma )
                     throws AssemblyException
             {
-                // Events
-                ma.values( RootBudCreatedEvent.class,
-                           BudCreatedEvent.class,
-                           BudTitleChangedEvent.class,
-                           BudContentChangedEvent.class ).
+                ma.entities( Bud.class ).
                         visibleIn( application );
 
-                // Services
-                ma.services( BudEventFactoryService.class ).
-                        visibleIn( application );
-                ma.importedServices( DomainEventFactory.class ).
-                        importedBy( InstanceImporter.class ).
-                        setMetaInfo( new DomainEventFactory() );
+                List<Class<? extends Role>> roleTypes = new ArrayList<Class<? extends Role>>();
+                List<Class<? extends RoleAction>> roleActionTypes = new ArrayList<Class<? extends RoleAction>>();
+                for ( BudPackDescriptor budPack : budPacks.values() ) {
+                    for ( RoleDescriptor role : budPack.roles().values() ) {
+                        roleTypes.add( role.roleType() );
+                        for ( RoleActionDescriptor action : role.actions().values() ) {
+                            roleActionTypes.add( action.roleActionType() );
+                        }
+                    }
+                }
+
+                if ( !roleTypes.isEmpty() ) {
+                    Class<?>[] rolesArray = roleTypes.toArray( new Class<?>[ roleTypes.size() ] );
+                    ma.entities( rolesArray ).
+                            visibleIn( application );
+                    LOGGER.info( "Assembled {} BudRoles: {}", rolesArray.length, Arrays.toString( rolesArray ) );
+                }
+
+                if ( !roleActionTypes.isEmpty() ) {
+                    Class<?>[] actionsArray = roleActionTypes.toArray( new Class<?>[ roleActionTypes.size() ] );
+                    ma.transients( actionsArray ).
+                            visibleIn( application );
+                    LOGGER.info( "Assembled {} BudActions: {}", actionsArray.length, Arrays.toString( actionsArray ) );
+                }
+
+                ma.services( BudsRepository.class,
+                             BudsFactory.class,
+                             BudPacksService.class ).
+                        visibleIn( application ).
+                        instantiateOnStartup();
+
+                ma.services( BudPacksService.class ).setMetaInfo( budPacks );
             }
 
         };
+    }
+
+    private QiBudDomainAssemblies()
+    {
     }
 
 }

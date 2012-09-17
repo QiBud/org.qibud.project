@@ -13,64 +13,30 @@
  */
 package controllers;
 
-import buds.BudPack;
-import buds.BudPacksRepository;
-import java.util.List;
+import domain.budpacks.BudPacksService;
+import org.qi4j.api.injection.scope.Service;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
 import views.html.budpacks.all_budpacks;
 import views.html.budpacks.show_budpack;
 
-
-@With(RootBudContext.class)
+@With( RootBudContext.class )
 public class BudPacks
         extends Controller
 {
 
+    @Service
+    public static BudPacksService roleRegistry;
+
     public static Result packs()
     {
-        List<BudPack> allBudPacks = BudPacksRepository.getInstance().findAll();
-        return ok( all_budpacks.render( allBudPacks ) );
-    }
-
-    public static Result packUploadForm()
-    {
-        return TODO;
-    }
-
-    public static Result uploadPack()
-    {
-        return TODO;
+        return ok( all_budpacks.render( roleRegistry.budPacks() ) );
     }
 
     public static Result pack( String pack )
     {
-        BudPack budPack = BudPacksRepository.getInstance().findByName( pack );
-        if ( budPack == null ) {
-            return notFound();
-        }
-        return ok( show_budpack.render( budPack ) );
-    }
-
-    public static Result packConfiguration( String pack )
-    {
-        return TODO;
-    }
-
-    public static Result savePackConfiguration( String pack )
-    {
-        return TODO;
-    }
-
-    public static Result actionForm( String pack, String action )
-    {
-        return TODO;
-    }
-
-    public static Result invokeAction( String pack, String action )
-    {
-        return TODO;
+        return ok( show_budpack.render( roleRegistry.budPack( pack ) ) );
     }
 
 }

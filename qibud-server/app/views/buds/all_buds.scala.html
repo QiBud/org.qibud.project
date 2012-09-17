@@ -1,4 +1,4 @@
-@(buds: List[_root_.buds.Bud])
+@(buds: List[_root_.domain.buds.Bud] )
 
 @import tags._
 
@@ -14,7 +14,7 @@
         @if( ! buds.isEmpty() ) {
             <ul>
                 @for( bud <- buds ) {
-                    <li><a href="@routes.Buds.bud( bud.identity )">@bud.entity().title</a></li>
+                    <li><a href="@routes.Buds.bud( bud.identity().get() )">@bud.title()</a></li>
                 }
             </ul>
         }

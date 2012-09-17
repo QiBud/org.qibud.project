@@ -1,4 +1,4 @@
-@(budpack: _root_.buds.BudPack)
+@(budpack: _root_.application.bootstrap.BudPackDescriptor)
 
 @import tags._
 @import _root_.views.tools._
@@ -6,13 +6,33 @@
 @main( budpack.name(), "budpacks" ) {
 
     @layout_fluid() {
-    
+
         @page_header( budpack.name() )
-        
+
         <div class="well">
             @markdown( budpack.description() )
         </div>
 
+        @if( budpack.roles().isEmpty() ) {
+            <p>This BudPack is empty.</p>
+        }
+        @if( ! budpack.roles().isEmpty() ) {
+            <ul>
+                @for( role <- budpack.roles().values() ) {
+                    <li>
+                        <strong>@role.name()</strong> <small>(@role.description())</small>
+                        @if( ! role.actions().isEmpty() ) {
+                            <ul>
+                                @for( action <- role.actions().values() ) {
+                                    <li><strong>@action.name</strong> <small>(@action.description())</small></li>
+                                }
+                            </ul>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+
     }
-    
+
 }

@@ -13,56 +13,13 @@
  */
 package domain.roles;
 
-import java.util.List;
-import org.qi4j.api.common.UseDefaults;
 import org.qi4j.api.entity.EntityComposite;
-import org.qi4j.api.injection.scope.This;
-import org.qi4j.api.mixin.Mixins;
 import org.qi4j.api.property.Property;
 
-@Mixins( Role.Mixin.class )
 public interface Role
         extends EntityComposite
 {
 
     Property<String> roleName();
-
-    @UseDefaults
-    Property<List<RoleAction>> actions();
-
-    boolean hasActionNamed( String name );
-
-    RoleAction actionNamed( String name );
-
-    abstract class Mixin
-            implements Role
-    {
-
-        @This
-        private Role me;
-
-        @Override
-        public boolean hasActionNamed( String name )
-        {
-            for ( RoleAction action : me.actions().get() ) {
-                if ( action.actionName().get().equals( name ) ) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public RoleAction actionNamed( String name )
-        {
-            for ( RoleAction action : me.actions().get() ) {
-                if ( action.actionName().get().equals( name ) ) {
-                    return action;
-                }
-            }
-            throw new RoleActionNotFound( name );
-        }
-
-    }
 
 }

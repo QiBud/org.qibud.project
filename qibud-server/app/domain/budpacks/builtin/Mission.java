@@ -13,9 +13,11 @@
  */
 package domain.budpacks.builtin;
 
-import domain.buds.Bud;
+import domain.roles.BudRole;
+import domain.roles.Role;
 
+@BudRole( name = "mission" )
 public interface Mission
-        extends Bud
+        extends Role
 {
 }

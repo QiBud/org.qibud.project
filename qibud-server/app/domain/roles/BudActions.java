@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2012, Paul Merlin. All Rights Reserved.
- * Copyright (c) 2012, Samuel Loup. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,24 +11,18 @@
  * limitations under the License.
  *
  */
-package domain.budpacks;
+package domain.roles;
 
-import java.util.List;
-import org.qi4j.api.entity.EntityComposite;
-import org.qi4j.api.property.Property;
-import domain.roles.RoleDescriptor;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public interface BudPack
-        extends EntityComposite
+@Target( ElementType.TYPE )
+@Retention( RetentionPolicy.RUNTIME )
+public @interface BudActions
 {
 
-    Property<String> name();
+    Class<? extends RoleAction>[] value();
 
-    Property<String> description();
-
-    Property<String> version();
-
-    Property<List<RoleDescriptor>> roles();
-
-    // TODO Add Dependencies
 }

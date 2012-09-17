@@ -16,6 +16,7 @@ package domain.buds;
 
 import com.mongodb.gridfs.GridFSDBFile;
 import domain.roles.Role;
+import domain.roles.RoleRegistry;
 import infrastructure.attachmentsdb.AttachmentsDB;
 import infrastructure.graphdb.GraphDB;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import org.qi4j.api.injection.scope.This;
 import org.qi4j.api.mixin.Mixins;
 import org.qi4j.api.property.Immutable;
 import org.qi4j.api.property.Property;
+import org.qi4j.api.value.ValueComposite;
 
 @Mixins( Bud.Mixin.class )
 public interface Bud
@@ -61,6 +63,8 @@ public interface Bud
     @Aggregated
     ManyAssociation<Role> roles();
 
+    Class<? extends ValueComposite> roleActionParamsType( String roleName, String actionName );
+
     abstract class Mixin
             implements Bud
     {
@@ -70,6 +74,9 @@ public interface Bud
 
         @Service
         private AttachmentsDB attachmentsDB;
+
+        @Service
+        private RoleRegistry roleRegistry;
 
         @This
         private Bud bud;
@@ -110,6 +117,12 @@ public interface Bud
         public boolean isRoot()
         {
             return ROOT_BUD_IDENTITY.equals( bud.identity().get() );
+        }
+
+        @Override
+        public Class<? extends ValueComposite> roleActionParamsType( String roleName, String actionName )
+        {
+            return null;
         }
 
     }

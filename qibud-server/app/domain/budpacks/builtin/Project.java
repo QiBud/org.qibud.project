@@ -13,8 +13,10 @@
  */
 package domain.budpacks.builtin;
 
+import domain.roles.BudRole;
 import domain.roles.Role;
 
+@BudRole( name = "project" )
 public interface Project
         extends Role
 {

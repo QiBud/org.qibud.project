@@ -21,10 +21,7 @@ public class QiBudPlayAssembler
 
     public QiBudPlayAssembler()
     {
-        super( Play.application().configuration().getString( "qibud.budpacks" ) == null
-               ? new String[]{}
-               : Play.application().configuration().getString( "qibud.budpacks" ).split( ":" ),
-               Play.application().configuration().getString( "qibud.entities.host" ),
+        super( Play.application().configuration().getString( "qibud.entities.host" ),
                Play.application().configuration().getInt( "qibud.entities.port" ),
                Play.application().configuration().getString( "qibud.entities.username" ),
                Play.application().configuration().getString( "qibud.entities.password" ),

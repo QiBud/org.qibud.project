@@ -13,28 +13,33 @@
  */
 package domain.bootstrap;
 
+import application.bootstrap.BudPackDescriptor;
+import application.bootstrap.RoleActionDescriptor;
+import application.bootstrap.RoleDescriptor;
 import domain.buds.Bud;
 import domain.buds.BudsFactory;
 import domain.buds.BudsRepository;
-import domain.roles.BudRole;
+import domain.roles.Role;
 import domain.roles.RoleAction;
-import domain.roles.RoleActionDescriptor;
-import domain.roles.RoleDescriptor;
 import domain.roles.RoleRegistry;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.qi4j.bootstrap.Assembler;
 import org.qi4j.bootstrap.AssemblyException;
 import org.qi4j.bootstrap.ModuleAssembly;
-import play.Play;
-import utils.ClassFinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.qi4j.api.common.Visibility.application;
 
 public final class QiBudDomainAssemblies
 {
 
-    public static Assembler buds( final String[] budPackPackages )
+    private static final Logger LOGGER = LoggerFactory.getLogger( "org.qibud.domain.buds" );
+
+    public static Assembler buds( final Map<String, BudPackDescriptor> budPacks )
     {
         return new Assembler()
         {
@@ -46,30 +51,36 @@ public final class QiBudDomainAssemblies
                 ma.entities( Bud.class ).
                         visibleIn( application );
 
-                List<Class<?>> roles = new ArrayList<Class<?>>();
-                for ( String budPackPackage : budPackPackages ) {
-                    Class<?>[] candidates = ClassFinder.getClasses( budPackPackage, Play.application().classloader() );
-                    for ( Class<?> candidate : candidates ) {
-                        if ( candidate.isAnnotationPresent( BudRole.class ) ) {
-                            roles.add( candidate );
+                List<Class<? extends Role>> roleTypes = new ArrayList<Class<? extends Role>>();
+                List<Class<? extends RoleAction>> roleActionTypes = new ArrayList<Class<? extends RoleAction>>();
+                for ( BudPackDescriptor budPack : budPacks.values() ) {
+                    for ( RoleDescriptor role : budPack.roles().values() ) {
+                        roleTypes.add( role.roleType() );
+                        for ( RoleActionDescriptor action : role.actions().values() ) {
+                            roleActionTypes.add( action.roleActionType() );
                         }
                     }
                 }
-                if ( !roles.isEmpty() ) {
-                    ma.entities( Bud.class ).
-                            withTypes( roles.toArray( new Class<?>[ roles.size() ] ) );
+
+                if ( !roleTypes.isEmpty() ) {
+                    Class<?>[] rolesArray = roleTypes.toArray( new Class<?>[ roleTypes.size() ] );
+                    ma.entities( rolesArray );
+                    LOGGER.info( "Assembled {} BudRoles: {}", rolesArray.length, Arrays.toString( rolesArray ) );
                 }
 
-                ma.values( RoleDescriptor.class,
-                           RoleActionDescriptor.class,
-                           RoleAction.class ).
-                        visibleIn( application );
+                if ( !roleActionTypes.isEmpty() ) {
+                    Class<?>[] actionsArray = roleActionTypes.toArray( new Class<?>[ roleActionTypes.size() ] );
+                    ma.transients( actionsArray );
+                    LOGGER.info( "Assembled {} BudActions: {}", actionsArray.length, Arrays.toString( actionsArray ) );
+                }
 
                 ma.services( BudsRepository.class,
                              BudsFactory.class,
                              RoleRegistry.class ).
                         visibleIn( application ).
                         instantiateOnStartup();
+
+                ma.services( RoleRegistry.class ).setMetaInfo( budPacks );
             }
 
         };

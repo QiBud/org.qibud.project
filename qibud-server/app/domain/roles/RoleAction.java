@@ -13,37 +13,14 @@
  */
 package domain.roles;
 
-import org.qi4j.api.injection.scope.This;
-import org.qi4j.api.mixin.Mixins;
-import org.qi4j.api.property.Immutable;
-import org.qi4j.api.property.Property;
-import org.qi4j.api.value.ValueComposite;
+import domain.buds.Bud;
+import org.qi4j.api.composite.TransientComposite;
 
-@Mixins( RoleAction.Mixin.class )
-public interface RoleAction<ParamType extends Object, ResultType extends Object, ThrowableType extends Throwable>
-        extends ValueComposite
+public interface RoleAction<RoleType extends Role, ParamType extends Object, ResultType extends Object, ThrowableType extends Throwable>
+        extends TransientComposite
 {
 
-    @Immutable
-    Property<String> actionName();
-
-    ResultType invokeAction( ParamType params )
+    ResultType invokeAction( Bud bud, RoleType role, ParamType params )
             throws ThrowableType;
-
-    abstract class Mixin
-            implements RoleAction
-    {
-
-        @This
-        private RoleAction me;
-
-        @Override
-        public Object invokeAction( Object params )
-                throws Throwable
-        {
-            return me.actionName();
-        }
-
-    }
 
 }

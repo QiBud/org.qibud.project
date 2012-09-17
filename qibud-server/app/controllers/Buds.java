@@ -216,6 +216,8 @@ public class Buds
 
     public static Result roleActionForm( String identity, String pack, String role, String action )
     {
+        // get action params type (ValueComposite)
+        // generate form from params
         return TODO;
     }
 

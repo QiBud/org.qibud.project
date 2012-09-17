@@ -1,5 +1,6 @@
 /*
  * Copyright 2012 TypeSafe.
+ * Copyright 2012 Paul Merlin.
  *
  * Licensed  under the  Apache License,  Version 2.0  (the "License");
  * you may not use  this file  except in  compliance with the License.
@@ -18,7 +19,6 @@
 package utils;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -28,10 +28,16 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
- * Borrowed from the inject plugin: https://github.com/typesafehub/play-plugins/tree/master/inject
+ * Originnaly borrowed from the inject plugin: https://github.com/typesafehub/play-plugins/tree/master/inject
+ * Added functionnality for this very project.
  */
 public class ClassFinder
 {
+
+    public static Class[] getClasses( Package pack, ClassLoader classLoader )
+    {
+        return getClasses( pack.getName(), classLoader );
+    }
 
     /**
      * Scans all classes accessible from the context class loader which belong to the given package and subpackages.

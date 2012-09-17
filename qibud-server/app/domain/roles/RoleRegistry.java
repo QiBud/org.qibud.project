@@ -13,29 +13,33 @@
  */
 package domain.roles;
 
-import domain.aaa.User;
-import java.util.Collections;
+import application.bootstrap.BudPackDescriptor;
+import application.bootstrap.RoleDescriptor;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.qi4j.api.entity.EntityBuilder;
 import org.qi4j.api.injection.scope.Structure;
+import org.qi4j.api.injection.scope.Uses;
 import org.qi4j.api.mixin.Mixins;
 import org.qi4j.api.service.ServiceActivation;
 import org.qi4j.api.service.ServiceComposite;
+import org.qi4j.api.service.ServiceDescriptor;
 import org.qi4j.api.structure.Module;
 import org.qi4j.api.unitofwork.UnitOfWork;
-import org.qi4j.api.value.ValueBuilder;
 
 @Mixins( RoleRegistry.Mixin.class )
 public interface RoleRegistry
         extends ServiceComposite, ServiceActivation
 {
 
-    Iterable<String> registeredRolesNames();
+    Collection<BudPackDescriptor> budPacks();
 
-    Iterable<RoleDescriptor> registeredRoles();
+    BudPackDescriptor budPack( String name );
 
     Role newRoleInstance( String roleName );
+
+    RoleAction newRoleActionInstance( String roleName, String actionName );
 
     abstract class Mixin
             implements RoleRegistry
@@ -44,49 +48,59 @@ public interface RoleRegistry
         @Structure
         private Module module;
 
-        private Map<String, RoleDescriptor> roleMap;
+        @Uses
+        private ServiceDescriptor descriptor;
+
+        private Map<String, BudPackDescriptor> budPacks;
+
+        private Map<String, RoleDescriptor> roles;
 
         @Override
         public void activateService()
                 throws Exception
         {
-            roleMap = new HashMap<String, RoleDescriptor>();
-            ValueBuilder<RoleDescriptor> builder = module.newValueBuilder( RoleDescriptor.class );
-            RoleDescriptor roleDescriptor = builder.prototype();
-            roleDescriptor.name().set( "user" );
-            roleDescriptor.description().set( "QiBud User Role" );
-            roleDescriptor.roleTypeName().set( User.class.getName() );
-            roleMap.put( "user", builder.newInstance() );
+            budPacks = descriptor.metaInfo( Map.class );
+            roles = new HashMap<String, RoleDescriptor>();
+            for ( BudPackDescriptor budPack : budPacks.values() ) {
+                roles.putAll( budPack.roles() );
+            }
         }
 
         @Override
         public void passivateService()
                 throws Exception
         {
-            roleMap = Collections.emptyMap();
+            budPacks = null;
+            roles = null;
         }
 
         @Override
-        public Iterable<String> registeredRolesNames()
+        public Collection<BudPackDescriptor> budPacks()
         {
-            return roleMap.keySet();
+            return budPacks.values();
         }
 
         @Override
-        public Iterable<RoleDescriptor> registeredRoles()
+        public BudPackDescriptor budPack( String name )
         {
-            return roleMap.values();
+            return budPacks.get( name );
         }
 
         @Override
         public Role newRoleInstance( String roleName )
         {
-            RoleDescriptor roleDescriptor = roleMap.get( roleName );
+            RoleDescriptor roleDescriptor = roles.get( roleName );
             UnitOfWork uow = module.currentUnitOfWork();
             EntityBuilder<? extends Role> builder = uow.newEntityBuilder( roleDescriptor.roleType() );
             Role role = builder.instance();
-            role.roleName().set( roleDescriptor.name().get() );
+            role.roleName().set( roleDescriptor.name() );
             return builder.newInstance();
+        }
+
+        @Override
+        public RoleAction newRoleActionInstance( String roleName, String actionName )
+        {
+            throw new UnsupportedOperationException( "Not supported yet." );
         }
 
     }

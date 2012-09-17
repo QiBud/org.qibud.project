@@ -5,7 +5,6 @@
 # Home page
 GET     /                                               controllers.Application.index()
 
-
 GET     /buds                                           controllers.Buds.buds
 GET     /bud/:identity/new                              controllers.Buds.budCreateForm(identity: String)
 POST    /bud/:identity/create                           controllers.Buds.saveNewBud(identity: String)
@@ -36,18 +35,7 @@ GET     /bud/:identity/:pack/:role/:action/form         controllers.Buds.roleAct
 POST    /bud/:identity/:pack/:role/:action              controllers.Buds.invokeRoleAction(identity: String, pack: String, role: String, action: String)
 
 GET     /packs                                          controllers.BudPacks.packs
-GET     /packs/new                                      controllers.BudPacks.packUploadForm
-POST    /packs                                          controllers.BudPacks.uploadPack
-
 GET     /pack/:pack                                     controllers.BudPacks.pack(pack: String)
-# doit pouvoir proposer un wizard d'installation si besoin ?
-GET     /pack/:pack/configuration                       controllers.BudPacks.packConfiguration(pack: String)
-POST    /pack/:pack/configuration                       controllers.BudPacks.savePackConfiguration(pack: String)
-GET     /pack/:pack/:action/form                        controllers.BudPacks.actionForm(pack: String, action: String)
-POST    /pack/:pack/:action                             controllers.BudPacks.invokeAction(pack: String, action: String)
-
-
-
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                                   controllers.Assets.at(path="/public", file)

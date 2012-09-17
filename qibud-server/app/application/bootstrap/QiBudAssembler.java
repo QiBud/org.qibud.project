@@ -75,6 +75,7 @@ public class QiBudAssembler
             throws AssemblyException
     {
         ApplicationAssembly appAss = aaf.newApplicationAssembly();
+        appAss.setName( "QiBud" );
 
         // Config
         LayerAssembly configLayer = appAss.layer( "config" );
@@ -139,7 +140,7 @@ public class QiBudAssembler
                                                   : roleAnnotation.description();
 
                             }
-                            RoleDescriptor role = new RoleDescriptor( roleName, roleDescription, roleType );
+                            RoleDescriptor role = new RoleDescriptor( budPackName, roleName, roleDescription, roleType );
                             if ( roleType.isAnnotationPresent( BudActions.class ) ) {
 
                                 // Actions

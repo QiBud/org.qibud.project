@@ -21,7 +21,7 @@ import domain.buds.BudsFactory;
 import domain.buds.BudsRepository;
 import domain.roles.Role;
 import domain.roles.RoleAction;
-import domain.roles.RoleRegistry;
+import domain.budpacks.BudPacksService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,23 +64,25 @@ public final class QiBudDomainAssemblies
 
                 if ( !roleTypes.isEmpty() ) {
                     Class<?>[] rolesArray = roleTypes.toArray( new Class<?>[ roleTypes.size() ] );
-                    ma.entities( rolesArray );
+                    ma.entities( rolesArray ).
+                            visibleIn( application );
                     LOGGER.info( "Assembled {} BudRoles: {}", rolesArray.length, Arrays.toString( rolesArray ) );
                 }
 
                 if ( !roleActionTypes.isEmpty() ) {
                     Class<?>[] actionsArray = roleActionTypes.toArray( new Class<?>[ roleActionTypes.size() ] );
-                    ma.transients( actionsArray );
+                    ma.transients( actionsArray ).
+                            visibleIn( application );
                     LOGGER.info( "Assembled {} BudActions: {}", actionsArray.length, Arrays.toString( actionsArray ) );
                 }
 
                 ma.services( BudsRepository.class,
                              BudsFactory.class,
-                             RoleRegistry.class ).
+                             BudPacksService.class ).
                         visibleIn( application ).
                         instantiateOnStartup();
 
-                ma.services( RoleRegistry.class ).setMetaInfo( budPacks );
+                ma.services( BudPacksService.class ).setMetaInfo( budPacks );
             }
 
         };

@@ -15,8 +15,8 @@
 package domain.buds;
 
 import com.mongodb.gridfs.GridFSDBFile;
+import domain.budpacks.BudPacksService;
 import domain.roles.Role;
-import domain.roles.RoleRegistry;
 import infrastructure.attachmentsdb.AttachmentsDB;
 import infrastructure.graphdb.GraphDB;
 import java.util.ArrayList;
@@ -63,6 +63,11 @@ public interface Bud
     @Aggregated
     ManyAssociation<Role> roles();
 
+    @Aggregated
+    ManyAssociation<Role> passivatedRoles();
+
+    Role role( String pack, String role );
+
     Class<? extends ValueComposite> roleActionParamsType( String roleName, String actionName );
 
     abstract class Mixin
@@ -76,7 +81,7 @@ public interface Bud
         private AttachmentsDB attachmentsDB;
 
         @Service
-        private RoleRegistry roleRegistry;
+        private BudPacksService roleRegistry;
 
         @This
         private Bud bud;
@@ -117,6 +122,18 @@ public interface Bud
         public boolean isRoot()
         {
             return ROOT_BUD_IDENTITY.equals( bud.identity().get() );
+        }
+
+        @Override
+        public Role role( String budPackName, String roleName )
+        {
+            for ( Role role : bud.roles() ) {
+                if ( role.budPackName().get().equals( budPackName )
+                     && role.roleName().get().equals( roleName ) ) {
+                    return role;
+                }
+            }
+            return null;
         }
 
         @Override

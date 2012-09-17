@@ -11,13 +11,13 @@
  * limitations under the License.
  *
  */
-package domain.budpacks.builtin;
+package domain.budpacks.project;
 
 import domain.roles.BudRole;
 import domain.roles.Role;
 
-@BudRole( name = "idea" )
-public interface Idea
+@BudRole( name = "mission" )
+public interface Mission
         extends Role
 {
 }

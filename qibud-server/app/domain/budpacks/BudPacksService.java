@@ -11,10 +11,12 @@
  * limitations under the License.
  *
  */
-package domain.roles;
+package domain.budpacks;
 
 import application.bootstrap.BudPackDescriptor;
 import application.bootstrap.RoleDescriptor;
+import domain.roles.Role;
+import domain.roles.RoleAction;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,8 +30,8 @@ import org.qi4j.api.service.ServiceDescriptor;
 import org.qi4j.api.structure.Module;
 import org.qi4j.api.unitofwork.UnitOfWork;
 
-@Mixins( RoleRegistry.Mixin.class )
-public interface RoleRegistry
+@Mixins( BudPacksService.Mixin.class )
+public interface BudPacksService
         extends ServiceComposite, ServiceActivation
 {
 
@@ -37,12 +39,14 @@ public interface RoleRegistry
 
     BudPackDescriptor budPack( String name );
 
-    Role newRoleInstance( String roleName );
+    Collection<RoleDescriptor> roles();
+
+    Role newRoleInstance( String budPackName, String roleName );
 
     RoleAction newRoleActionInstance( String roleName, String actionName );
 
     abstract class Mixin
-            implements RoleRegistry
+            implements BudPacksService
     {
 
         @Structure
@@ -81,18 +85,25 @@ public interface RoleRegistry
         }
 
         @Override
+        public Collection<RoleDescriptor> roles()
+        {
+            return roles.values();
+        }
+
+        @Override
         public BudPackDescriptor budPack( String name )
         {
             return budPacks.get( name );
         }
 
         @Override
-        public Role newRoleInstance( String roleName )
+        public Role newRoleInstance( String budPackName, String roleName )
         {
-            RoleDescriptor roleDescriptor = roles.get( roleName );
+            RoleDescriptor roleDescriptor = budPacks.get( budPackName ).roles().get( roleName );
             UnitOfWork uow = module.currentUnitOfWork();
             EntityBuilder<? extends Role> builder = uow.newEntityBuilder( roleDescriptor.roleType() );
             Role role = builder.instance();
+            role.budPackName().set( roleDescriptor.budPackName() );
             role.roleName().set( roleDescriptor.name() );
             return builder.newInstance();
         }

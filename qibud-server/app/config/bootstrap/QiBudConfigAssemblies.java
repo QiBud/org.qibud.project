@@ -17,7 +17,9 @@ import org.qi4j.bootstrap.Assembler;
 import org.qi4j.bootstrap.AssemblyException;
 import org.qi4j.bootstrap.ModuleAssembly;
 import org.qi4j.entitystore.memory.MemoryEntityStoreService;
+import org.qi4j.library.fileconfig.FileConfigurationService;
 
+import static org.qi4j.api.common.Visibility.application;
 import static org.qi4j.api.common.Visibility.module;
 
 public final class QiBudConfigAssemblies
@@ -27,9 +29,9 @@ public final class QiBudConfigAssemblies
      * Qi4j application configuration resides in-memory as we use the Play!
      * configuration values to default Qi4j configuration properties at
      * assembly time.
-     * 
+     *
      * See other assemblers that take a config module assembly parameter.
-     * 
+     *
      * @return Assembler of the config layer.
      */
     public static Assembler config()
@@ -43,6 +45,10 @@ public final class QiBudConfigAssemblies
             {
                 ma.services( MemoryEntityStoreService.class ).
                         visibleIn( module ).
+                        instantiateOnStartup();
+                
+                ma.services( FileConfigurationService.class ).
+                        visibleIn( application ).
                         instantiateOnStartup();
             }
 

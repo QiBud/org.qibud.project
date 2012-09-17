@@ -62,15 +62,15 @@ public interface BudsFactory
 
                 uow.get( Bud.class, Bud.ROOT_BUD_IDENTITY );
                 uow.discard();
-                System.out.println( "ROOT BUD ALREADY EXIST!" );
 
             } catch ( NoSuchEntityException noRootBud ) {
 
-                System.out.println( "ROOT BUD DO NOT EXIST, WILL CREATE IT" );
+                LOGGER.debug( "Root Bud does not exists, first start?" );
 
                 // Create ROOT BudEntity
-                EntityBuilder<Bud> builder = uow.newEntityBuilder( Bud.class, Bud.ROOT_BUD_IDENTITY );
+                EntityBuilder<Bud> builder = uow.newEntityBuilder( Bud.class );
                 Bud root = builder.instance();
+                root.identity().set( Bud.ROOT_BUD_IDENTITY );
                 root.title().set( "Root Bud" );
                 root.postedAt().set( new DateTime() );
                 root.content().set( "## This is the Root Bud\nFor now this Bud has no Role and this sample content only." );
@@ -87,6 +87,8 @@ public interface BudsFactory
                 try {
 
                     uow.complete();
+
+                    LOGGER.info( "Rood Bud created!" );
 
                 } catch ( UnitOfWorkCompletionException ex ) {
 

@@ -20,7 +20,9 @@ import org.qi4j.bootstrap.AssemblyException;
 import org.qi4j.bootstrap.ModuleAssembly;
 import org.qi4j.entitystore.mongodb.MongoEntityStoreConfiguration;
 import org.qi4j.entitystore.mongodb.MongoMapEntityStoreAssembler;
-import org.qi4j.index.rdf.assembly.RdfMemoryStoreAssembler;
+import org.qi4j.index.rdf.assembly.RdfNativeSesameStoreAssembler;
+import org.qi4j.library.rdf.repository.NativeConfiguration;
+import play.Play;
 
 import static org.qi4j.api.common.Visibility.application;
 
@@ -44,7 +46,7 @@ public final class QiBudInfraAssemblies
                         withConfigModule( configModule ).
                         withConfigVisibility( application ).
                         assemble( ma );
-                MongoEntityStoreConfiguration mongoESConf = ma.forMixin( MongoEntityStoreConfiguration.class ).
+                MongoEntityStoreConfiguration mongoESConf = configModule.forMixin( MongoEntityStoreConfiguration.class ).
                         declareDefaults();
                 mongoESConf.hostname().set( mongoHostname );
                 mongoESConf.port().set( mongoPort );
@@ -54,7 +56,10 @@ public final class QiBudInfraAssemblies
                 mongoESConf.collection().set( mongoCollection );
 
                 // Entities Indexing & Query
-                new RdfMemoryStoreAssembler( application, application ).assemble( ma );
+                new RdfNativeSesameStoreAssembler( application, application ).assemble( ma );
+                configModule.entities( NativeConfiguration.class ).visibleIn( application );
+                NativeConfiguration rdfConf = configModule.forMixin( NativeConfiguration.class ).declareDefaults();
+                rdfConf.dataDirectory().set( Play.application().configuration().getString( "qibud.entities.indexpath" ) );
 
                 // Attachments
                 ma.services( AttachmentsDBService.class ).

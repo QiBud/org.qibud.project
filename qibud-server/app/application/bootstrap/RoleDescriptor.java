@@ -21,6 +21,8 @@ import java.util.Map;
 public class RoleDescriptor
 {
 
+    private final String budPackName;
+
     private final String name;
 
     private final String description;
@@ -29,8 +31,9 @@ public class RoleDescriptor
 
     private final Map<String, RoleActionDescriptor> actions = new HashMap<String, RoleActionDescriptor>();
 
-    public RoleDescriptor( String name, String description, Class<? extends Role> roleType )
+    public RoleDescriptor( String budPackName, String name, String description, Class<? extends Role> roleType )
     {
+        this.budPackName = budPackName;
         this.name = name;
         this.description = description;
         this.roleType = roleType;
@@ -39,6 +42,11 @@ public class RoleDescriptor
     /* package */ Map<String, RoleActionDescriptor> mutableActions()
     {
         return actions;
+    }
+
+    public String budPackName()
+    {
+        return budPackName;
     }
 
     public String name()

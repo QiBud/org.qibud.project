@@ -11,13 +11,17 @@
  * limitations under the License.
  *
  */
-package domain.budpacks.builtin;
+package domain.roles;
 
-import domain.roles.BudRole;
-import domain.roles.Role;
+import utils.QiBudException;
 
-@BudRole( name = "issue" )
-public interface Issue
-        extends Role
+public class RoleNotFound
+        extends QiBudException
 {
+
+    public RoleNotFound( String budPackName, String roleName )
+    {
+        super( "Role '" + budPackName + "/" + roleName + "' not found." );
+    }
+
 }

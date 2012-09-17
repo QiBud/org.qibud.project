@@ -1,78 +1,85 @@
-@(bud: _root_.domain.buds.Bud)
+@(bud: _root_.domain.buds.Bud, bud_roles: Collection[_root_.domain.roles.Role], available_roles: Collection[_root_.application.bootstrap.RoleDescriptor])
 
 @import tags._
 @import _root_.views.tools._
 
-@sidebar = {
-    @show_bud_sidebar( bud )
+@bud_content = {
+    @page_header( bud.title().get() )
+
+    <p>
+        <a href="@routes.Buds.budCreateForm( bud.identity().get() )" class="btn btn-mini btn-primary"><i class="icon-plus"></i> New</a>
+        <a href="@routes.Buds.budEditForm( bud.identity().get() )" class="btn btn-mini btn-primary"><i class="icon-edit"></i> Edit</a>
+        @if( bud.isRoot() ) {
+            <a class="btn btn-mini btn-danger disabled" title="You cannot delete the root Bud"><i class="icon-trash"></i> Delete</a>
+        }
+        @if( ! bud.isRoot() ) {
+            <a href="@routes.Buds.deleteBud( bud.identity().get() )" class="btn btn-mini btn-danger">Delete</a>
+        }
+    </p>
+
+    @markdown( bud.content().get() )
 }
 
-@scripts = {
-    <script type="text/javascript">
-        $(document).ready( function() {
+@main( bud.title().get(), "buds" ) {
 
-            var width = 500, height = 200;
+    @if( available_roles.isEmpty() ) {
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span9">
+                    @bud_content
+                </div>
+                <div class="span3">
+                    <div class="well" style="min-height: 400px">
+                        @show_bud_sidebar( bud )
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 
-            var cluster = d3.layout.cluster().size([height, width - 100]);
-
-            var diagonal = d3.svg.diagonal().projection(function(d) { return [d.y, d.x]; });
-
-            var vis = d3.select("#bud-graph-@bud.identity()").append("svg")
-            .attr("width", width)
-            .attr("height", height)
-            .append("g")
-            .attr("transform", "translate(40, 0)");
-
-            var nodes = cluster.nodes({
-                "name": "@bud.title()"
-            });
-
-            var link = vis.selectAll("path.link")
-            .data(cluster.links(nodes))
-            .enter().append("path")
-            .attr("class", "link")
-            .attr("d", diagonal);
-
-            var node = vis.selectAll("g.node")
-            .data(nodes)
-            .enter().append("g")
-            .attr("class", "node")
-            .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; })
-
-            node.append("circle")
-            .attr("r", 4.5);
-
-            node.append("text")
-            .attr("dx", function(d) { return d.children ? -8 : 8; })
-            .attr("dy", 3)
-            .attr("text-anchor", function(d) { return d.children ? "end" : "start"; })
-            .text(function(d) { return d.name; });
-        });
-    </script>
-}
-
-@main( bud.title().get(), "buds", scripts ) {
-
-    @layout_fluid( right_sidebar = sidebar ) {
-
-        @page_header( bud.title().get() )
-
-        <h3 style="padding-right: 1em; font-weight: bold">Graph</h3>
-        <div id="bud-graph-@bud.identity()"></div>
-
-        <p>
-            <a href="@routes.Buds.budCreateForm( bud.identity().get() )" class="btn btn-mini btn-primary"><i class="icon-plus"></i> New</a>
-            <a href="@routes.Buds.budEditForm( bud.identity().get() )" class="btn btn-mini btn-primary"><i class="icon-edit"></i> Edit</a>
-            @if( bud.isRoot() ) {
-                <a class="btn btn-mini btn-danger disabled" title="You cannot delete the root Bud"><i class="icon-trash"></i> Delete</a>
-            }
-            @if( ! bud.isRoot() ) {
-                <a href="@routes.Buds.deleteBud( bud.identity().get() )" class="btn btn-mini btn-danger">Delete</a>
-            }
-        </p>
-
-        @markdown( bud.content().get() )
-
+    @if( ! available_roles.isEmpty() ) {
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span6">
+                    @bud_content
+                </div>
+                <div class="span3">
+                    <div class="well" style="min-height: 400px">
+                        <h3>Roles</h3>
+                        @if( bud_roles.isEmpty() ) {
+                            <p>This Bud has no Role.</p>
+                        }
+                        @if( ! bud_roles.isEmpty() ) {
+                            <ul>
+                                @for( role <- bud_roles) {
+                                    <li>
+                                        <a href='@routes.Buds.deleteBudRole(bud.identity().get(), role.budPackName().get(), role.roleName().get() )' class="btn btn-mini">
+                                            <i class="icon-trash"></i> @role.budPackName()/@role.roleName()
+                                        </a>
+                                        <p><a href='@routes.Buds.budRole(bud.identity().get(), role.budPackName().get(), role.roleName().get() )' target="_blank">role state</a></p>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        <p>Add a role:</p>
+                        <ul>
+                            @for( available_role <- available_roles) {
+                                <li>
+                                    <a href='@routes.Buds.addBudRole(bud.identity().get(), available_role.budPackName(), available_role.name() )' class="btn btn-mini">
+                                        <i class="icon-plus"></i> @available_role.budPackName()/@available_role.name()
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <div class="span3">
+                    <div class="well" style="min-height: 400px">
+                        @show_bud_sidebar( bud )
+                    </div>
+                </div>
+            </div>
+        </div>
     }
 
 }

@@ -37,15 +37,16 @@ public class Global
     private static final String SHUTDOWN_HOOK_THREAD_NAME = "QiBud.Shutdown";
 
     @Override
-    public void onStart( Application app )
+    public void beforeStart( Application app )
     {
-        super.onStart( app );
+        super.beforeStart( app );
         if ( !app.isProd() && !Threads.isThreadRegisteredAsShutdownHook( SHUTDOWN_HOOK_THREAD_NAME ) ) {
 
             // Entities
             final String entitiesHost = app.configuration().getString( "qibud.entities.host" );
             final int entitiesPort = app.configuration().getInt( "qibud.entities.port" );
             final String entitiesDatabase = app.configuration().getString( "qibud.entities.database" );
+            final File entitiesIndexPath = new File( app.configuration().getString( "qibud.entities.indexpath" ) );
 
             // Attachments
             final String attachmentsHost = app.configuration().getString( "qibud.attachmentsdb.host" );
@@ -70,6 +71,13 @@ public class Global
                         System.err.println( "Unable to delete entities" );
                         ex.printStackTrace();
                     }
+                    try {
+                        FileUtils.deleteDirectory( entitiesIndexPath );
+                        System.out.println( "Entities Index Cleared!" );
+                    } catch ( Exception ex ) {
+                        System.err.println( "Unable to delete entities index" );
+                        ex.printStackTrace();
+                    }
 
                     // Attachments
                     try {
@@ -92,6 +100,12 @@ public class Global
 
             }, SHUTDOWN_HOOK_THREAD_NAME ) );
         }
+    }
+
+    @Override
+    public void onStart( Application app )
+    {
+        super.onStart( app );
     }
 
     @Override

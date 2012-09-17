@@ -11,36 +11,13 @@
  * limitations under the License.
  *
  */
-package domain.budpacks.builtin;
+package domain.budpacks.project;
 
-import domain.buds.Bud;
-import domain.roles.BudAction;
-import domain.roles.BudActions;
 import domain.roles.BudRole;
 import domain.roles.Role;
-import domain.roles.RoleAction;
-import org.qi4j.api.property.Property;
 
-@BudRole( name = "person", description = "Person Role" )
-@BudActions( Person.Say.class )
-public interface Person
+@BudRole( name = "action" )
+public interface Action
         extends Role
 {
-
-    Property<String> fullName();
-
-    @BudAction( name = "say" )
-    class Say
-            implements RoleAction<Person, String, String, Throwable>
-    {
-
-        @Override
-        public String invokeAction( Bud bud, Person role, String message )
-                throws Throwable
-        {
-            return role.fullName().get() + " say " + message;
-        }
-
-    }
-
 }

@@ -13,7 +13,7 @@
  */
 package controllers;
 
-import domain.roles.RoleRegistry;
+import domain.budpacks.BudPacksService;
 import org.qi4j.api.injection.scope.Service;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -27,7 +27,7 @@ public class BudPacks
 {
 
     @Service
-    public static RoleRegistry roleRegistry;
+    public static BudPacksService roleRegistry;
 
     public static Result packs()
     {

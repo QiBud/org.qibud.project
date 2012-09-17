@@ -8,8 +8,6 @@ GET     /                                               controllers.Application.
 GET     /buds                                           controllers.Buds.buds
 GET     /bud/:identity/new                              controllers.Buds.budCreateForm(identity: String)
 POST    /bud/:identity/create                           controllers.Buds.saveNewBud(identity: String)
-# GET     /buds/:module
-# GET     /buds/:module/:role
 
 # tous les roles du bud rajoutent de la vue à la vue de base
 GET     /bud/:identity                                  controllers.Buds.bud(identity: String)
@@ -22,17 +20,12 @@ GET     /bud/:identity/edit                             controllers.Buds.budEdit
 POST    /bud/:identity                                  controllers.Buds.saveBud(identity: String)
 # tous les roles du bud rajoutent de la validation, du "comportement BudStore"
 GET     /bud/:identity/delete                           controllers.Buds.deleteBud(identity: String)
+GET     /bud/:identity/:pack/:role/add                  controllers.Buds.addBudRole(identity: String, pack: String, role: String)
+GET     /bud/:identity/:pack/:role/delete               controllers.Buds.deleteBudRole(identity: String, pack: String, role: String)
 
-# seul le role pointé rajoute de la vue à la vue de base
-GET     /bud/:identity/:pack/:role                      controllers.Buds.budByRole(identity: String, pack: String, role: String)
-# seul le role pointé rajoute du formulaire
-GET     /bud/:identity/:pack/:role/edit                 controllers.Buds.budEditFormByRole(identity: String, pack: String, role: String)
-# seul le role pointé rajoute de la validation, du "comportement BudStore"
-POST    /bud/:identity/:pack/:role                      controllers.Buds.saveBudByRole(identity: String, pack: String, role: String)
-# seul le role pointé rajoute de la validation, du "comportement BudStore"
-GET     /bud/:identity/:pack/:role/delete               controllers.Buds.deleteBudByRole(identity: String, pack: String, role: String)
-GET     /bud/:identity/:pack/:role/:action/form         controllers.Buds.roleActionForm(identity: String, pack: String, role: String, action: String)
-POST    /bud/:identity/:pack/:role/:action              controllers.Buds.invokeRoleAction(identity: String, pack: String, role: String, action: String)
+GET     /bud/:identity/:pack/:role                      controllers.Buds.budRole(identity: String, pack: String, role: String)
+POST    /bud/:identity/:pack/:role                      controllers.Buds.saveBudRole(identity: String, pack: String, role: String)
+POST    /bud/:identity/:pack/:role/:action              controllers.Buds.invokeBudRoleAction(identity: String, pack: String, role: String, action: String)
 
 GET     /packs                                          controllers.BudPacks.packs
 GET     /pack/:pack                                     controllers.BudPacks.pack(pack: String)

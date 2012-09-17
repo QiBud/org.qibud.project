@@ -20,6 +20,8 @@ public interface Role
         extends EntityComposite
 {
 
+    Property<String> budPackName();
+
     Property<String> roleName();
 
 }

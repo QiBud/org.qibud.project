@@ -14,6 +14,11 @@
 package controllers;
 
 import application.bootstrap.RoleDescriptor;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
+import com.mongodb.util.JSON;
 import domain.budpacks.BudPacksService;
 import domain.buds.Bud;
 import domain.buds.BudsRepository;
@@ -25,16 +30,14 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 import org.json.JSONException;
-import org.qi4j.api.association.AssociationStateDescriptor;
-import org.qi4j.api.common.QualifiedName;
+import org.json.JSONObject;
 import org.qi4j.api.injection.scope.Service;
 import org.qi4j.api.injection.scope.Structure;
-import org.qi4j.api.property.PropertyDescriptor;
 import org.qi4j.api.structure.Module;
 import org.qi4j.api.unitofwork.UnitOfWork;
 import org.qi4j.api.unitofwork.UnitOfWorkCompletionException;
+import org.qi4j.entitystore.mongodb.MongoMapEntityStoreService;
 import org.qi4j.spi.Qi4jSPI;
-import org.qi4j.spi.entity.EntityState;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
@@ -55,6 +58,9 @@ public class BudRoles
 
     @Service
     public static BudsRepository budsRepository;
+
+    @Service
+    public static MongoMapEntityStoreService mongoEntityStore;
 
     public static Result budRole( String identity, String pack, String role )
             throws UnitOfWorkCompletionException, IOException, JSONException
@@ -80,24 +86,13 @@ public class BudRoles
             mapper.writeValue( descriptorWriter, roleDescriptor );
             json.put( "descriptor", mapper.readValue( descriptorWriter.toString(), JsonNode.class ) );
 
-            ObjectNode jsonState = JsonNodeFactory.instance.objectNode();
-            AssociationStateDescriptor entityStateDescriptor = qi4j.getEntityDescriptor( roleEntity ).state();
-            EntityState entityState = qi4j.getEntityState( roleEntity );
-            for ( PropertyDescriptor propertyDescriptor : entityStateDescriptor.properties() ) {
-                QualifiedName qualifiedName = propertyDescriptor.qualifiedName();
-                if ( "identity".equals( qualifiedName.name() ) ) {
-                    continue; // Skip Role identity
-                }
-                Object value = entityState.getProperty( qualifiedName );
-                String serialized = value == null ? "" : value.toString();
-                jsonState.put( qualifiedName.name(), serialized );
-            }
-
-            jsonState.put( "associations", JsonNodeFactory.instance.arrayNode() );
-
-            jsonState.put( "many-associations", JsonNodeFactory.instance.objectNode() );
-
-            json.put( "state", jsonState );
+            DB mongoDb = mongoEntityStore.dbInstanceUsed();
+            mongoDb.requestStart();
+            DBCollection collection = mongoDb.getCollection( mongoEntityStore.collectionUsed() );
+            DBObject roleState = collection.findOne( new BasicDBObject( "identity", roleEntity.identity().get() ) );
+            String jsonRoleState = JSON.serialize( roleState );
+            mongoDb.requestDone();
+            json.put( "state", mapper.readTree( new JSONObject( jsonRoleState ).getJSONObject( "state" ).toString() ) );
 
             return ok( json );
 

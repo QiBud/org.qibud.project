@@ -21,6 +21,7 @@ import domain.roles.BudRole;
 import domain.roles.Role;
 import domain.roles.RoleAction;
 import infrastructure.bootstrap.QiBudInfraAssemblies;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import org.codeartisans.java.toolbox.Strings;
@@ -157,10 +158,17 @@ public class QiBudAssembler
                                                             : actionAnnotation.description();
 
                                     }
-                                    RoleActionDescriptor action = new RoleActionDescriptor( actionName, actionDescription, actionType );
+                                    Method actionMethod = findActionMethod( actionType );
+                                    Class<?> returnType = actionMethod.getReturnType();
+                                    Class<?> parameterType = actionMethod.getParameterTypes()[2];
+
+                                    RoleActionDescriptor action = new RoleActionDescriptor( actionName, actionDescription, actionType,
+                                                                                            returnType, parameterType );
                                     System.out.println( "ACTION: " + action );
                                     // QUID ? Param type ? Return type ?
-                                    //Method actionMethod = actionType.getDeclaredMethod( "invokeAction", Bud.class, roleType, Object.class );
+                                    System.out.println( "ACTION METHOD: " + actionMethod );
+
+
                                     role.mutableActions().put( actionName, action );
                                 }
 
@@ -183,6 +191,17 @@ public class QiBudAssembler
             }
         }
         return packs;
+    }
+
+    private Method findActionMethod( Class<? extends RoleAction> actionType )
+    {
+        for ( Method method : actionType.getDeclaredMethods() ) {
+            if ( "invokeAction".equals( method.getName() )
+                 && method.getParameterTypes().length == 3 ) {
+                return method;
+            }
+        }
+        throw new QiBudException( "BudAction has no single invokeAction(...) method, cannot register " + actionType );
     }
 
 }

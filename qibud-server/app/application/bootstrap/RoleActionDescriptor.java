@@ -25,11 +25,18 @@ public class RoleActionDescriptor
 
     private final Class<? extends RoleAction> roleActionType;
 
-    /* package */ RoleActionDescriptor( String name, String description, Class<? extends RoleAction> roleActionType )
+    private final Class<?> returnType;
+
+    private final Class<?> parameterType;
+
+
+    /* package */ RoleActionDescriptor( String name, String description, Class<? extends RoleAction> roleActionType, Class<?> returnType, Class<?> parameterType )
     {
         this.name = name;
         this.description = description;
         this.roleActionType = roleActionType;
+        this.returnType = returnType;
+        this.parameterType = parameterType;
     }
 
     @JsonProperty
@@ -47,6 +54,28 @@ public class RoleActionDescriptor
     public Class<? extends RoleAction> roleActionType()
     {
         return roleActionType;
+    }
+
+    public Class<?> returnType()
+    {
+        return returnType;
+    }
+
+    @JsonProperty( "input" )
+    public String returnTypeSimpleName()
+    {
+        return returnType.getSimpleName();
+    }
+
+    public Class<?> parameterType()
+    {
+        return parameterType;
+    }
+
+    @JsonProperty( "output" )
+    public String parameterTypeSimpleName()
+    {
+        return parameterType.getSimpleName();
     }
 
     @Override

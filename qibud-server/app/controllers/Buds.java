@@ -25,9 +25,10 @@ import domain.roles.Role;
 import forms.BudForm;
 import infrastructure.attachmentsdb.AttachmentsDB;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.StringWriter;
 import java.util.Iterator;
-import java.util.List;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 import org.json.JSONException;
@@ -43,6 +44,7 @@ import play.mvc.Call;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
+import views.BudViewData;
 import views.html.buds.all_buds;
 import views.html.buds.create_bud;
 import views.html.buds.edit_bud;
@@ -129,18 +131,7 @@ public class Buds
             if ( bud == null ) {
                 return notFound();
             }
-            List<RoleDescriptor> availableRoles = new ArrayList<RoleDescriptor>( budPacksService.roles() );
-            for ( Role budRole : bud.roles() ) {
-                Iterator<RoleDescriptor> it = availableRoles.iterator();
-                while ( it.hasNext() ) {
-                    RoleDescriptor availableRole = it.next();
-                    if ( availableRole.budPackName().equals( budRole.budPackName().get() )
-                         && availableRole.name().equals( budRole.roleName().get() ) ) {
-                        it.remove();
-                    }
-                }
-            }
-            return ok( show_bud.render( bud, Iterables.toList( bud.roles() ), availableRoles ) );
+            return ok( show_bud.render( new BudViewData( bud, budPacksService.unusedRoles( bud ) ) ) );
         } finally {
             uow.discard();
         }
@@ -195,7 +186,8 @@ public class Buds
             if ( bud == null ) {
                 return notFound();
             }
-            return ok( edit_bud.render( bud, form( BudForm.class ).fill( BudForm.filledWith( bud ) ) ) );
+            return ok( edit_bud.render( new BudViewData( bud, budPacksService.unusedRoles( bud ) ),
+                                        form( BudForm.class ).fill( BudForm.filledWith( bud ) ) ) );
         } finally {
             uow.discard();
         }
@@ -214,7 +206,8 @@ public class Buds
             Form<BudForm> filledForm = budForm.bindFromRequest();
 
             if ( filledForm.hasErrors() ) {
-                return badRequest( edit_bud.render( bud, filledForm ) );
+                return badRequest( edit_bud.render( new BudViewData( bud, budPacksService.unusedRoles( bud ) ),
+                                                    filledForm ) );
             } else {
                 BudForm updated = filledForm.get();
                 bud.title().set( updated.title );
@@ -308,7 +301,6 @@ public class Buds
     public static Result budRole( String identity, String pack, String role )
             throws UnitOfWorkCompletionException, IOException, JSONException
     {
-        // Return JSON state and actions description
         UnitOfWork uow = module.newUnitOfWork();
         try {
             Bud bud = budsRepository.findByIdentity( identity );
@@ -319,8 +311,15 @@ public class Buds
             if ( roleEntity == null ) {
                 return notFound();
             }
+            // TODO Return JSON state and actions description
+            RoleDescriptor roleDescriptor = budPacksService.budPack( pack ).role( role );
+
+            ObjectMapper mapper = new ObjectMapper();
             ObjectNode json = JsonNodeFactory.instance.objectNode();
             json.put( "identity", bud.identity().get() );
+            StringWriter descriptorWriter = new StringWriter();
+            mapper.writeValue( descriptorWriter, roleDescriptor );
+            json.put( "descriptor", mapper.readValue( descriptorWriter.toString(), JsonNode.class ) );
             return ok( json );
         } finally {
             uow.discard();

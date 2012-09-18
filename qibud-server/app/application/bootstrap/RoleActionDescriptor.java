@@ -14,6 +14,7 @@
 package application.bootstrap;
 
 import domain.roles.RoleAction;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 public class RoleActionDescriptor
 {
@@ -24,18 +25,20 @@ public class RoleActionDescriptor
 
     private final Class<? extends RoleAction> roleActionType;
 
-    public RoleActionDescriptor( String name, String description, Class<? extends RoleAction> roleActionType )
+    /* package */ RoleActionDescriptor( String name, String description, Class<? extends RoleAction> roleActionType )
     {
         this.name = name;
         this.description = description;
         this.roleActionType = roleActionType;
     }
 
+    @JsonProperty
     public String name()
     {
         return name;
     }
 
+    @JsonProperty
     public String description()
     {
         return description;

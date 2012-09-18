@@ -52,6 +52,11 @@ public class BudPackDescriptor
         return description;
     }
 
+    public RoleDescriptor role( String role )
+    {
+        return roles.get( role );
+    }
+
     public Map<String, RoleDescriptor> roles()
     {
         return Collections.unmodifiableMap( roles );

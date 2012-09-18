@@ -1,4 +1,4 @@
-@(bud: _root_.domain.buds.Bud, editForm: Form[_root_.forms.BudForm])
+@(budview: _root_.views.BudViewData, editForm: Form[_root_.forms.BudForm])
 
 @import tags._
 @import _root_.views.tools._
@@ -8,16 +8,16 @@
 }
 
 @sidebar = {
-    @show_bud_sidebar( bud )
+    @show_bud_sidebar( budview )
 }
 
-@main( bud.title().get(), "buds", scripts ) {
+@main( budview.bud.title().get(), "buds", scripts ) {
 
     @layout_fluid(right_sidebar = sidebar) {
 
-        @page_header( bud.title().get() )
+        @page_header( budview.bud.title().get() )
 
-        @helper.form( action = routes.Buds.saveBud( bud.identity().get() ) ) {
+        @helper.form( action = routes.Buds.saveBud( budview.bud.identity().get() ) ) {
             <fieldset>
                 @html5_text(
                     editForm("title"),
@@ -32,7 +32,7 @@
             </fieldset>
             <div class="form-actions">
                 <input id="save" type="submit" class="btn btn-primary btn-mini" value="Save" />
-                <a href="@routes.Buds.bud( bud.identity().get() )" class="btn btn-mini">Cancel</a>
+                <a href="@routes.Buds.bud( budview.bud.identity().get() )" class="btn btn-mini">Cancel</a>
             </div>
         }
         @markdown_editor( "content", "save" )

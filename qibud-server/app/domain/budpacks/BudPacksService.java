@@ -15,10 +15,14 @@ package domain.budpacks;
 
 import application.bootstrap.BudPackDescriptor;
 import application.bootstrap.RoleDescriptor;
+import domain.buds.Bud;
 import domain.roles.Role;
 import domain.roles.RoleAction;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import org.qi4j.api.entity.EntityBuilder;
 import org.qi4j.api.injection.scope.Structure;
@@ -40,6 +44,8 @@ public interface BudPacksService
     BudPackDescriptor budPack( String name );
 
     Collection<RoleDescriptor> roles();
+
+    Collection<RoleDescriptor> unusedRoles( Bud bud );
 
     Role newRoleInstance( String budPackName, String roleName );
 
@@ -94,6 +100,23 @@ public interface BudPacksService
         public BudPackDescriptor budPack( String name )
         {
             return budPacks.get( name );
+        }
+
+        @Override
+        public Collection<RoleDescriptor> unusedRoles( Bud bud )
+        {
+            List<RoleDescriptor> unused = new ArrayList<RoleDescriptor>( roles.values() );
+            for ( Role budRole : bud.roles() ) {
+                Iterator<RoleDescriptor> it = unused.iterator();
+                while ( it.hasNext() ) {
+                    RoleDescriptor availableRole = it.next();
+                    if ( availableRole.budPackName().equals( budRole.budPackName().get() )
+                         && availableRole.name().equals( budRole.roleName().get() ) ) {
+                        it.remove();
+                    }
+                }
+            }
+            return unused;
         }
 
         @Override

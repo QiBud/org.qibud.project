@@ -1,4 +1,4 @@
-@(bud: _root_.domain.buds.Bud, bud_roles: Collection[_root_.domain.roles.Role], available_roles: Collection[_root_.application.bootstrap.RoleDescriptor])
+@( budview: _root_.views.BudViewData )
 
 @import tags._
 @import _root_.views.tools._
@@ -7,7 +7,7 @@
     <script type="text/javascript">
     $(document).ready( function() {
         /*
-        roles.budRole( "@bud.identity().get()", "project", "project", function( data ) {
+        roles.budRole( "@budview.bud.identity().get()", "project", "person", function( data ) {
             console.log(data);
         } );
         */
@@ -16,82 +16,35 @@
 }
 
 @bud_content = {
-    @page_header( bud.title().get() )
+    @page_header( budview.bud.title().get() )
 
     <p>
-        <a href="@routes.Buds.budCreateForm( bud.identity().get() )" class="btn btn-mini btn-primary"><i class="icon-plus"></i> New</a>
-        <a href="@routes.Buds.budEditForm( bud.identity().get() )" class="btn btn-mini btn-primary"><i class="icon-edit"></i> Edit</a>
-        @if( bud.isRoot() ) {
+        <a href="@routes.Buds.budCreateForm( budview.bud.identity().get() )" class="btn btn-mini btn-primary"><i class="icon-plus"></i> New</a>
+        <a href="@routes.Buds.budEditForm( budview.bud.identity().get() )" class="btn btn-mini btn-primary"><i class="icon-edit"></i> Edit</a>
+        @if( budview.bud.isRoot() ) {
             <a class="btn btn-mini btn-danger disabled" title="You cannot delete the root Bud"><i class="icon-trash"></i> Delete</a>
         }
-        @if( ! bud.isRoot() ) {
-            <a href="@routes.Buds.deleteBud( bud.identity().get() )" class="btn btn-mini btn-danger">Delete</a>
+        @if( ! budview.bud.isRoot() ) {
+            <a href="@routes.Buds.deleteBud( budview.bud.identity().get() )" class="btn btn-mini btn-danger">Delete</a>
         }
     </p>
 
-    @markdown( bud.content().get() )
+    @markdown( budview.bud.content().get() )
 }
 
-@main( bud.title().get(), "buds", scripts ) {
+@main( budview.bud.title().get(), "buds", scripts ) {
 
-    @if( available_roles.isEmpty() ) {
-        <div class="container-fluid">
-            <div class="row-fluid">
-                <div class="span9">
-                    @bud_content
-                </div>
-                <div class="span3">
-                    <div class="well" style="min-height: 400px">
-                        @show_bud_sidebar( bud )
-                    </div>
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="span9">
+                @bud_content
+            </div>
+            <div class="span3">
+                <div class="well" style="min-height: 400px">
+                    @show_bud_sidebar( budview )
                 </div>
             </div>
         </div>
-    }
-
-    @if( ! available_roles.isEmpty() ) {
-        <div class="container-fluid">
-            <div class="row-fluid">
-                <div class="span6">
-                    @bud_content
-                </div>
-                <div class="span3">
-                    <div class="well" style="min-height: 400px">
-                        <h3>Roles</h3>
-                        @if( bud_roles.isEmpty() ) {
-                            <p>This Bud has no Role.</p>
-                        }
-                        @if( ! bud_roles.isEmpty() ) {
-                            <ul>
-                                @for( role <- bud_roles) {
-                                    <li>
-                                        <a href='@routes.Buds.deleteBudRole(bud.identity().get(), role.budPackName().get(), role.roleName().get() )' class="btn btn-mini">
-                                            <i class="icon-trash"></i> @role.budPackName()/@role.roleName()
-                                        </a>
-                                        <p><a href='@routes.Buds.budRole(bud.identity().get(), role.budPackName().get(), role.roleName().get() )' target="_blank">role state</a></p>
-                                    </li>
-                                }
-                            </ul>
-                        }
-                        <p>Add a role:</p>
-                        <ul>
-                            @for( available_role <- available_roles) {
-                                <li>
-                                    <a href='@routes.Buds.addBudRole(bud.identity().get(), available_role.budPackName(), available_role.name() )' class="btn btn-mini">
-                                        <i class="icon-plus"></i> @available_role.budPackName()/@available_role.name()
-                                    </a>
-                                </li>
-                            }
-                        </ul>
-                    </div>
-                </div>
-                <div class="span3">
-                    <div class="well" style="min-height: 400px">
-                        @show_bud_sidebar( bud )
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
+    </div>
 
 }

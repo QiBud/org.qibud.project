@@ -39,6 +39,7 @@ public class Application
     @Service
     public static BudsRepository budsRepository;
 
+    // Homepage
     @Usecase( "QiBud Server Index" )
     public static Result index()
     {
@@ -50,6 +51,7 @@ public class Application
         }
     }
 
+    // Javascript Routing
     public static Result javascriptRoutes()
     {
         response().setContentType( "text/javascript" );

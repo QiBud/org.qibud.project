@@ -17,6 +17,7 @@ import domain.roles.Role;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 public class RoleDescriptor
 {
@@ -44,16 +45,19 @@ public class RoleDescriptor
         return actions;
     }
 
+    @JsonProperty( "budpack-name" )
     public String budPackName()
     {
         return budPackName;
     }
 
+    @JsonProperty( "role-name" )
     public String name()
     {
         return name;
     }
 
+    @JsonProperty( "description" )
     public String description()
     {
         return description;
@@ -64,6 +68,7 @@ public class RoleDescriptor
         return roleType;
     }
 
+    @JsonProperty( "actions" )
     public Map<String, RoleActionDescriptor> actions()
     {
         return Collections.unmodifiableMap( actions );

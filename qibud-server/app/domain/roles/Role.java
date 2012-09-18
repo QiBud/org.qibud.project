@@ -14,8 +14,11 @@
 package domain.roles;
 
 import org.qi4j.api.entity.EntityComposite;
+import org.qi4j.api.injection.scope.This;
+import org.qi4j.api.mixin.Mixins;
 import org.qi4j.api.property.Property;
 
+@Mixins( Role.Mixin.class )
 public interface Role
         extends EntityComposite
 {
@@ -23,5 +26,36 @@ public interface Role
     Property<String> budPackName();
 
     Property<String> roleName();
+
+    /**
+     * @return budPackName() + "/" + roleName()
+     */
+    String codename();
+
+    /**
+     * @return budPackName() + "-" + roleName()
+     */
+    String idname();
+
+    abstract class Mixin
+            implements Role
+    {
+
+        @This
+        private Role role;
+
+        @Override
+        public String codename()
+        {
+            return role.budPackName() + "/" + role.roleName();
+        }
+
+        @Override
+        public String idname()
+        {
+            return role.budPackName() + "-" + role.roleName();
+        }
+
+    }
 
 }

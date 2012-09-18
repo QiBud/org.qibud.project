@@ -3,6 +3,25 @@
 @import tags._
 @import _root_.views.tools._
 
+@accordion_group( id: String, group_id: String, title: String, icon: String = "list" )( content: Html ) = {
+    <div class="accordion-group">
+        <div class="accordion-heading">
+            <a class="accordion-toggle" data-toggle="collapse" data-parent='#@id-accordion' href="#@id-@group_id"><i class="icon-@icon"></i> @title</a>
+        </div>
+        <div id="@id-@group_id" class="accordion-body collapse in">
+            <div class="accordion-inner">
+                @content
+            </div>
+        </div>
+    </div>
+}
+
+@accordion( id: String )( content: Html ) = {
+    <div class="accordion" id="@id-accordion">
+        @content
+    </div>
+}
+
 <h3 class="pull-left" style="padding-right: 1em; font-weight: bold">Qi</h3>
 <div class="progress progress-striped active" style="margin-top:0.4em">
     <div class="bar" style='width: 50%;'>@budview.bud.graphNode().getQi()</div>
@@ -13,27 +32,26 @@
     <p>This Bud has no Role.</p>
 }
 @if( ! budview.roles.isEmpty() ) {
-    <ul>
+    @accordion( "roles" ) {
         @for( role <- budview.roles ) {
-            <li>
-                <a href='@routes.Buds.deleteBudRole(budview.bud.identity().get(), role.budPackName().get(), role.roleName().get() )' class="btn btn-mini">
-                    <i class="icon-trash"></i> @role.budPackName()/@role.roleName()
-                </a>
-                <p><a href='@routes.Buds.budRole(budview.bud.identity().get(), role.budPackName().get(), role.roleName().get() )' target="_blank">role state</a></p>
-            </li>
+            @accordion_group( "roles", role.idname(), role.codename() ) {
+                <div id="@role.idname()-view-placeholder"></div>
+                <p style="text-align:right">
+                    <a href='@routes.Buds.deleteBudRole(budview.bud.identity().get(), role.budPackName().get(), role.roleName().get() )' class="btn btn-mini btn-danger">
+                        <i class="icon-trash"></i> Remove role
+                    </a>
+                </p>
+            }
         }
-    </ul>
+    }
 }
 <p>Add a role:</p>
-<ul>
+<select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+    <option value="">Select...</option>
     @for( unused_role <- budview.unused_roles) {
-        <li>
-            <a href='@routes.Buds.addBudRole(budview.bud.identity().get(), unused_role.budPackName(), unused_role.name() )' class="btn btn-mini">
-                <i class="icon-plus"></i> @unused_role.budPackName()/@unused_role.name()
-            </a>
-        </li>
+        <option value='@routes.Buds.addBudRole(budview.bud.identity().get(), unused_role.budPackName(), unused_role.name() )'>@unused_role.budPackName()/@unused_role.name()</option>
     }
-</ul>
+</select>
 
 
 @if( ! budview.bud.attachments().isEmpty() ) {
@@ -50,44 +68,30 @@
             </div>
         }
         @if( eachAttachment.contentType() != null ) {
-            <div class="accordion" id="attachment-@eachAttachment.id()-accordion">
-                <div class="accordion-group">
-                    <div class="accordion-heading">
-                        <a class="accordion-toggle" data-toggle="collapse" data-parent='#attachment-@eachAttachment.id()-accordion' href="#attachment-@eachAttachment.id()-preview"><i class="icon-eye-open"></i> Preview</a>
-                    </div>
-                    <div id="attachment-@eachAttachment.id()-preview" class="accordion-body collapse in">
-                        <div class="accordion-inner">
-                            @img( routes.Buds.attachment( budview.bud.identity().get(), eachAttachment.id() ).toString() )
-                        </div>
-                    </div>
-                </div>
-                <div class="accordion-group">
-                    <div class="accordion-heading">
-                        <a class="accordion-toggle" data-toggle="collapse" data-parent='#attachment-@eachAttachment.id()-accordion' href="#attachment-@eachAttachment.id()-metadata"><i class="icon-list"></i> Metadata</a>
-                    </div>
-                    <div id="attachment-@eachAttachment.id()-metadata" class="accordion-body collapse in">
-                        <div class="accordion-inner">
-                            <table class="table table-condensed table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Key</th>
-                                        <th>Value</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @for( meta <- eachAttachment.metadata() ) {
-                                        <tr>
-                                            <td>@meta._1</td>
-                                            <td>@meta._2</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                            <p style="text-align:right"><a href="@routes.Buds.attachmentMetadata( budview.bud.identity().get(), eachAttachment.id() )" target="_blank" class="btn btn-mini">As JSON</a></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            @accordion( "attachment-" + budview.bud.identity().get() ) {
+                @accordion_group( "attachment-" + budview.bud.identity().get(), "preview", "Preview", "eye-open" ) {
+                    @img( routes.Buds.attachment( budview.bud.identity().get(), eachAttachment.id() ).toString() )
+                }
+                @accordion_group( "attachment-" + budview.bud.identity().get(), "metadata", "Metadata" ) {
+                    <table class="table table-condensed table-striped">
+                        <thead>
+                            <tr>
+                                <th>Key</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for( meta <- eachAttachment.metadata() ) {
+                                <tr>
+                                    <td>@meta._1</td>
+                                    <td>@meta._2</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <p style="text-align:right"><a href="@routes.Buds.attachmentMetadata( budview.bud.identity().get(), eachAttachment.id() )" target="_blank" class="btn btn-mini">As JSON</a></p>
+                }
+            }
         }
     }
 }

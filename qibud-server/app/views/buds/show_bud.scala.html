@@ -3,6 +3,18 @@
 @import tags._
 @import _root_.views.tools._
 
+@scripts = {
+    <script type="text/javascript">
+    $(document).ready( function() {
+        /*
+        roles.budRole( "@bud.identity().get()", "project", "project", function( data ) {
+            console.log(data);
+        } );
+        */
+    } );
+    </script>
+}
+
 @bud_content = {
     @page_header( bud.title().get() )
 
@@ -20,7 +32,7 @@
     @markdown( bud.content().get() )
 }
 
-@main( bud.title().get(), "buds" ) {
+@main( bud.title().get(), "buds", scripts ) {
 
     @if( available_roles.isEmpty() ) {
         <div class="container-fluid">

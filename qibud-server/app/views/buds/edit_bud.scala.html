@@ -3,11 +3,15 @@
 @import tags._
 @import _root_.views.tools._
 
+@scripts = {
+    @markdown_editor( "content", "save" )
+}
+
 @sidebar = {
     @show_bud_sidebar( bud )
 }
 
-@main( bud.title().get(), "buds" ) {
+@main( bud.title().get(), "buds", scripts ) {
 
     @layout_fluid(right_sidebar = sidebar) {
 

@@ -3,7 +3,11 @@
 @import tags._
 @import _root_.views.tools._
 
-@main( parentBud.title().get(), "createbuds" ) {
+@scripts = {
+    @markdown_editor( "content", "save" )
+}
+
+@main( parentBud.title().get(), "createbuds", scripts ) {
 
     @layout_fluid() {
 
@@ -27,7 +31,6 @@
                 <a href="@routes.Buds.bud( parentBud.identity().get() )" class="btn btn-mini">Cancel</a>
             </div>
         }
-        @markdown_editor( "content", "save" )
     }
 
 }

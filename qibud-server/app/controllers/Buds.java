@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.jackson.node.ObjectNode;
 import org.json.JSONException;
 import org.neo4j.helpers.collection.Iterables;
 import org.qi4j.api.injection.scope.Service;
@@ -111,7 +113,7 @@ public class Buds
             } else {
                 BudForm newBud = filledForm.get();
                 Bud createdBud = budsFactory.createNewBud( parent, newBud.title, newBud.content );
-
+                flash( "success", newBud.title + " created" );
                 return redirect( routes.Buds.bud( createdBud.identity().get() ) );
             }
         } finally {
@@ -217,6 +219,7 @@ public class Buds
                 BudForm updated = filledForm.get();
                 bud.title().set( updated.title );
                 bud.content().set( updated.content );
+                flash( "success", updated.title + " saved" );
                 return redirect( routes.Buds.bud( bud.identity().get() ) );
             }
         } finally {
@@ -238,6 +241,7 @@ public class Buds
                             ? routes.Application.index()
                             : routes.Buds.bud( parent.identity().get() );
             // TODO Implement deleteBud();
+            flash( "success", bud.title().get() + " deleted" );
             return redirect( redirect );
         } finally {
             uow.complete();
@@ -268,6 +272,7 @@ public class Buds
                 newRole = budPacksService.newRoleInstance( pack, role );
             }
             bud.roles().add( newRole );
+            flash( "success", "Role " + pack + "/" + role + " added" );
             return redirect( routes.Buds.bud( bud.identity().get() ) );
         } finally {
             uow.complete();
@@ -293,6 +298,7 @@ public class Buds
                     break;
                 }
             }
+            flash( "success", "Role " + pack + "/" + role + " removed" );
             return redirect( routes.Buds.bud( bud.identity().get() ) );
         } finally {
             uow.complete();
@@ -313,7 +319,9 @@ public class Buds
             if ( roleEntity == null ) {
                 return notFound();
             }
-            return ok( roleEntity.toString() );
+            ObjectNode json = JsonNodeFactory.instance.objectNode();
+            json.put( "identity", bud.identity().get() );
+            return ok( json );
         } finally {
             uow.discard();
         }

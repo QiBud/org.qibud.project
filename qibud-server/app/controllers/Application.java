@@ -19,6 +19,7 @@ import org.qi4j.api.injection.scope.Structure;
 import org.qi4j.api.structure.Module;
 import org.qi4j.api.unitofwork.UnitOfWork;
 import org.qibud.eventstore.Usecase;
+import play.Routes;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
@@ -47,6 +48,17 @@ public class Application
         } finally {
             uow.discard();
         }
+    }
+
+    public static Result javascriptRoutes()
+    {
+        response().setContentType( "text/javascript" );
+        return ok( Routes.javascriptRouter(
+                "jsRoutes",
+                // Routes for Buds
+                controllers.routes.javascript.Buds.budRole(),
+                controllers.routes.javascript.Buds.saveBudRole(),
+                controllers.routes.javascript.Buds.invokeBudRoleAction() ) );
     }
 
 }

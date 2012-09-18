@@ -15,22 +15,19 @@
  */
 package test;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-
-import org.junit.Ignore;
-import org.junit.Test;
-
 import play.api.libs.ws.WS;
-import play.mvc.*;
-import play.test.*;
-import play.libs.F.*;
+import play.libs.F.Callback;
+import play.mvc.Result;
+import play.test.TestBrowser;
 
-import static play.test.Helpers.*;
 import static org.fest.assertions.Assertions.*;
+import static play.mvc.Http.Status.OK;
+import static play.test.Helpers.*;
 
 public class QiBudServerTest
 {
@@ -54,9 +51,11 @@ public class QiBudServerTest
     @Ignore( "There is no HTTP Context available from here." )
     public void testTemplate()
     {
-        Content html = views.html.index.render();
-        assertThat( contentType( html ) ).isEqualTo( "text/html" );
-        assertThat( contentAsString( html ) ).contains( "QiBud" );
+        /*
+         Content html = views.html.index.render();
+         assertThat( contentType( html ) ).isEqualTo( "text/html" );
+         assertThat( contentAsString( html ) ).contains( "QiBud" );
+         */
     }
 
     @Test

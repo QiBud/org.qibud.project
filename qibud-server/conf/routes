@@ -4,6 +4,7 @@
 
 # Home page
 GET     /                                               controllers.Application.index()
+GET     /assets/javascripts/routes                      controllers.Application.javascriptRoutes()
 
 GET     /buds                                           controllers.Buds.buds
 GET     /bud/:identity/new                              controllers.Buds.budCreateForm(identity: String)

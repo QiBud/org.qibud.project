@@ -24,9 +24,9 @@ GET     /bud/:identity/delete                           controllers.Buds.deleteB
 GET     /bud/:identity/:pack/:role/add                  controllers.Buds.addBudRole(identity: String, pack: String, role: String)
 GET     /bud/:identity/:pack/:role/delete               controllers.Buds.deleteBudRole(identity: String, pack: String, role: String)
 
-GET     /bud/:identity/:pack/:role                      controllers.Buds.budRole(identity: String, pack: String, role: String)
-POST    /bud/:identity/:pack/:role                      controllers.Buds.saveBudRole(identity: String, pack: String, role: String)
-POST    /bud/:identity/:pack/:role/:action              controllers.Buds.invokeBudRoleAction(identity: String, pack: String, role: String, action: String)
+GET     /bud/:identity/:pack/:role                      controllers.BudRoles.budRole(identity: String, pack: String, role: String)
+POST    /bud/:identity/:pack/:role                      controllers.BudRoles.saveBudRole(identity: String, pack: String, role: String)
+POST    /bud/:identity/:pack/:role/:action              controllers.BudRoles.invokeBudRoleAction(identity: String, pack: String, role: String, action: String)
 
 GET     /packs                                          controllers.BudPacks.packs
 GET     /pack/:pack                                     controllers.BudPacks.pack(pack: String)

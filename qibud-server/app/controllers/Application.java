@@ -58,9 +58,9 @@ public class Application
         return ok( Routes.javascriptRouter(
                 "jsRoutes",
                 // Routes for Buds
-                controllers.routes.javascript.Buds.budRole(),
-                controllers.routes.javascript.Buds.saveBudRole(),
-                controllers.routes.javascript.Buds.invokeBudRoleAction() ) );
+                controllers.routes.javascript.BudRoles.budRole(),
+                controllers.routes.javascript.BudRoles.saveBudRole(),
+                controllers.routes.javascript.BudRoles.invokeBudRoleAction() ) );
     }
 
 }

@@ -14,7 +14,6 @@
  */
 package controllers;
 
-import application.bootstrap.RoleDescriptor;
 import com.mongodb.DBObject;
 import com.mongodb.gridfs.GridFSDBFile;
 import domain.budpacks.BudPacksService;
@@ -24,14 +23,7 @@ import domain.buds.BudsRepository;
 import domain.roles.Role;
 import forms.BudForm;
 import infrastructure.attachmentsdb.AttachmentsDB;
-import java.io.IOException;
-import java.io.StringWriter;
 import java.util.Iterator;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.JsonNodeFactory;
-import org.codehaus.jackson.node.ObjectNode;
-import org.json.JSONException;
 import org.neo4j.helpers.collection.Iterables;
 import org.qi4j.api.injection.scope.Service;
 import org.qi4j.api.injection.scope.Structure;
@@ -296,45 +288,6 @@ public class Buds
         } finally {
             uow.complete();
         }
-    }
-
-    public static Result budRole( String identity, String pack, String role )
-            throws UnitOfWorkCompletionException, IOException, JSONException
-    {
-        UnitOfWork uow = module.newUnitOfWork();
-        try {
-            Bud bud = budsRepository.findByIdentity( identity );
-            if ( bud == null ) {
-                return notFound();
-            }
-            Role roleEntity = bud.role( pack, role );
-            if ( roleEntity == null ) {
-                return notFound();
-            }
-            // TODO Return JSON state and actions description
-            RoleDescriptor roleDescriptor = budPacksService.budPack( pack ).role( role );
-
-            ObjectMapper mapper = new ObjectMapper();
-            ObjectNode json = JsonNodeFactory.instance.objectNode();
-            json.put( "identity", bud.identity().get() );
-            StringWriter descriptorWriter = new StringWriter();
-            mapper.writeValue( descriptorWriter, roleDescriptor );
-            json.put( "descriptor", mapper.readValue( descriptorWriter.toString(), JsonNode.class ) );
-            return ok( json );
-        } finally {
-            uow.discard();
-        }
-    }
-
-    public static Result saveBudRole( String identity, String pack, String role )
-    {
-        // Save JSON state
-        return TODO;
-    }
-
-    public static Result invokeBudRoleAction( String identity, String pack, String role, String action )
-    {
-        return TODO;
     }
 
 }

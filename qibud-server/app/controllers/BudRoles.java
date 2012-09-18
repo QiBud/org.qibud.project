@@ -16,13 +16,10 @@ package controllers;
 import application.bootstrap.RoleDescriptor;
 import domain.budpacks.BudPacksService;
 import domain.buds.Bud;
-import domain.buds.BudsFactory;
 import domain.buds.BudsRepository;
 import domain.roles.Role;
-import infrastructure.attachmentsdb.AttachmentsDB;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.math.BigDecimal;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.JsonNodeFactory;
@@ -32,7 +29,6 @@ import org.qi4j.api.association.AssociationStateDescriptor;
 import org.qi4j.api.common.QualifiedName;
 import org.qi4j.api.injection.scope.Service;
 import org.qi4j.api.injection.scope.Structure;
-import org.qi4j.api.json.JSONWriterSerializer;
 import org.qi4j.api.property.PropertyDescriptor;
 import org.qi4j.api.structure.Module;
 import org.qi4j.api.unitofwork.UnitOfWork;
@@ -98,12 +94,13 @@ public class BudRoles
             }
 
             jsonState.put( "associations", JsonNodeFactory.instance.arrayNode() );
-            
+
             jsonState.put( "many-associations", JsonNodeFactory.instance.objectNode() );
 
             json.put( "state", jsonState );
 
             return ok( json );
+
         } finally {
             uow.discard();
         }

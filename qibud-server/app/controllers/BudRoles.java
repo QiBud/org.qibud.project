@@ -22,12 +22,10 @@ import domain.roles.Role;
 import domain.roles.RoleAction;
 import domain.roles.RoleActionException;
 import java.io.IOException;
-import java.io.StringWriter;
 import org.codehaus.jackson.node.ObjectNode;
 import org.json.JSONException;
 import org.qi4j.api.injection.scope.Service;
 import org.qi4j.api.injection.scope.Structure;
-import org.qi4j.api.json.JSONWriterSerializer;
 import org.qi4j.api.structure.Module;
 import org.qi4j.api.unitofwork.UnitOfWork;
 import org.qi4j.api.unitofwork.UnitOfWorkCompletionException;
@@ -72,12 +70,8 @@ public class BudRoles
             // Describe Role
             ObjectNode json = Json.newObject();
             json.put( "bud-identity", bud.identity().get() );
-
             json.put( "descriptor", Json.toJson( roleDescriptor ) );
-
-            StringWriter stateWriter = new StringWriter();
-            new JSONWriterSerializer( stateWriter ).serialize( roleValue );
-            json.put( "state", Json.parse( stateWriter.toString() ) );
+            json.put( "state", roleValue.jsonRoleState() );
 
             return ok( json );
 

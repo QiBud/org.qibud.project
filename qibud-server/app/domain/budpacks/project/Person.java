@@ -21,17 +21,12 @@ import domain.roles.BudRole;
 import domain.roles.Role;
 import domain.roles.RoleActionException;
 import org.codehaus.jackson.node.ObjectNode;
-import org.qi4j.api.common.Optional;
-import org.qi4j.api.property.Property;
 
 @BudRole( name = "person", description = "Person Role" )
 @BudActions( Person.Say.class )
 public interface Person
         extends Role
 {
-
-    @Optional
-    Property<String> fullName();
 
     @BudAction( name = "say" )
     class Say
@@ -44,7 +39,7 @@ public interface Person
         {
             String message = param.get( "message" ).asText();
             ObjectNode result = nodeFactory.objectNode();
-            result.put( "message", role.fullName().get() + " say " + message );
+            result.put( "message", role.roleState().get() + " say " + message );
             return result;
         }
 

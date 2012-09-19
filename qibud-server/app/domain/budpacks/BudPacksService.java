@@ -32,6 +32,7 @@ import org.qi4j.api.service.ServiceComposite;
 import org.qi4j.api.service.ServiceDescriptor;
 import org.qi4j.api.structure.Module;
 import org.qi4j.api.value.ValueBuilder;
+import play.libs.Json;
 
 @Mixins( BudPacksService.Mixin.class )
 public interface BudPacksService
@@ -126,6 +127,7 @@ public interface BudPacksService
             Role role = roleBuilder.prototype();
             role.budPackName().set( roleDescriptor.budPackName() );
             role.roleName().set( roleDescriptor.name() );
+            role.roleState().set( Json.stringify( Json.newObject() ) );
             return roleBuilder.newInstance();
         }
 

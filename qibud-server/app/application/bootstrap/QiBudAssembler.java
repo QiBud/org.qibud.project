@@ -123,13 +123,14 @@ public class QiBudAssembler
                 }
                 if ( configKey.endsWith( ".package" ) ) {
 
+                    // Roles
                     String budPackPackage = Play.application().configuration().getString( configKey );
                     Class<?>[] candidates = ClassFinder.getClasses( budPackPackage, Play.application().classloader() );
                     for ( Class<?> candidate : candidates ) {
 
                         if ( Role.class.isAssignableFrom( candidate ) ) {
 
-                            // Roles
+                            // Role
                             Class<? extends Role> roleType = ( Class<? extends Role> ) candidate;
                             String roleName = roleType.getCanonicalName();
                             String roleDescription = roleName;
@@ -142,6 +143,7 @@ public class QiBudAssembler
                                                   : roleAnnotation.description();
 
                             }
+
                             RoleDescriptor role = new RoleDescriptor( budPackName, roleName, roleDescription, roleType );
                             if ( roleType.isAnnotationPresent( BudActions.class ) ) {
 
@@ -189,7 +191,8 @@ public class QiBudAssembler
     {
         for ( Method method : actionType.getDeclaredMethods() ) {
             if ( "invokeAction".equals( method.getName() )
-                 && method.getParameterTypes().length == 3 ) {
+                 && method.getParameterTypes().length == 3
+                 && !method.isSynthetic() ) {
                 return method;
             }
         }

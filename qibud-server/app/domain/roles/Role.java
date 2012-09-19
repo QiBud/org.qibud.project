@@ -13,10 +13,12 @@
  */
 package domain.roles;
 
+import org.codehaus.jackson.JsonNode;
 import org.qi4j.api.injection.scope.This;
 import org.qi4j.api.mixin.Mixins;
 import org.qi4j.api.property.Property;
 import org.qi4j.api.value.ValueComposite;
+import play.libs.Json;
 
 @Mixins( Role.Mixin.class )
 public interface Role
@@ -26,6 +28,8 @@ public interface Role
     Property<String> budPackName();
 
     Property<String> roleName();
+
+    Property<String> roleState();
 
     boolean is( String pack, String role );
 
@@ -38,6 +42,8 @@ public interface Role
      * @return budPackName() + "-" + roleName()
      */
     String idname();
+
+    JsonNode jsonRoleState();
 
     abstract class Mixin
             implements Role
@@ -62,6 +68,12 @@ public interface Role
         public String idname()
         {
             return roleValue.budPackName().get() + "-" + roleValue.roleName().get();
+        }
+
+        @Override
+        public JsonNode jsonRoleState()
+        {
+            return Json.parse( roleValue.roleState().get() );
         }
 
     }

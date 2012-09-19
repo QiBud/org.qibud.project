@@ -14,11 +14,13 @@
 package domain.budpacks.project;
 
 import domain.buds.Bud;
+import domain.roles.AbstractRoleAction;
 import domain.roles.BudAction;
 import domain.roles.BudActions;
 import domain.roles.BudRole;
 import domain.roles.Role;
-import domain.roles.RoleAction;
+import domain.roles.RoleActionException;
+import org.codehaus.jackson.node.ObjectNode;
 import org.qi4j.api.common.Optional;
 import org.qi4j.api.property.Property;
 
@@ -33,14 +35,17 @@ public interface Person
 
     @BudAction( name = "say" )
     class Say
-            implements RoleAction<Person, String, String, Throwable>
+            extends AbstractRoleAction<Person>
     {
 
         @Override
-        public String invokeAction( Bud bud, Person role, String message )
-                throws Throwable
+        public ObjectNode invokeAction( Bud bud, Person role, ObjectNode param )
+                throws RoleActionException
         {
-            return role.fullName().get() + " say " + message;
+            String message = param.get( "message" ).asText();
+            ObjectNode result = nodeFactory.objectNode();
+            result.put( "message", role.fullName().get() + " say " + message );
+            return result;
         }
 
     }

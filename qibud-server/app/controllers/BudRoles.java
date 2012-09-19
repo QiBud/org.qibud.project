@@ -13,9 +13,9 @@
  */
 package controllers;
 
+import application.bootstrap.RoleActionDescriptor;
 import application.bootstrap.RoleDescriptor;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
@@ -23,6 +23,8 @@ import domain.budpacks.BudPacksService;
 import domain.buds.Bud;
 import domain.buds.BudsRepository;
 import domain.roles.Role;
+import domain.roles.RoleAction;
+import domain.roles.RoleActionException;
 import java.io.IOException;
 import java.io.StringWriter;
 import org.codehaus.jackson.JsonNode;
@@ -67,16 +69,18 @@ public class BudRoles
     {
         UnitOfWork uow = module.newUnitOfWork();
         try {
+
             Bud bud = budsRepository.findByIdentity( identity );
             if ( bud == null ) {
-                return notFound();
+                return notFound( "This Bud does not exists." );
             }
             Role roleEntity = bud.role( pack, role );
             if ( roleEntity == null ) {
-                return notFound();
+                return notFound( "This Bud has no '" + pack + "/" + role + "' role" );
             }
-            // TODO Return JSON state and actions description
             RoleDescriptor roleDescriptor = budPacksService.budPack( pack ).role( role );
+
+            // Build JSON Response
 
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode json = JsonNodeFactory.instance.objectNode();
@@ -86,12 +90,9 @@ public class BudRoles
             mapper.writeValue( descriptorWriter, roleDescriptor );
             json.put( "descriptor", mapper.readValue( descriptorWriter.toString(), JsonNode.class ) );
 
-            DB mongoDb = mongoEntityStore.dbInstanceUsed();
-            mongoDb.requestStart();
-            DBCollection collection = mongoDb.getCollection( mongoEntityStore.collectionUsed() );
+            DBCollection collection = mongoEntityStore.dbInstanceUsed().getCollection( mongoEntityStore.collectionUsed() );
             DBObject roleState = collection.findOne( new BasicDBObject( "identity", roleEntity.identity().get() ) );
             String jsonRoleState = JSON.serialize( roleState );
-            mongoDb.requestDone();
             json.put( "state", mapper.readTree( new JSONObject( jsonRoleState ).getJSONObject( "state" ).toString() ) );
 
             return ok( json );
@@ -108,8 +109,34 @@ public class BudRoles
     }
 
     public static Result invokeBudRoleAction( String identity, String pack, String role, String action )
+            throws UnitOfWorkCompletionException, InstantiationException, IllegalAccessException, RoleActionException, IOException
     {
-        return TODO;
+        UnitOfWork uow = module.newUnitOfWork();
+        try {
+
+            Bud bud = budsRepository.findByIdentity( identity );
+            if ( bud == null ) {
+                return notFound( "This Bud does not exists." );
+            }
+            Role roleEntity = bud.role( pack, role );
+            if ( roleEntity == null ) {
+                return notFound( "This Bud has no '" + pack + "/" + role + "' role" );
+            }
+            RoleActionDescriptor actionDescriptor = budPacksService.budPack( pack ).role( role ).action( action );
+            if ( actionDescriptor == null ) {
+                return notFound( "This Bud Role Action does not exists" );
+            }
+
+            // Call action
+            ObjectNode actionParam = ( ObjectNode ) new ObjectMapper().readTree( ( String ) ctx().args.get( "param" ) );
+            RoleAction roleAction = actionDescriptor.roleActionType().newInstance();
+            ObjectNode actionResult = roleAction.invokeAction( bud, roleEntity, actionParam );
+
+            return ok( actionResult );
+
+        } finally {
+            uow.complete();
+        }
     }
 
 }

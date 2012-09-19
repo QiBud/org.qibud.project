@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import org.codeartisans.java.toolbox.Strings;
+import org.codehaus.jackson.node.ObjectNode;
 import org.qi4j.bootstrap.ApplicationAssembler;
 import org.qi4j.bootstrap.ApplicationAssembly;
 import org.qi4j.bootstrap.ApplicationAssemblyFactory;
@@ -158,17 +159,8 @@ public class QiBudAssembler
                                                             : actionAnnotation.description();
 
                                     }
-                                    Method actionMethod = findActionMethod( actionType );
-                                    Class<?> returnType = actionMethod.getReturnType();
-                                    Class<?> parameterType = actionMethod.getParameterTypes()[2];
-
                                     RoleActionDescriptor action = new RoleActionDescriptor( actionName, actionDescription, actionType,
-                                                                                            returnType, parameterType );
-                                    System.out.println( "ACTION: " + action );
-                                    // QUID ? Param type ? Return type ?
-                                    System.out.println( "ACTION METHOD: " + actionMethod );
-
-
+                                                                                            ObjectNode.class, ObjectNode.class );
                                     role.mutableActions().put( actionName, action );
                                 }
 

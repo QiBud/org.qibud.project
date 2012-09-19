@@ -13,15 +13,15 @@
  */
 package domain.roles;
 
-import domain.buds.Bud;
-import org.codehaus.jackson.node.ObjectNode;
-import org.qi4j.api.composite.TransientComposite;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.JsonNodeFactory;
 
-public interface RoleAction<RoleType extends Role>
-        extends TransientComposite
+public abstract class AbstractRoleAction<RoleType extends Role>
+        implements RoleAction<RoleType>
 {
 
-    ObjectNode invokeAction( Bud bud, RoleType role, ObjectNode param )
-            throws RoleActionException;
+    protected final ObjectMapper mapper = new ObjectMapper();
+
+    protected final JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
 
 }

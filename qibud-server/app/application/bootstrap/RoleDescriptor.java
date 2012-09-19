@@ -74,6 +74,11 @@ public class RoleDescriptor
         return Collections.unmodifiableMap( actions );
     }
 
+    public RoleActionDescriptor action( String action )
+    {
+        return actions.get( action );
+    }
+
     @Override
     public String toString()
     {

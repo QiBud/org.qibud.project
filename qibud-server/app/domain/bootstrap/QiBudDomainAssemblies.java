@@ -16,12 +16,12 @@ package domain.bootstrap;
 import application.bootstrap.BudPackDescriptor;
 import application.bootstrap.RoleActionDescriptor;
 import application.bootstrap.RoleDescriptor;
+import domain.budpacks.BudPacksService;
 import domain.buds.Bud;
 import domain.buds.BudsFactory;
 import domain.buds.BudsRepository;
 import domain.roles.Role;
 import domain.roles.RoleAction;
-import domain.budpacks.BudPacksService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,6 +50,8 @@ public final class QiBudDomainAssemblies
             {
                 ma.entities( Bud.class ).
                         visibleIn( application );
+                ma.values( Role.class ).
+                        visibleIn( application );
 
                 List<Class<? extends Role>> roleTypes = new ArrayList<Class<? extends Role>>();
                 List<Class<? extends RoleAction>> roleActionTypes = new ArrayList<Class<? extends RoleAction>>();
@@ -64,7 +66,7 @@ public final class QiBudDomainAssemblies
 
                 if ( !roleTypes.isEmpty() ) {
                     Class<?>[] rolesArray = roleTypes.toArray( new Class<?>[ roleTypes.size() ] );
-                    ma.entities( rolesArray ).
+                    ma.values( rolesArray ).
                             visibleIn( application );
                     LOGGER.info( "Assembled {} BudRoles: {}", rolesArray.length, Arrays.toString( rolesArray ) );
                 }

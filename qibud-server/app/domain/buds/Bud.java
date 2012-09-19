@@ -24,10 +24,8 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.neo4j.graphdb.Node;
 import org.qi4j.api.association.Association;
-import org.qi4j.api.association.ManyAssociation;
 import org.qi4j.api.common.Optional;
 import org.qi4j.api.common.UseDefaults;
-import org.qi4j.api.entity.Aggregated;
 import org.qi4j.api.entity.EntityComposite;
 import org.qi4j.api.injection.scope.Service;
 import org.qi4j.api.injection.scope.This;
@@ -60,11 +58,11 @@ public interface Bud
 
     boolean isRoot();
 
-    @Aggregated
-    ManyAssociation<Role> roles();
+    @UseDefaults
+    Property<List<Role>> roles();
 
-    @Aggregated
-    ManyAssociation<Role> passivatedRoles();
+    @UseDefaults
+    Property<List<Role>> passivatedRoles();
 
     Role role( String pack, String role );
 
@@ -127,7 +125,7 @@ public interface Bud
         @Override
         public Role role( String budPackName, String roleName )
         {
-            for ( Role role : bud.roles() ) {
+            for ( Role role : bud.roles().get() ) {
                 if ( role.budPackName().get().equals( budPackName )
                      && role.roleName().get().equals( roleName ) ) {
                     return role;

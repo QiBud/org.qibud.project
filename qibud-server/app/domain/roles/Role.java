@@ -13,19 +13,21 @@
  */
 package domain.roles;
 
-import org.qi4j.api.entity.EntityComposite;
 import org.qi4j.api.injection.scope.This;
 import org.qi4j.api.mixin.Mixins;
 import org.qi4j.api.property.Property;
+import org.qi4j.api.value.ValueComposite;
 
 @Mixins( Role.Mixin.class )
 public interface Role
-        extends EntityComposite
+        extends ValueComposite
 {
 
     Property<String> budPackName();
 
     Property<String> roleName();
+
+    boolean is( String pack, String role );
 
     /**
      * @return budPackName() + "/" + roleName()
@@ -42,18 +44,24 @@ public interface Role
     {
 
         @This
-        private Role role;
+        private Role roleValue;
+
+        @Override
+        public boolean is( String pack, String role )
+        {
+            return roleValue.budPackName().get().equals( pack ) && roleValue.roleName().get().equals( role );
+        }
 
         @Override
         public String codename()
         {
-            return role.budPackName() + "/" + role.roleName();
+            return roleValue.budPackName().get() + "/" + roleValue.roleName().get();
         }
 
         @Override
         public String idname()
         {
-            return role.budPackName() + "-" + role.roleName();
+            return roleValue.budPackName().get() + "-" + roleValue.roleName().get();
         }
 
     }

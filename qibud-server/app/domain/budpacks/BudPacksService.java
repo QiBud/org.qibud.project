@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.qi4j.api.entity.EntityBuilder;
 import org.qi4j.api.injection.scope.Structure;
 import org.qi4j.api.injection.scope.Uses;
 import org.qi4j.api.mixin.Mixins;
@@ -32,7 +31,7 @@ import org.qi4j.api.service.ServiceActivation;
 import org.qi4j.api.service.ServiceComposite;
 import org.qi4j.api.service.ServiceDescriptor;
 import org.qi4j.api.structure.Module;
-import org.qi4j.api.unitofwork.UnitOfWork;
+import org.qi4j.api.value.ValueBuilder;
 
 @Mixins( BudPacksService.Mixin.class )
 public interface BudPacksService
@@ -106,7 +105,7 @@ public interface BudPacksService
         public Collection<RoleDescriptor> unusedRoles( Bud bud )
         {
             List<RoleDescriptor> unused = new ArrayList<RoleDescriptor>( roles.values() );
-            for ( Role budRole : bud.roles() ) {
+            for ( Role budRole : bud.roles().get() ) {
                 Iterator<RoleDescriptor> it = unused.iterator();
                 while ( it.hasNext() ) {
                     RoleDescriptor availableRole = it.next();
@@ -123,12 +122,11 @@ public interface BudPacksService
         public Role newRoleInstance( String budPackName, String roleName )
         {
             RoleDescriptor roleDescriptor = budPacks.get( budPackName ).roles().get( roleName );
-            UnitOfWork uow = module.currentUnitOfWork();
-            EntityBuilder<? extends Role> builder = uow.newEntityBuilder( roleDescriptor.roleType() );
-            Role role = builder.instance();
+            ValueBuilder<? extends Role> roleBuilder = module.newValueBuilder( roleDescriptor.roleType() );
+            Role role = roleBuilder.prototype();
             role.budPackName().set( roleDescriptor.budPackName() );
             role.roleName().set( roleDescriptor.name() );
-            return builder.newInstance();
+            return roleBuilder.newInstance();
         }
 
         @Override

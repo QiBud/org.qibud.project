@@ -15,10 +15,6 @@ package controllers;
 
 import application.bootstrap.RoleActionDescriptor;
 import application.bootstrap.RoleDescriptor;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 import domain.budpacks.BudPacksService;
 import domain.buds.Bud;
 import domain.buds.BudsRepository;
@@ -32,9 +28,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.qi4j.api.injection.scope.Service;
 import org.qi4j.api.injection.scope.Structure;
+import org.qi4j.api.json.JSONWriterSerializer;
 import org.qi4j.api.structure.Module;
 import org.qi4j.api.unitofwork.UnitOfWork;
 import org.qi4j.api.unitofwork.UnitOfWorkCompletionException;
@@ -74,8 +70,8 @@ public class BudRoles
             if ( bud == null ) {
                 return notFound( "This Bud does not exists." );
             }
-            Role roleEntity = bud.role( pack, role );
-            if ( roleEntity == null ) {
+            Role roleValue = bud.role( pack, role );
+            if ( roleValue == null ) {
                 return notFound( "This Bud has no '" + pack + "/" + role + "' role" );
             }
             RoleDescriptor roleDescriptor = budPacksService.budPack( pack ).role( role );
@@ -90,10 +86,9 @@ public class BudRoles
             mapper.writeValue( descriptorWriter, roleDescriptor );
             json.put( "descriptor", mapper.readValue( descriptorWriter.toString(), JsonNode.class ) );
 
-            DBCollection collection = mongoEntityStore.dbInstanceUsed().getCollection( mongoEntityStore.collectionUsed() );
-            DBObject roleState = collection.findOne( new BasicDBObject( "identity", roleEntity.identity().get() ) );
-            String jsonRoleState = JSON.serialize( roleState );
-            json.put( "state", mapper.readTree( new JSONObject( jsonRoleState ).getJSONObject( "state" ).toString() ) );
+            StringWriter stateWriter = new StringWriter();
+            new JSONWriterSerializer( stateWriter ).serialize( roleValue );
+            json.put( "state", mapper.readTree( stateWriter.toString() ) );
 
             return ok( json );
 

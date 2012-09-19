@@ -20,6 +20,7 @@ import domain.roles.Role;
 import infrastructure.attachmentsdb.AttachmentsDB;
 import infrastructure.graphdb.GraphDB;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import org.joda.time.DateTime;
 import org.neo4j.graphdb.Node;
@@ -32,7 +33,6 @@ import org.qi4j.api.injection.scope.This;
 import org.qi4j.api.mixin.Mixins;
 import org.qi4j.api.property.Immutable;
 import org.qi4j.api.property.Property;
-import org.qi4j.api.value.ValueComposite;
 
 @Mixins( Bud.Mixin.class )
 public interface Bud
@@ -66,7 +66,11 @@ public interface Bud
 
     Role role( String pack, String role );
 
-    Class<? extends ValueComposite> roleActionParamsType( String roleName, String actionName );
+    void addRole( String pack, String role );
+
+    void removeRole( String pack, String role );
+
+    void updateRole( Role role );
 
     abstract class Mixin
             implements Bud
@@ -79,7 +83,7 @@ public interface Bud
         private AttachmentsDB attachmentsDB;
 
         @Service
-        private BudPacksService roleRegistry;
+        private BudPacksService budPacksService;
 
         @This
         private Bud bud;
@@ -135,9 +139,63 @@ public interface Bud
         }
 
         @Override
-        public Class<? extends ValueComposite> roleActionParamsType( String roleName, String actionName )
+        public void addRole( String pack, String role )
         {
-            return null;
+            Role newRole = null;
+            List<Role> passivatedRoles = bud.passivatedRoles().get();
+            Iterator<Role> passivatedIterator = passivatedRoles.iterator();
+            while ( passivatedIterator.hasNext() ) {
+                Role unusedRole = passivatedIterator.next();
+                if ( unusedRole.is( pack, role ) ) {
+                    passivatedIterator.remove();
+                    newRole = unusedRole;
+                    bud.passivatedRoles().set( passivatedRoles );
+                    break;
+                }
+            }
+
+            if ( newRole == null ) {
+                newRole = budPacksService.newRoleInstance( pack, role );
+            }
+
+            List<Role> roles = bud.roles().get();
+            roles.add( newRole );
+            bud.roles().set( roles );
+        }
+
+        @Override
+        public void removeRole( String pack, String role )
+        {
+            List<Role> roles = bud.roles().get();
+            Iterator<Role> rolesIterator = roles.iterator();
+            while ( rolesIterator.hasNext() ) {
+                Role candidate = rolesIterator.next();
+                if ( candidate.budPackName().get().equals( pack )
+                     && candidate.roleName().get().equals( role ) ) {
+                    rolesIterator.remove();
+                    List<Role> passivatedRoles = bud.passivatedRoles().get();
+                    passivatedRoles.add( candidate );
+                    bud.passivatedRoles().set( passivatedRoles );
+                    break;
+                }
+            }
+        }
+
+        @Override
+        public void updateRole( Role role )
+        {
+            List<Role> roles = bud.roles().get();
+            Iterator<Role> rolesIterator = roles.iterator();
+            while ( rolesIterator.hasNext() ) {
+                Role candidate = rolesIterator.next();
+                if ( candidate.budPackName().get().equals( role.budPackName().get() )
+                     && candidate.roleName().get().equals( role.roleName().get() ) ) {
+                    rolesIterator.remove();
+                    break;
+                }
+            }
+            roles.add( role );
+            bud.roles().set( roles );
         }
 
     }

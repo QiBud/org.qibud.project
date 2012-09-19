@@ -20,11 +20,8 @@ import domain.budpacks.BudPacksService;
 import domain.buds.Bud;
 import domain.buds.BudsFactory;
 import domain.buds.BudsRepository;
-import domain.roles.Role;
 import forms.BudForm;
 import infrastructure.attachmentsdb.AttachmentsDB;
-import java.util.Iterator;
-import java.util.List;
 import org.neo4j.helpers.collection.Iterables;
 import org.qi4j.api.injection.scope.Service;
 import org.qi4j.api.injection.scope.Structure;
@@ -99,6 +96,8 @@ public class Buds
         try {
             Bud parent = budsRepository.findByIdentity( identity );
             if ( parent == null ) {
+                uow.discard();
+                uow = null;
                 return notFound();
             }
             Form<BudForm> filledForm = budForm.bindFromRequest();
@@ -112,7 +111,9 @@ public class Buds
                 return redirect( routes.Buds.bud( createdBud.identity().get() ) );
             }
         } finally {
-            uow.complete();
+            if ( uow != null ) {
+                uow.complete();
+            }
         }
     }
 
@@ -193,6 +194,8 @@ public class Buds
         try {
             Bud bud = budsRepository.findByIdentity( identity );
             if ( bud == null ) {
+                uow.discard();
+                uow = null;
                 return notFound();
             }
 
@@ -209,7 +212,9 @@ public class Buds
                 return redirect( routes.Buds.bud( bud.identity().get() ) );
             }
         } finally {
-            uow.complete();
+            if ( uow != null ) {
+                uow.complete();
+            }
         }
     }
 
@@ -220,6 +225,8 @@ public class Buds
         try {
             Bud bud = budsRepository.findByIdentity( identity );
             if ( bud == null ) {
+                uow.discard();
+                uow = null;
                 return notFound();
             }
             Bud parent = bud.parent().get();
@@ -230,7 +237,9 @@ public class Buds
             flash( "success", bud.title().get() + " deleted" );
             return redirect( redirect );
         } finally {
-            uow.complete();
+            if ( uow != null ) {
+                uow.complete();
+            }
         }
     }
 
@@ -242,34 +251,20 @@ public class Buds
 
             Bud bud = budsRepository.findByIdentity( identity );
             if ( bud == null ) {
+                uow.discard();
+                uow = null;
                 return notFound();
             }
 
-            Role newRole = null;
-            List<Role> passivatedRoles = bud.passivatedRoles().get();
-            Iterator<Role> passivatedIterator = passivatedRoles.iterator();
-            while ( passivatedIterator.hasNext() ) {
-                Role unusedRole = passivatedIterator.next();
-                if ( unusedRole.is( pack, role ) ) {
-                    passivatedIterator.remove();
-                    newRole = unusedRole;
-                    bud.passivatedRoles().set( passivatedRoles );
-                    break;
-                }
-            }
-
-            if ( newRole == null ) {
-                newRole = budPacksService.newRoleInstance( pack, role );
-            }
-
-            List<Role> roles = bud.roles().get();
-            roles.add( newRole );
-            bud.roles().set( roles );
+            bud.addRole( pack, role );
 
             flash( "success", "Role " + pack + "/" + role + " added" );
             return redirect( routes.Buds.bud( identity ) );
+
         } finally {
-            uow.complete();
+            if ( uow != null ) {
+                uow.complete();
+            }
         }
     }
 
@@ -280,25 +275,19 @@ public class Buds
         try {
             Bud bud = budsRepository.findByIdentity( identity );
             if ( bud == null ) {
+                uow.discard();
+                uow = null;
                 return notFound();
             }
-            List<Role> roles = bud.roles().get();
-            Iterator<Role> rolesIterator = roles.iterator();
-            while ( rolesIterator.hasNext() ) {
-                Role candidate = rolesIterator.next();
-                if ( candidate.budPackName().get().equals( pack )
-                     && candidate.roleName().get().equals( role ) ) {
-                    rolesIterator.remove();
-                    List<Role> passivatedRoles = bud.passivatedRoles().get();
-                    passivatedRoles.add( candidate );
-                    bud.passivatedRoles().set( passivatedRoles );
-                    break;
-                }
-            }
+
+            bud.removeRole( pack, role );
+
             flash( "success", "Role " + pack + "/" + role + " removed" );
             return redirect( routes.Buds.bud( bud.identity().get() ) );
         } finally {
-            uow.complete();
+            if ( uow != null ) {
+                uow.complete();
+            }
         }
     }
 

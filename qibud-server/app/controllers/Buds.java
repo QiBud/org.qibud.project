@@ -40,12 +40,12 @@ import views.html.buds.create_bud;
 import views.html.buds.edit_bud;
 import views.html.buds.show_bud;
 
-@With( RootBudContext.class )
+@With( { RootBudContext.class, AuthContext.class } )
 public class Buds
         extends Controller
 {
 
-    final static Form<BudForm> budForm = form( BudForm.class );
+    static final Form<BudForm> budForm = form( BudForm.class );
 
     @Structure
     public static Module module;
@@ -73,8 +73,6 @@ public class Buds
         }
     }
 
-    static final Form<BudForm> budEntityForm = form( BudForm.class );
-
     public static Result budCreateForm( String identity )
     {
         UnitOfWork uow = module.newUnitOfWork();
@@ -83,7 +81,7 @@ public class Buds
             if ( parent == null ) {
                 return notFound();
             }
-            return ok( create_bud.render( parent, form( BudForm.class ) ) );
+            return ok( create_bud.render( parent, budForm ) );
         } finally {
             uow.discard();
         }

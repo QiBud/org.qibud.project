@@ -28,7 +28,7 @@ import views.html.index;
 /**
  * Web front controller.
  */
-@With( RootBudContext.class )
+@With( { RootBudContext.class, AuthContext.class } )
 public class Application
         extends Controller
 {

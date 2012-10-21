@@ -50,6 +50,11 @@
             <artifactId>org.qi4j.extension.indexing-rdf</artifactId>
             <version>${qi4j.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.qi4j.library</groupId>
+            <artifactId>org.qi4j.library.shiro-core</artifactId>
+            <version>${qi4j.version}</version>
+        </dependency>
 
         <!-- Views -->
         <dependency>

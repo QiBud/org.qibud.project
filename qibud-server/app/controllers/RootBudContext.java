@@ -22,17 +22,19 @@ public class RootBudContext
         extends Action.Simple
 {
 
+    private static final String ROOT_BUD_IDENTITY_KEY = "bud:root:identity";
+
     @Override
     public Result call( Http.Context ctx )
             throws Throwable
     {
-        ctx.args.put( "bud:root:identity", Bud.ROOT_BUD_IDENTITY );
+        ctx.args.put( ROOT_BUD_IDENTITY_KEY, Bud.ROOT_BUD_IDENTITY );
         return delegate.call( ctx );
     }
 
     public static String rootBudIdentity()
     {
-        return ( String ) Http.Context.current().args.get( "bud:root:identity" );
+        return ( String ) Http.Context.current().args.get( ROOT_BUD_IDENTITY_KEY );
     }
 
 }

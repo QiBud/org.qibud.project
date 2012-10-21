@@ -28,7 +28,7 @@ import play.mvc.With;
 import views.html.budpacks.all_budpacks;
 import views.html.budpacks.show_budpack;
 
-@With( RootBudContext.class )
+@With( { RootBudContext.class, AuthContext.class } )
 public class BudPacks
         extends Controller
 {

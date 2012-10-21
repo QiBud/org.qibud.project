@@ -6,6 +6,10 @@
 GET     /                                               controllers.Application.index()
 GET     /assets/javascripts/routes                      controllers.Application.javascriptRoutes()
 
+GET     /login                                          controllers.Authentication.login_form()
+POST    /login                                          controllers.Authentication.login()
+GET     /logout                                         controllers.Authentication.logout()
+
 GET     /buds                                           controllers.Buds.buds
 GET     /bud/:identity/new                              controllers.Buds.budCreateForm(identity: String)
 POST    /bud/:identity/create                           controllers.Buds.saveNewBud(identity: String)

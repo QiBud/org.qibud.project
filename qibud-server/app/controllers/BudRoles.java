@@ -35,7 +35,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
 
-@With( RootBudContext.class )
+@With( { RootBudContext.class, AuthContext.class } )
 public class BudRoles
         extends Controller
 {

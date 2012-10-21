@@ -20,10 +20,16 @@ import domain.roles.BudActions;
 import domain.roles.BudRole;
 import domain.roles.Role;
 import domain.roles.RoleActionException;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
+import org.qi4j.api.injection.scope.This;
+import org.qi4j.api.mixin.Mixins;
+import play.libs.Json;
 
 @BudRole( name = "person", description = "Person Role" )
 @BudActions( Person.Say.class )
+@Mixins( Person.PersonMixin.class )
 public interface Person
         extends Role
 {
@@ -39,8 +45,28 @@ public interface Person
         {
             String message = param.get( "message" ).asText();
             ObjectNode result = nodeFactory.objectNode();
-            result.put( "message", role.roleState().get() + " say " + message );
+            JsonNode state = role.jsonRoleState();
+            String personName = state.has( "name" ) ? state.get( "name" ).getTextValue() : "Unknown";
+            result.put( "message", personName + " say " + message );
             return result;
+        }
+
+    }
+
+    abstract class PersonMixin
+            implements Person
+    {
+
+        @This
+        private Role role;
+
+        @Override
+        public void onCreate( Bud bud )
+        {
+            // Use Bud title as Person name by default
+            ObjectNode state = JsonNodeFactory.instance.objectNode();
+            state.put( "name", bud.title().get() );
+            role.roleState().set( Json.stringify( state ) );
         }
 
     }

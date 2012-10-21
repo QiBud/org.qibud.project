@@ -18,20 +18,29 @@ var roles = {};
     };
 
     // TODO Implement JS invokeBudRoleAction
-    _root.invokeBudRoleAction = function( identity ,pack, role, action, data ) {
+    _root.invokeBudRoleAction = function( identity, pack, role, action, data, callback ) {
         var url = jsRoutes.controllers.BudRoles.invokeBudRoleAction( identity, pack, role, action ).url;
         console.log( "QiBud.invokeBudRoleAction() on " + url );
+        $.ajax( {
+            type: 'POST',
+            url: url,
+            data: JSON.stringify( data ),
+            dataType: 'json',
+            contentType: 'application/json',
+            success: function( response ) {
+                callback( response );
+            }
+        } );
     };
+
+    _root.packs = {};
 
 })(roles)
 
 // Do whatever should be done on each page
 $(document).ready( function() {
 
-    console.log( "QiBud" );
-
-    console.log( "Javascript Routing:" );
-    console.log( jsRoutes );
+    console.log( "UI Layer Started!" );
 
     console.log( "Bud Roles SPI:" );
     console.log( roles );

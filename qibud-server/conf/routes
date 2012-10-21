@@ -29,6 +29,7 @@ POST    /bud/:identity/:pack/:role                      controllers.BudRoles.sav
 POST    /bud/:identity/:pack/:role/:action              controllers.BudRoles.invokeBudRoleAction(identity: String, pack: String, role: String, action: String)
 
 GET     /packs                                          controllers.BudPacks.packs
+GET     /packs/js                                       controllers.BudPacks.packsJavascript
 GET     /pack/:pack                                     controllers.BudPacks.pack(pack: String)
 
 # Map static resources from the /public folder to the /assets URL path

@@ -13,8 +13,15 @@
  */
 package controllers;
 
+import application.bootstrap.BudPackDescriptor;
+import application.bootstrap.RoleDescriptor;
 import domain.budpacks.BudPacksService;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import org.codeartisans.java.toolbox.Strings;
 import org.qi4j.api.injection.scope.Service;
+import play.Play;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
@@ -27,16 +34,42 @@ public class BudPacks
 {
 
     @Service
-    public static BudPacksService roleRegistry;
+    public static BudPacksService budPacksService;
 
     public static Result packs()
     {
-        return ok( all_budpacks.render( roleRegistry.budPacks() ) );
+        return ok( all_budpacks.render( budPacksService.budPacks() ) );
     }
 
     public static Result pack( String pack )
     {
-        return ok( show_budpack.render( roleRegistry.budPack( pack ) ) );
+        return ok( show_budpack.render( budPacksService.budPack( pack ) ) );
+    }
+
+    /**
+     * Generate the BudPacks javascript from all available BudPacks scripts.
+     * BudPacks initializers first and then all Bud Roles.
+     */
+    public static Result packsJavascript()
+            throws IOException
+    {
+        StringBuilder jsBuilder = new StringBuilder();
+        for ( BudPackDescriptor budPack : budPacksService.budPacks() ) {
+            String resourceName = "/public/budpacks/" + budPack.name() + "/_" + budPack.name() + ".js";
+            URL resource = Play.application().resource( resourceName );
+            if ( resource != null ) {
+                jsBuilder.append( Strings.toString( new InputStreamReader( resource.openStream(), "UTF-8" ) ) ).append( Strings.NEWLINE );
+            }
+        }
+        for ( RoleDescriptor role : budPacksService.roles() ) {
+            String resourceName = "/public/budpacks/" + role.budPackName() + "/" + role.name() + ".js";
+            URL resource = Play.application().resource( resourceName );
+            if ( resource != null ) {
+                jsBuilder.append( Strings.toString( new InputStreamReader( resource.openStream(), "UTF-8" ) ) ).append( Strings.NEWLINE );
+            }
+        }
+        jsBuilder.append( Strings.NEWLINE ).append( "console.log(\"BudPacks Javascript Loaded\");" ).append( Strings.NEWLINE );
+        return ok( jsBuilder.toString() ).as( "application/javascript" );
     }
 
 }

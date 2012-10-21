@@ -13,6 +13,7 @@
  */
 package domain.roles;
 
+import domain.buds.Bud;
 import org.codehaus.jackson.JsonNode;
 import org.qi4j.api.injection.scope.This;
 import org.qi4j.api.mixin.Mixins;
@@ -45,6 +46,8 @@ public interface Role
 
     JsonNode jsonRoleState();
 
+    void onCreate( Bud bud );
+
     abstract class Mixin
             implements Role
     {
@@ -74,6 +77,12 @@ public interface Role
         public JsonNode jsonRoleState()
         {
             return Json.parse( roleValue.roleState().get() );
+        }
+
+        @Override
+        public void onCreate( Bud bud )
+        {
+            // NOOP Override in role Mixins
         }
 
     }

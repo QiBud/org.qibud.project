@@ -17,7 +17,6 @@ import application.bootstrap.BudPackDescriptor;
 import application.bootstrap.RoleDescriptor;
 import domain.buds.Bud;
 import domain.roles.Role;
-import domain.roles.RoleAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,9 +46,7 @@ public interface BudPacksService
 
     Collection<RoleDescriptor> unusedRoles( Bud bud );
 
-    Role newRoleInstance( String budPackName, String roleName );
-
-    RoleAction newRoleActionInstance( String roleName, String actionName );
+    Role newRoleInstance( Bud bud, String budPackName, String roleName );
 
     abstract class Mixin
             implements BudPacksService
@@ -120,7 +117,7 @@ public interface BudPacksService
         }
 
         @Override
-        public Role newRoleInstance( String budPackName, String roleName )
+        public Role newRoleInstance( Bud bud, String budPackName, String roleName )
         {
             RoleDescriptor roleDescriptor = budPacks.get( budPackName ).roles().get( roleName );
             ValueBuilder<? extends Role> roleBuilder = module.newValueBuilder( roleDescriptor.roleType() );
@@ -128,13 +125,9 @@ public interface BudPacksService
             role.budPackName().set( roleDescriptor.budPackName() );
             role.roleName().set( roleDescriptor.name() );
             role.roleState().set( Json.stringify( Json.newObject() ) );
-            return roleBuilder.newInstance();
-        }
-
-        @Override
-        public RoleAction newRoleActionInstance( String roleName, String actionName )
-        {
-            throw new UnsupportedOperationException( "Not supported yet." );
+            role.onCreate( bud );
+            role = roleBuilder.newInstance();
+            return role;
         }
 
     }

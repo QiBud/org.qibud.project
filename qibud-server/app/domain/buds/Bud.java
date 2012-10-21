@@ -155,7 +155,7 @@ public interface Bud
             }
 
             if ( newRole == null ) {
-                newRole = budPacksService.newRoleInstance( pack, role );
+                newRole = budPacksService.newRoleInstance( bud, pack, role );
             }
 
             List<Role> roles = bud.roles().get();

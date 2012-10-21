@@ -11,22 +11,30 @@ var roles = {};
         } );
     };
 
-    // TODO Implement JS saveBudRole
-    _root.saveBudRole = function( identity, pack, role, data ) {
+    _root.saveBudRole = function( identity, pack, role, data, callback ) {
         var url = jsRoutes.controllers.BudRoles.saveBudRole( identity, pack, role ).url;
         console.log( "QiBud.saveBudRole() on " + url );
+        $.ajax( {
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: url,
+            data: JSON.stringify( data ),
+            success: function( response ) {
+                callback( response );
+            }
+        } );
     };
 
-    // TODO Implement JS invokeBudRoleAction
     _root.invokeBudRoleAction = function( identity, pack, role, action, data, callback ) {
         var url = jsRoutes.controllers.BudRoles.invokeBudRoleAction( identity, pack, role, action ).url;
         console.log( "QiBud.invokeBudRoleAction() on " + url );
         $.ajax( {
             type: 'POST',
-            url: url,
-            data: JSON.stringify( data ),
             dataType: 'json',
             contentType: 'application/json',
+            url: url,
+            data: JSON.stringify( data ),
             success: function( response ) {
                 callback( response );
             }

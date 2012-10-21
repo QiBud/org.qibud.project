@@ -94,8 +94,8 @@ public class BudRoles
                 return notFound( "This Bud does not exists." );
             }
 
-            Role roleValue = bud.role( pack, role );
-            if ( roleValue == null ) {
+            Role roleEntity = bud.role( pack, role );
+            if ( roleEntity == null ) {
                 uow.discard();
                 uow = null;
                 return notFound( "This Bud has no '" + pack + "/" + role + "' role" );
@@ -103,9 +103,7 @@ public class BudRoles
 
             // Update Role
             ObjectNode jsonState = ( ObjectNode ) request().body().asJson();
-            RoleDescriptor roleDescriptor = budPacksService.budPack( pack ).role( role );
-            roleValue = module.newValueFromJSON( roleDescriptor.roleType(), Json.stringify( jsonState ) );
-            bud.updateRole( roleValue );
+            roleEntity.roleState().set( Json.stringify( jsonState ) );
 
             return ok();
 

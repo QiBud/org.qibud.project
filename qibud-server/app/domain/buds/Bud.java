@@ -74,8 +74,6 @@ public interface Bud
 
     void removeRole( String pack, String role );
 
-    void updateRole( Role role );
-
     abstract class Mixin
             implements Bud
     {
@@ -176,21 +174,6 @@ public interface Bud
                     break;
                 }
             }
-        }
-
-        @Override
-        public void updateRole( Role role )
-        {
-            Iterator<Role> rolesIterator = bud.roles().iterator();
-            while ( rolesIterator.hasNext() ) {
-                Role candidate = rolesIterator.next();
-                if ( candidate.budPackName().get().equals( role.budPackName().get() )
-                     && candidate.roleName().get().equals( role.roleName().get() ) ) {
-                    rolesIterator.remove();
-                    break;
-                }
-            }
-            bud.roles().add( role );
         }
 
     }

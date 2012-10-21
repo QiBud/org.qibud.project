@@ -15,15 +15,15 @@ package domain.roles;
 
 import domain.buds.Bud;
 import org.codehaus.jackson.JsonNode;
+import org.qi4j.api.entity.EntityComposite;
 import org.qi4j.api.injection.scope.This;
 import org.qi4j.api.mixin.Mixins;
 import org.qi4j.api.property.Property;
-import org.qi4j.api.value.ValueComposite;
 import play.libs.Json;
 
 @Mixins( Role.Mixin.class )
 public interface Role
-        extends ValueComposite
+        extends EntityComposite
 {
 
     Property<String> budPackName();

@@ -128,7 +128,7 @@ public class QiBudAssembler
                     Class<?>[] candidates = ClassFinder.getClasses( budPackPackage, Play.application().classloader() );
                     for ( Class<?> candidate : candidates ) {
 
-                        if ( Role.class.isAssignableFrom( candidate ) ) {
+                        if ( candidate.isInterface() && Role.class.isAssignableFrom( candidate ) ) {
 
                             // Role
                             Class<? extends Role> roleType = ( Class<? extends Role> ) candidate;

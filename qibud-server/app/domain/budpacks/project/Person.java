@@ -47,7 +47,7 @@ public interface Person
             ObjectNode result = nodeFactory.objectNode();
             JsonNode state = role.jsonRoleState();
             String personName = state.has( "name" ) ? state.get( "name" ).getTextValue() : "Unknown";
-            result.put( "message", personName + " say " + message );
+            result.put( "message", personName + " say '" + message + "'" );
             return result;
         }
 

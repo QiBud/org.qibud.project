@@ -3,7 +3,7 @@
         inject_view: function( bud_identity, target, descriptor, state ) {
             var $view = $("#"+target);
             var view = "<h3>"+descriptor.description+"</h3>";
-            view += "<h4>Role Descriptor</h4><pre>"+JSON.stringify(descriptor)+"</pre>";
+            //view += "<h4>Role Descriptor</h4><pre>"+JSON.stringify(descriptor)+"</pre>";
             view += "<h4>Role State</h4><pre>"+JSON.stringify(state)+"</pre>";
             view += '<h4>Actions</h4>';
             $view.append( view );

@@ -43,14 +43,12 @@ public final class QiBudDomainAssemblies
     {
         return new Assembler()
         {
-
             @Override
             public void assemble( ModuleAssembly ma )
                     throws AssemblyException
             {
-                ma.entities( Bud.class ).
-                        visibleIn( application );
-                ma.values( Role.class ).
+                ma.entities( Bud.class,
+                             Role.class ).
                         visibleIn( application );
 
                 List<Class<? extends Role>> roleTypes = new ArrayList<Class<? extends Role>>();
@@ -66,7 +64,7 @@ public final class QiBudDomainAssemblies
 
                 if ( !roleTypes.isEmpty() ) {
                     Class<?>[] rolesArray = roleTypes.toArray( new Class<?>[ roleTypes.size() ] );
-                    ma.values( rolesArray ).
+                    ma.entities( rolesArray ).
                             visibleIn( application );
                     LOGGER.info( "Assembled {} BudRoles: {}", rolesArray.length, Arrays.toString( rolesArray ) );
                 }

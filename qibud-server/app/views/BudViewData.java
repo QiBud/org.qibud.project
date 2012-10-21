@@ -18,6 +18,7 @@ import domain.buds.Bud;
 import domain.roles.Role;
 import java.util.Collection;
 import java.util.Collections;
+import org.qi4j.functional.Iterables;
 
 /**
  * Template helper created by controllers and used to group Bud data frequently used by views.
@@ -34,7 +35,7 @@ public class BudViewData
     public BudViewData( Bud bud, Collection<RoleDescriptor> unused_roles )
     {
         this.bud = bud;
-        this.roles = Collections.unmodifiableCollection( bud.roles().get() );
+        this.roles = Collections.unmodifiableCollection( Iterables.toList( bud.roles() ) );
         this.unused_roles = Collections.unmodifiableCollection( unused_roles );
     }
 

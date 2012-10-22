@@ -34,6 +34,8 @@ public interface Person
         extends Role
 {
 
+    String name();
+
     @BudAction( name = "say" )
     class Say
             extends AbstractRoleAction<Person>
@@ -45,9 +47,7 @@ public interface Person
         {
             String message = param.get( "message" ).asText();
             ObjectNode result = nodeFactory.objectNode();
-            JsonNode state = role.jsonRoleState();
-            String personName = state.has( "name" ) ? state.get( "name" ).getTextValue() : "Unknown";
-            result.put( "message", personName + " say '" + message + "'" );
+            result.put( "message", role.name() + " say '" + message + "'" );
             return result;
         }
 
@@ -59,6 +59,13 @@ public interface Person
 
         @This
         private Role role;
+
+        @Override
+        public String name()
+        {
+            JsonNode state = role.jsonRoleState();
+            return state.has( "name" ) ? state.get( "name" ).getTextValue() : "Unknown";
+        }
 
         @Override
         public void onCreate( Bud bud )

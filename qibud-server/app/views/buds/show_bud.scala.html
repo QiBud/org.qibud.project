@@ -7,11 +7,6 @@
 @scripts = {
     <script type="text/javascript">
         $(document).ready( function() {
-            /*
-            roles.budRole( "@budview.bud.identity().get()", "project", "person", function( data ) {
-                console.log(data);
-            } );
-            */
             @if( ! budview.roles.isEmpty() ) {
                 @for( role <- budview.roles ) {
                     if( roles.packs.@(role.budPackName()) && roles.packs.@(role.budPackName()).@(role.roleName()) ) {

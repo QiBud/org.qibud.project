@@ -13,21 +13,20 @@
  */
 package views;
 
-import org.apache.commons.lang.RandomStringUtils;
 import org.pegdown.PegDownProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.api.templates.Html;
 
-import static org.apache.commons.lang.StringUtils.EMPTY;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.RandomStringUtils.*;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class tools
 {
 
     public static String make_id()
     {
-        return RandomStringUtils.randomAlphanumeric( 6 );
+        return randomAlphanumeric( 6 );
     }
 
     public static Html markdown( String markdown )

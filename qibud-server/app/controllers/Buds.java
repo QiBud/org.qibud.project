@@ -22,6 +22,7 @@ import domain.buds.BudsFactory;
 import domain.buds.BudsRepository;
 import forms.BudForm;
 import infrastructure.attachmentsdb.AttachmentsDB;
+import infrastructure.graphdb.GraphDB;
 import org.neo4j.helpers.collection.Iterables;
 import org.qi4j.api.injection.scope.Service;
 import org.qi4j.api.injection.scope.Structure;
@@ -61,6 +62,9 @@ public class Buds
 
     @Service
     public static AttachmentsDB attachmentsDB;
+
+    @Service
+    public static GraphDB graphDB;
 
     public static Result buds()
     {
@@ -227,12 +231,20 @@ public class Buds
                 uow = null;
                 return notFound();
             }
+            if ( budsRepository.findChildren( bud.identity().get() ).count() > 0 ) {
+                uow = null;
+                flash( "warn", bud.title().get() + " has children and cannot be deleted!" );
+                return redirect( routes.Buds.bud( bud.identity().get() ) );
+            }
             Bud parent = bud.parent().get();
             Call redirect = parent == null
                             ? routes.Application.index()
                             : routes.Buds.bud( parent.identity().get() );
-            // TODO Implement deleteBud();
             flash( "success", bud.title().get() + " deleted" );
+            // Effectively delete bud
+            attachmentsDB.deleteBudDBFiles( bud.identity().get() );
+            graphDB.deleteBudNode( bud.identity().get() );
+            uow.remove( bud );
             return redirect( redirect );
         } finally {
             if ( uow != null ) {

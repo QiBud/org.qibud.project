@@ -16,8 +16,11 @@ package domain.buds;
 import org.qi4j.api.injection.scope.Structure;
 import org.qi4j.api.mixin.Mixins;
 import org.qi4j.api.query.Query;
+import org.qi4j.api.query.QueryBuilder;
 import org.qi4j.api.service.ServiceComposite;
 import org.qi4j.api.structure.Module;
+
+import static org.qi4j.api.query.QueryExpressions.*;
 
 @Mixins( BudsRepository.Mixin.class )
 public interface BudsRepository
@@ -29,6 +32,8 @@ public interface BudsRepository
     Query<Bud> findAll();
 
     Bud findByIdentity( String identity );
+
+    Query<Bud> findChildren( String identity );
 
     abstract class Mixin
             implements BudsRepository
@@ -53,6 +58,20 @@ public interface BudsRepository
         public Bud findByIdentity( String identity )
         {
             return module.currentUnitOfWork().get( Bud.class, identity );
+        }
+
+        @Override
+        public Query<Bud> findChildren( String identity )
+        {
+            QueryBuilder<Bud> builder = module.newQueryBuilder( Bud.class );
+            Bud template = templateFor( Bud.class );
+            builder = builder.where( eq( template.parent().get().identity(), identity ) );
+            Query<Bud> query = module.currentUnitOfWork().newQuery( builder );
+            System.out.println( "###############################" );
+            System.out.println( query );
+            System.out.println( query.count() );
+            System.out.println( "###############################" );
+            return query;
         }
 
     }

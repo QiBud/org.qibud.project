@@ -136,6 +136,7 @@ public interface BudsFactory
             // Create Bud Entity
             EntityBuilder<Bud> builder = uow.newEntityBuilder( Bud.class );
             Bud bud = builder.instance();
+            bud.parent().set( creationBud );
             bud.title().set( title );
             bud.postedAt().set( new DateTime() );
             bud.content().set( content );

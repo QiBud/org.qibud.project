@@ -134,22 +134,22 @@ public class Global
             public Result call( Http.Context ctx )
                     throws Throwable
             {
-                LOGGER.debug( "Before request with Usecase '{}'", usecase );
+                LOGGER.trace( "Before request with Usecase '{}'", usecase );
 
                 try {
 
                     Result result = delegate.call( ctx );
-                    LOGGER.debug( "After request with Usecase '{}'", usecase );
+                    LOGGER.trace( "After request with Usecase '{}'", usecase );
                     return result;
 
                 } catch ( Throwable ex ) {
 
-                    LOGGER.debug( "Error after request with Usecase '{}'", usecase, ex );
+                    LOGGER.trace( "Error after request with Usecase '{}'", usecase, ex );
                     throw ex;
 
                 } finally {
 
-                    LOGGER.debug( "Finally after request with Usecase '{}'", usecase );
+                    LOGGER.trace( "Finally after request with Usecase '{}'", usecase );
 
                 }
             }

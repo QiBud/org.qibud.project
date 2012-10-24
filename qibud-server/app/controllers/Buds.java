@@ -20,6 +20,7 @@ import domain.budpacks.BudPacksService;
 import domain.buds.Bud;
 import domain.buds.BudsFactory;
 import domain.buds.BudsRepository;
+import domain.roles.Role;
 import forms.BudForm;
 import infrastructure.attachmentsdb.AttachmentsDB;
 import infrastructure.graphdb.GraphDB;
@@ -241,10 +242,17 @@ public class Buds
                             ? routes.Application.index()
                             : routes.Buds.bud( parent.identity().get() );
             flash( "success", bud.title().get() + " deleted" );
+
+            // Disable all roles
+            for ( Role role : bud.roles() ) {
+                bud.removeRole( role.budPackName().get(), role.roleName().get() );
+            }
+
             // Effectively delete bud
             attachmentsDB.deleteBudDBFiles( bud.identity().get() );
             graphDB.deleteBudNode( bud.identity().get() );
             uow.remove( bud );
+
             return redirect( redirect );
         } finally {
             if ( uow != null ) {

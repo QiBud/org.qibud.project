@@ -46,7 +46,20 @@ public interface Role
 
     JsonNode jsonRoleState();
 
+    /**
+     * Called on first Role creation.
+     */
     void onCreate( Bud bud );
+
+    /**
+     * Called on Role enablement.
+     */
+    void onEnable( Bud bud );
+
+    /**
+     * Called on Role disablement.
+     */
+    void onDisable( Bud bud );
 
     abstract class Mixin
             implements Role
@@ -81,6 +94,18 @@ public interface Role
 
         @Override
         public void onCreate( Bud bud )
+        {
+            // NOOP Override in role Mixins
+        }
+
+        @Override
+        public void onEnable( Bud bud )
+        {
+            // NOOP Override in role Mixins
+        }
+
+        @Override
+        public void onDisable( Bud bud )
         {
             // NOOP Override in role Mixins
         }

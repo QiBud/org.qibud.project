@@ -159,6 +159,7 @@ public interface Bud
             }
 
             bud.roles().add( newRole );
+            newRole.onEnable( bud );
         }
 
         @Override
@@ -171,6 +172,7 @@ public interface Bud
                      && candidate.roleName().get().equals( role ) ) {
                     rolesIterator.remove();
                     bud.passivatedRoles().add( candidate );
+                    candidate.onDisable( bud );
                     break;
                 }
             }

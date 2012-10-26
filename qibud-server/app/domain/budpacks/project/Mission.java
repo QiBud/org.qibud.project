@@ -13,11 +13,45 @@
  */
 package domain.budpacks.project;
 
+import domain.buds.Bud;
 import domain.roles.BudRole;
 import domain.roles.Role;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.jackson.node.ObjectNode;
+import org.qi4j.api.injection.scope.This;
+import org.qi4j.api.mixin.Mixins;
+import play.libs.Json;
 
-@BudRole( name = "mission" )
+@BudRole(name = "mission")
+@Mixins(Mission.MissionMixin.class)
 public interface Mission
-        extends Role
-{
+        extends Role {
+
+    String missionStatus();
+
+
+    abstract class MissionMixin implements Mission {
+
+        @This
+        private Role role;
+
+        @Override
+        public String missionStatus() {
+            JsonNode state = role.jsonRoleState();
+            return state.has("missionStatus") ? state.get("missionStatus").getTextValue() : "N/D";
+        }
+
+        @Override
+        public void onCreate(Bud bud) {
+
+            ObjectNode state = JsonNodeFactory.instance.objectNode();
+            //Initialise le statut de base du cycle de vie
+            state.put("missionStatus", "Waiting for projects");
+
+            //Prépare la stockage des projets fils
+            state.putArray("projects");
+            role.roleState().set(Json.stringify(state));
+        }
+    }
 }

@@ -170,9 +170,9 @@ public interface Bud
                 Role candidate = rolesIterator.next();
                 if ( candidate.budPackName().get().equals( pack )
                      && candidate.roleName().get().equals( role ) ) {
+                    candidate.onDisable( bud );
                     rolesIterator.remove();
                     bud.passivatedRoles().add( candidate );
-                    candidate.onDisable( bud );
                     break;
                 }
             }

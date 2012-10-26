@@ -247,8 +247,7 @@ public class Buds
             // Disable all roles
             Iterator<Role> rolesIt = bud.roles().iterator();
             while ( rolesIt.hasNext() ) {
-                rolesIt.next();
-                rolesIt.remove();
+                rolesIt.next().onDisable( bud );
             }
 
             // Effectively delete bud

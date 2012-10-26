@@ -24,6 +24,7 @@ import domain.roles.Role;
 import forms.BudForm;
 import infrastructure.attachmentsdb.AttachmentsDB;
 import infrastructure.graphdb.GraphDB;
+import java.util.Iterator;
 import org.neo4j.helpers.collection.Iterables;
 import org.qi4j.api.injection.scope.Service;
 import org.qi4j.api.injection.scope.Structure;
@@ -244,8 +245,10 @@ public class Buds
             flash( "success", bud.title().get() + " deleted" );
 
             // Disable all roles
-            for ( Role role : bud.roles() ) {
-                bud.removeRole( role.budPackName().get(), role.roleName().get() );
+            Iterator<Role> rolesIt = bud.roles().iterator();
+            while ( rolesIt.hasNext() ) {
+                rolesIt.next();
+                rolesIt.remove();
             }
 
             // Effectively delete bud

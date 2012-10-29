@@ -212,6 +212,9 @@ public class Buds
                 BudForm updated = filledForm.get();
                 bud.title().set( updated.title );
                 bud.content().set( updated.content );
+                for ( Role role : bud.roles() ) {
+                    role.onBudChange( bud );
+                }
                 flash( "success", updated.title + " saved" );
                 return redirect( routes.Buds.bud( bud.identity().get() ) );
             }

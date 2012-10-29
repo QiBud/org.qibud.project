@@ -61,6 +61,11 @@ public interface Role
      */
     void onDisable( Bud bud );
 
+    /**
+     * Called on Bud change.
+     */
+    void onBudChange( Bud bud );
+
     abstract class Mixin
             implements Role
     {
@@ -106,6 +111,12 @@ public interface Role
 
         @Override
         public void onDisable( Bud bud )
+        {
+            // NOOP Override in role Mixins
+        }
+
+        @Override
+        public void onBudChange( Bud bud )
         {
             // NOOP Override in role Mixins
         }

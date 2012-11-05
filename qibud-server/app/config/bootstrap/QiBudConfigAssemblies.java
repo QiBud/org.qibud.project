@@ -41,15 +41,15 @@ public final class QiBudConfigAssemblies
 
             @Override
             public void assemble( ModuleAssembly ma )
-                    throws AssemblyException
+                throws AssemblyException
             {
                 ma.services( MemoryEntityStoreService.class ).
-                        visibleIn( module ).
-                        instantiateOnStartup();
-                
+                    visibleIn( module ).
+                    instantiateOnStartup();
+
                 ma.services( FileConfigurationService.class ).
-                        visibleIn( application ).
-                        instantiateOnStartup();
+                    visibleIn( application ).
+                    instantiateOnStartup();
             }
 
         };

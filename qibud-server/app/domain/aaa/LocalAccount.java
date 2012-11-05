@@ -11,17 +11,11 @@
  * limitations under the License.
  *
  */
-package domain.roles;
+package domain.aaa;
 
-import utils.QiBudException;
+import org.qi4j.library.shiro.domain.passwords.PasswordSecurable;
 
-public class RoleNotFound
-    extends QiBudException
+public interface LocalAccount
+    extends Account, PasswordSecurable
 {
-
-    public RoleNotFound( String budPackName, String roleName )
-    {
-        super( "Role '" + budPackName + "/" + roleName + "' not found." );
-    }
-
 }

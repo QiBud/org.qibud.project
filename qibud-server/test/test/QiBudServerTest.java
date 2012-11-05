@@ -29,6 +29,7 @@ import static org.fest.assertions.Assertions.*;
 import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.*;
 
+@Ignore
 public class QiBudServerTest
 {
 

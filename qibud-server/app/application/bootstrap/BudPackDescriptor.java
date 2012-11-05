@@ -21,9 +21,7 @@ public class BudPackDescriptor
 {
 
     private final String name;
-
     private String description;
-
     private final Map<String, RoleDescriptor> roles = new HashMap<String, RoleDescriptor>();
 
     /* package */ BudPackDescriptor( String name )

@@ -31,32 +31,30 @@ import play.Play;
 import utils.QiBudException;
 
 public class GraphDBImpl
-        implements GraphDB, ServiceActivation
+    implements GraphDB, ServiceActivation
 {
 
     public static enum RelTypes
-            implements RelationshipType
+        implements RelationshipType
     {
 
         IS_BUD_REF,
         IS_BUD,
         IS_ROOT_BUD,
         IS_CHILD_BUD
-
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger( GraphDB.class );
-
     private String graphDatabasePath;
-
     private GraphDatabaseService graphDatabase;
 
     @Override
     public void activateService()
-            throws Exception
+        throws Exception
     {
         graphDatabasePath = Play.application().configuration().getString( "qibud.graphdb.path" );
-        if ( StringUtils.isEmpty( graphDatabasePath ) ) {
+        if( StringUtils.isEmpty( graphDatabasePath ) )
+        {
             throw new QiBudException( "Neo4J Database Storage Path is empty, check your configuration" );
         }
 
@@ -65,14 +63,18 @@ public class GraphDBImpl
 
         // BudReferenceNode creation if needed
         Iterable<Relationship> relationships = graphDatabase.getReferenceNode().getRelationships( Direction.OUTGOING, RelTypes.IS_BUD_REF );
-        if ( Iterables.count( relationships ) <= 0 ) {
+        if( Iterables.count( relationships ) <= 0 )
+        {
             Transaction tx = graphDatabase.beginTx();
-            try {
+            try
+            {
                 Node budRefNode = graphDatabase.createNode();
                 graphDatabase.getReferenceNode().createRelationshipTo( budRefNode, RelTypes.IS_BUD_REF );
                 tx.success();
                 LOGGER.info( "Bud Ref Node created" );
-            } finally {
+            }
+            finally
+            {
                 tx.finish();
             }
         }
@@ -80,7 +82,7 @@ public class GraphDBImpl
 
     @Override
     public void passivateService()
-            throws Exception
+        throws Exception
     {
         graphDatabase.shutdown();
         graphDatabase = null;
@@ -92,10 +94,12 @@ public class GraphDBImpl
     public Node getBudNode( String identity )
     {
         Iterable<Relationship> isBudsRelationships = getBudRefNode().getRelationships( Direction.OUTGOING, RelTypes.IS_BUD );
-        for ( Relationship eachIsBudRel : isBudsRelationships ) {
+        for( Relationship eachIsBudRel : isBudsRelationships )
+        {
             Node eachNode = eachIsBudRel.getEndNode();
-            String eachIdentity = ( String ) eachNode.getProperty( BudNode.IDENTITY );
-            if ( identity.equals( eachIdentity ) ) {
+            String eachIdentity = (String) eachNode.getProperty( BudNode.IDENTITY );
+            if( identity.equals( eachIdentity ) )
+            {
                 return eachNode;
             }
         }
@@ -105,12 +109,13 @@ public class GraphDBImpl
     @Override
     public Node createRootBudNode( String identity )
     {
-        if ( Iterables.count( getBudRefNode().getRelationships( Direction.OUTGOING, RelTypes.IS_ROOT_BUD ) ) > 0 ) {
+        if( Iterables.count( getBudRefNode().getRelationships( Direction.OUTGOING, RelTypes.IS_ROOT_BUD ) ) > 0 )
+        {
             throw new IllegalStateException( "The Root Bud already exists, check your code" );
         }
         Transaction tx = graphDatabase.beginTx();
-        try {
-
+        try
+        {
             Node budNode = graphDatabase.createNode();
             budNode.setProperty( BudNode.IDENTITY, identity );
             budNode.setProperty( BudNode.QI, 0L );
@@ -121,8 +126,9 @@ public class GraphDBImpl
             tx.success();
 
             return budNode;
-
-        } finally {
+        }
+        finally
+        {
             tx.finish();
         }
     }
@@ -137,10 +143,11 @@ public class GraphDBImpl
     public Node createBudNode( String parentIdentity, String identity, Long qi )
     {
         Transaction tx = graphDatabase.beginTx();
-        try {
-
+        try
+        {
             Node parentNode = getBudNode( parentIdentity );
-            if ( parentNode == null ) {
+            if( parentNode == null )
+            {
                 throw new IllegalArgumentException( "Parent Bud Node '" + parentIdentity + "' do not exists in GraphDB." );
             }
             Node budNode = graphDatabase.createNode();
@@ -153,8 +160,9 @@ public class GraphDBImpl
             tx.success();
 
             return budNode;
-
-        } finally {
+        }
+        finally
+        {
             tx.finish();
         }
     }
@@ -163,11 +171,13 @@ public class GraphDBImpl
     public void deleteBudNode( String identity )
     {
         Transaction tx = graphDatabase.beginTx();
-        try {
-
+        try
+        {
             Node budNode = getBudNode( identity );
-            for ( Relationship eachRel : budNode.getRelationships() ) {
-                if ( eachRel.getType() == RelTypes.IS_ROOT_BUD ) {
+            for( Relationship eachRel : budNode.getRelationships() )
+            {
+                if( eachRel.getType() == RelTypes.IS_ROOT_BUD )
+                {
                     throw new IllegalArgumentException( "You cannot delete the root bud" );
                 }
                 eachRel.delete();
@@ -175,8 +185,9 @@ public class GraphDBImpl
             budNode.delete();
 
             tx.success();
-
-        } finally {
+        }
+        finally
+        {
             tx.finish();
         }
     }

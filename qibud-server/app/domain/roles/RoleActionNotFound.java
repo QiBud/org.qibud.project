@@ -16,7 +16,7 @@ package domain.roles;
 import utils.QiBudException;
 
 public class RoleActionNotFound
-        extends QiBudException
+    extends QiBudException
 {
 
     public RoleActionNotFound( String actionName )

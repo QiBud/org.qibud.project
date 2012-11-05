@@ -14,7 +14,7 @@ GET     /buds                                           controllers.Buds.buds
 GET     /bud/:identity/new                              controllers.Buds.budCreateForm(identity: String)
 POST    /bud/:identity/create                           controllers.Buds.saveNewBud(identity: String)
 
-# tous les roles du bud rajoutent de la vue à la vue de base
+# tous les roles du bud rajoutent de la vue \u00c3\u00a0 la vue de base
 GET     /bud/:identity                                  controllers.Buds.bud(identity: String)
 # bud attachments
 GET     /bud/:identity/attachment/:attachment_id        controllers.Buds.attachment(identity: String, attachment_id: String)

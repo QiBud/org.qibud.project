@@ -22,7 +22,7 @@ import org.codeartisans.playqi.PlayQi;
 import org.qi4j.api.structure.Module;
 
 public final class QiBud
-        extends PlayQi
+    extends PlayQi
 {
 
     public static Module budsDomainModule()

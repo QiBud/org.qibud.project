@@ -20,13 +20,9 @@ public class RoleActionDescriptor
 {
 
     private final String name;
-
     private final String description;
-
     private final Class<? extends RoleAction> roleActionType;
-
     private final Class<?> returnType;
-
     private final Class<?> parameterType;
 
 

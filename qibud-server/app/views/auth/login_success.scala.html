@@ -1,0 +1,25 @@
+@()
+
+@import tags._
+
+@scripts = {
+    <script type="text/javascript">
+        $( document ).ready( function() {
+            setTimeout( "window.location = '@routes.Application.index()';", 1500 );
+        } );
+    </script>
+}
+
+@main( "QiBud Login Success", "login", scripts ) {
+
+    @layout_fluid() {
+
+        @page_header( "QiBud", "Login Success" )
+
+        <div style="text-align: center">
+            <h4>You have been logged-in as <em>@AuthContextAction.connectedSubject()</em></h4>
+            <p>You should be automatically redirected, otherwise <a href='@routes.Application.index()'>click here</a></p>
+        </div>
+
+    }
+}

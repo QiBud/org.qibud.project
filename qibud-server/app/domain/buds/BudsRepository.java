@@ -24,7 +24,7 @@ import static org.qi4j.api.query.QueryExpressions.*;
 
 @Mixins( BudsRepository.Mixin.class )
 public interface BudsRepository
-        extends ServiceComposite
+    extends ServiceComposite
 {
 
     Bud findRootBud();
@@ -36,7 +36,7 @@ public interface BudsRepository
     Query<Bud> findChildren( String identity );
 
     abstract class Mixin
-            implements BudsRepository
+        implements BudsRepository
     {
 
         @Structure
@@ -67,10 +67,6 @@ public interface BudsRepository
             Bud template = templateFor( Bud.class );
             builder = builder.where( eq( template.parent().get().identity(), identity ) );
             Query<Bud> query = module.currentUnitOfWork().newQuery( builder );
-            System.out.println( "###############################" );
-            System.out.println( query );
-            System.out.println( query.count() );
-            System.out.println( "###############################" );
             return query;
         }
 

@@ -1,4 +1,5 @@
 import java.util.concurrent.TimeUnit;
+import org.junit.Ignore;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import play.libs.WS;
@@ -13,11 +14,11 @@ import static org.fest.assertions.Assertions.*;
 import static org.fluentlenium.core.filter.FilterConstructor.*;
 
 
-
+@Ignore
 public class BrowserTest {
-   
-   
-    
+
+
+
    @Test
     public void runInBrowser() {
         running(testServer(3337, fakeApplication(inMemoryDatabase())), HTMLUNIT, new Callback<TestBrowser>() {
@@ -26,7 +27,7 @@ public class BrowserTest {
                browser.goTo("http://localhost:3337/bud/root");
                assertThat(browser.$("h1").first().getText()).isEqualTo("Root Bud");
                //goTo new bud
-               browser.$("#new").click();              
+               browser.$("#new").click();
                System.out.println(browser.url());
                browser.await().atMost(20, TimeUnit.SECONDS);
                //create a new bud and submit the form
@@ -35,9 +36,9 @@ public class BrowserTest {
                browser.submit("input[id=save]");
                System.out.println(browser.url());
                assertThat(browser.$("h1").first().getText()).isEqualTo("Browser Test");
-               
-               
-               
+
+
+
             }
         });
     }

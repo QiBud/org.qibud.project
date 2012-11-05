@@ -17,11 +17,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.JsonNodeFactory;
 
 public abstract class AbstractRoleAction<RoleType extends Role>
-        implements RoleAction<RoleType>
+    implements RoleAction<RoleType>
 {
 
     protected final ObjectMapper mapper = new ObjectMapper();
-
     protected final JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
-
 }

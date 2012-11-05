@@ -49,26 +49,32 @@ public class ClassFinder
      */
     public static Class[] getClasses( String packageName, ClassLoader classLoader )
     {
-        try {
+        try
+        {
             assert classLoader != null;
             String path = packageName.replace( '.', '/' );
             Enumeration<URL> resources = classLoader.getResources( path );
             List<String> dirs = new ArrayList<String>();
-            while ( resources.hasMoreElements() ) {
+            while( resources.hasMoreElements() )
+            {
                 URL resource = resources.nextElement();
                 dirs.add( resource.getFile() );
             }
             TreeSet<String> classes = new TreeSet<String>();
-            for ( String directory : dirs ) {
+            for( String directory : dirs )
+            {
                 classes.addAll( findClasses( directory, packageName ) );
             }
             ArrayList<Class> classList = new ArrayList<Class>();
-            for ( String clazz : classes ) {
+            for( String clazz : classes )
+            {
                 classList.add( classLoader.loadClass( clazz ) );
             }
             return classList.toArray( new Class[ classes.size() ] );
-        } catch ( Exception e ) {
-            e.printStackTrace();
+        }
+        catch( Exception ex )
+        {
+            play.Logger.warn( "Unable to find classes in " + packageName, ex );
             return null;
         }
     }
@@ -82,34 +88,46 @@ public class ClassFinder
      * @throws ClassNotFoundException
      */
     private static TreeSet<String> findClasses( String directory, String packageName )
-            throws Exception
+        throws Exception
     {
         TreeSet<String> classes = new TreeSet<String>();
-        if ( directory.startsWith( "file:" ) && directory.contains( "!" ) ) {
+        if( directory.startsWith( "file:" ) && directory.contains( "!" ) )
+        {
             String[] split = directory.split( "!" );
             URL jar = new URL( split[0] );
             ZipInputStream zip = new ZipInputStream( jar.openStream() );
-            ZipEntry entry = null;
-            while ( ( entry = zip.getNextEntry() ) != null ) {
-                if ( entry.getName().endsWith( ".class" ) ) {
+            ZipEntry entry;
+            while( ( entry = zip.getNextEntry() ) != null )
+            {
+                if( entry.getName().endsWith( ".class" ) )
+                {
                     String className = entry.getName().replaceAll( "[$].*", "" ).replaceAll( "[.]class", "" ).replace( '/', '.' );
-                    if ( className.startsWith( packageName ) ) {
+                    if( className.startsWith( packageName ) )
+                    {
                         classes.add( className );
                     }
                 }
             }
         }
         File dir = new File( directory );
-        if ( !dir.exists() ) {
+        if( !dir.exists() )
+        {
             return classes;
         }
         File[] files = dir.listFiles();
-        for ( File file : files ) {
-            if ( file.isDirectory() ) {
+        for( File file : files )
+        {
+            if( file.isDirectory() )
+            {
                 assert !file.getName().contains( "." );
                 classes.addAll( findClasses( file.getAbsolutePath(), packageName + "." + file.getName() ) );
-            } else if ( file.getName().endsWith( ".class" ) ) {
-                classes.add( packageName + '.' + file.getName().substring( 0, file.getName().length() - 6 ) );
+            }
+            else
+            {
+                if( file.getName().endsWith( ".class" ) )
+                {
+                    classes.add( packageName + '.' + file.getName().substring( 0, file.getName().length() - 6 ) );
+                }
             }
         }
         return classes;

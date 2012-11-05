@@ -16,7 +16,7 @@ package application.bootstrap;
 import play.Play;
 
 public class QiBudPlayAssembler
-        extends QiBudAssembler
+    extends QiBudAssembler
 {
 
     public QiBudPlayAssembler()

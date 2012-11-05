@@ -20,9 +20,7 @@ public class BudNode
 {
 
     public static final String IDENTITY = "identity";
-
     public static final String QI = "qi";
-
     private final Node underlyingNode;
 
     /* package */ BudNode( Node underlyingNode )
@@ -37,12 +35,12 @@ public class BudNode
 
     public String getIdentity()
     {
-        return ( String ) underlyingNode.getProperty( IDENTITY );
+        return (String) underlyingNode.getProperty( IDENTITY );
     }
 
     public Long getQi()
     {
-        return ( Long ) underlyingNode.getProperty( QI );
+        return (Long) underlyingNode.getProperty( QI );
     }
 
     @Override
@@ -54,7 +52,7 @@ public class BudNode
     @Override
     public boolean equals( Object o )
     {
-        return o instanceof BudNode && underlyingNode.equals( ( ( BudNode ) o ).getUnderlyingNode() );
+        return o instanceof BudNode && underlyingNode.equals( ( (BudNode) o ).getUnderlyingNode() );
     }
 
     @Override

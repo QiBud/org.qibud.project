@@ -21,7 +21,6 @@ import domain.roles.BudRole;
 import domain.roles.Role;
 import domain.roles.RoleAction;
 import infrastructure.bootstrap.QiBudInfraAssemblies;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import org.codeartisans.java.toolbox.Strings;
@@ -37,27 +36,19 @@ import utils.ClassFinder;
 import utils.QiBudException;
 
 public class QiBudAssembler
-        implements ApplicationAssembler
+    implements ApplicationAssembler
 {
 
     public static final String LAYER_DOMAIN = "domain";
-
     public static final String MODULE_BUDS = "buds";
-
+    public static final String MODULE_AAA = "aaa";
     public static final String LAYER_INFRASTRUCTURE = "infrastructure";
-
     public static final String MODULE_PERSISTENCE = "persistence";
-
     private final String mongoHostname;
-
     private final int mongoPort;
-
     private final String mongoUsername;
-
     private final String mongoPassword;
-
     private final String mongoDatabase;
-
     private final String mongoCollection;
 
     public QiBudAssembler( String mongoHostname, int mongoPort,
@@ -74,7 +65,7 @@ public class QiBudAssembler
 
     @Override
     public ApplicationAssembly assemble( ApplicationAssemblyFactory aaf )
-            throws AssemblyException
+        throws AssemblyException
     {
         ApplicationAssembly appAss = aaf.newApplicationAssembly();
         appAss.setName( "QiBud" );
@@ -92,6 +83,10 @@ public class QiBudAssembler
         {
             QiBudDomainAssemblies.buds( loadBudPacks() ).assemble( buds );
         }
+        ModuleAssembly aaa = domainLayer.module( MODULE_AAA );
+        {
+            QiBudDomainAssemblies.aaa( config ).assemble( aaa );
+        }
 
         // Infrastructure
         LayerAssembly infraLayer = appAss.layer( LAYER_INFRASTRUCTURE );
@@ -101,7 +96,7 @@ public class QiBudAssembler
                                               mongoHostname, mongoPort,
                                               mongoUsername, mongoPassword,
                                               mongoDatabase, mongoCollection ).
-                    assemble( persistence );
+                assemble( persistence );
         }
 
         domainLayer.uses( infraLayer, configLayer );
@@ -114,89 +109,81 @@ public class QiBudAssembler
     {
         Map<String, BudPackDescriptor> packs = new HashMap<String, BudPackDescriptor>();
         String configPrefix = "qibud.budpack.";
-        for ( String configKey : Play.application().configuration().keys() ) {
-            if ( configKey.startsWith( configPrefix ) ) {
+        for( String configKey : Play.application().configuration().keys() )
+        {
+            if( configKey.startsWith( configPrefix ) )
+            {
                 String budPackName = configKey.substring( configPrefix.length(), configKey.lastIndexOf( '.' ) );
                 BudPackDescriptor budPack = packs.get( budPackName );
-                if ( budPack == null ) {
+                if( budPack == null )
+                {
                     budPack = new BudPackDescriptor( budPackName );
                 }
-                if ( configKey.endsWith( ".package" ) ) {
+                if( configKey.endsWith( ".package" ) )
+                {
 
                     // Roles
                     String budPackPackage = Play.application().configuration().getString( configKey );
                     Class<?>[] candidates = ClassFinder.getClasses( budPackPackage, Play.application().classloader() );
-                    for ( Class<?> candidate : candidates ) {
-
-                        if ( candidate.isInterface() && Role.class.isAssignableFrom( candidate ) ) {
-
+                    for( Class<?> candidate : candidates )
+                    {
+                        if( candidate.isInterface() && Role.class.isAssignableFrom( candidate ) )
+                        {
                             // Role
-                            Class<? extends Role> roleType = ( Class<? extends Role> ) candidate;
+                            Class<? extends Role> roleType = (Class<? extends Role>) candidate;
                             String roleName = roleType.getCanonicalName();
                             String roleDescription = roleName;
-                            if ( roleType.isAnnotationPresent( BudRole.class ) ) {
-
+                            if( roleType.isAnnotationPresent( BudRole.class ) )
+                            {
                                 BudRole roleAnnotation = roleType.getAnnotation( BudRole.class );
                                 roleName = roleAnnotation.name();
                                 roleDescription = Strings.EMPTY.equals( roleAnnotation.description() )
                                                   ? roleName
                                                   : roleAnnotation.description();
-
                             }
 
                             RoleDescriptor role = new RoleDescriptor( budPackName, roleName, roleDescription, roleType );
-                            if ( roleType.isAnnotationPresent( BudActions.class ) ) {
-
+                            if( roleType.isAnnotationPresent( BudActions.class ) )
+                            {
                                 // Actions
                                 BudActions actionsAnnotation = roleType.getAnnotation( BudActions.class );
-                                for ( Class<? extends RoleAction> actionType : actionsAnnotation.value() ) {
+                                for( Class<? extends RoleAction> actionType : actionsAnnotation.value() )
+                                {
                                     String actionName = actionType.getCanonicalName();
                                     String actionDescription = actionName;
-                                    if ( actionType.isAnnotationPresent( BudAction.class ) ) {
-
+                                    if( actionType.isAnnotationPresent( BudAction.class ) )
+                                    {
                                         BudAction actionAnnotation = actionType.getAnnotation( BudAction.class );
                                         actionName = actionAnnotation.name();
                                         actionDescription = Strings.EMPTY.equals( actionAnnotation.description() )
                                                             ? actionName
                                                             : actionAnnotation.description();
-
                                     }
                                     RoleActionDescriptor action = new RoleActionDescriptor( actionName, actionDescription, actionType,
                                                                                             ObjectNode.class, ObjectNode.class );
                                     role.mutableActions().put( actionName, action );
                                 }
-
                             }
                             budPack.mutableRoles().put( roleName, role );
                         }
-
                     }
-
-                } else if ( configKey.endsWith( ".description" ) ) {
-
-                    String budPackDescription = Play.application().configuration().getString( configKey );
-                    budPack.description( budPackDescription );
-
-                } else {
-                    throw new QiBudException( "Unknown BudPack configuration parameter: " + configKey );
                 }
-
+                else
+                {
+                    if( configKey.endsWith( ".description" ) )
+                    {
+                        String budPackDescription = Play.application().configuration().getString( configKey );
+                        budPack.description( budPackDescription );
+                    }
+                    else
+                    {
+                        throw new QiBudException( "Unknown BudPack configuration parameter: " + configKey );
+                    }
+                }
                 packs.put( budPackName, budPack );
             }
         }
         return packs;
-    }
-
-    private Method findActionMethod( Class<? extends RoleAction> actionType )
-    {
-        for ( Method method : actionType.getDeclaredMethods() ) {
-            if ( "invokeAction".equals( method.getName() )
-                 && method.getParameterTypes().length == 3
-                 && !method.isSynthetic() ) {
-                return method;
-            }
-        }
-        throw new QiBudException( "BudAction has no single invokeAction(...) method, cannot register " + actionType );
     }
 
 }

@@ -23,9 +23,7 @@ public class BudAttachment
 {
 
     public static final String IDENTITY = "bud_identity";
-
     public static final String ORIGINAL_FILENAME = "bud_original_filename";
-
     private final GridFSDBFile gridFSFile;
 
     /* package */ BudAttachment( GridFSDBFile gridFSFile )
@@ -40,8 +38,9 @@ public class BudAttachment
 
     public String filename()
     {
-        if ( gridFSFile.containsField( ORIGINAL_FILENAME ) ) {
-            return ( String ) gridFSFile.get( ORIGINAL_FILENAME );
+        if( gridFSFile.containsField( ORIGINAL_FILENAME ) )
+        {
+            return (String) gridFSFile.get( ORIGINAL_FILENAME );
         }
         return gridFSFile.getFilename();
     }
@@ -67,7 +66,7 @@ public class BudAttachment
     }
 
     public void writeTo( OutputStream outputStream )
-            throws IOException
+        throws IOException
     {
         gridFSFile.writeTo( outputStream );
     }

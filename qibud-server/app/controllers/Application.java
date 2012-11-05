@@ -13,42 +13,24 @@
  */
 package controllers;
 
-import domain.buds.BudsRepository;
-import org.qi4j.api.injection.scope.Service;
-import org.qi4j.api.injection.scope.Structure;
-import org.qi4j.api.structure.Module;
-import org.qi4j.api.unitofwork.UnitOfWork;
-import org.qibud.eventstore.Usecase;
 import play.Routes;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.With;
 import views.html.index;
 
 /**
  * Web front controller.
  */
-@With( { RootBudContext.class, AuthContext.class } )
+@WithRootBudContext
+@WithAuthContext
 public class Application
-        extends Controller
+    extends Controller
 {
 
-    @Structure
-    public static Module module;
-
-    @Service
-    public static BudsRepository budsRepository;
-
     // Homepage
-    @Usecase( "QiBud Server Index" )
     public static Result index()
     {
-        UnitOfWork uow = module.newUnitOfWork();
-        try {
-            return ok( index.render( budsRepository.findRootBud() ) );
-        } finally {
-            uow.discard();
-        }
+        return ok( index.render() );
     }
 
     // Javascript Routing
@@ -56,11 +38,11 @@ public class Application
     {
         response().setContentType( "text/javascript" );
         return ok( Routes.javascriptRouter(
-                "jsRoutes",
-                // Routes for Buds
-                controllers.routes.javascript.BudRoles.budRole(),
-                controllers.routes.javascript.BudRoles.saveBudRole(),
-                controllers.routes.javascript.BudRoles.invokeBudRoleAction() ) );
+            "jsRoutes",
+            // Routes for Buds
+            controllers.routes.javascript.BudRoles.budRole(),
+            controllers.routes.javascript.BudRoles.saveBudRole(),
+            controllers.routes.javascript.BudRoles.invokeBudRoleAction() ) );
     }
 
 }

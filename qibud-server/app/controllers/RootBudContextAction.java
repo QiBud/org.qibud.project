@@ -11,17 +11,31 @@
  * limitations under the License.
  *
  */
-package domain.roles;
+package controllers;
 
-import utils.QiBudException;
+import domain.buds.Bud;
+import play.mvc.Action;
+import play.mvc.Http;
+import play.mvc.Result;
 
-public class RoleNotFound
-    extends QiBudException
+public class RootBudContextAction
+    extends Action<WithRootBudContext>
 {
 
-    public RoleNotFound( String budPackName, String roleName )
+    private static final String ROOT_BUD_IDENTITY_KEY = "bud:root:identity";
+
+    @Override
+    public Result call( Http.Context ctx )
+        throws Throwable
     {
-        super( "Role '" + budPackName + "/" + roleName + "' not found." );
+        ctx.args.put( ROOT_BUD_IDENTITY_KEY, Bud.ROOT_BUD_IDENTITY );
+        Result result = delegate.call( ctx );
+        return result;
+    }
+
+    public static String rootBudIdentity()
+    {
+        return (String) Http.Context.current().args.get( ROOT_BUD_IDENTITY_KEY );
     }
 
 }

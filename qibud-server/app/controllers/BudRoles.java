@@ -33,35 +33,35 @@ import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.With;
 
-@With( { RootBudContext.class, AuthContext.class } )
+@WithRootBudContext
+@WithAuthContext
 public class BudRoles
-        extends Controller
+    extends Controller
 {
 
     @Structure
     public static Module module;
-
     @Service
     public static BudPacksService budPacksService;
-
     @Service
     public static BudsRepository budsRepository;
 
     public static Result budRole( String identity, String pack, String role )
-            throws UnitOfWorkCompletionException, IOException, JSONException
+        throws UnitOfWorkCompletionException, IOException, JSONException
     {
         UnitOfWork uow = module.newUnitOfWork();
-        try {
-
+        try
+        {
             Bud bud = budsRepository.findByIdentity( identity );
-            if ( bud == null ) {
+            if( bud == null )
+            {
                 return notFound( "This Bud does not exists." );
             }
 
             Role roleValue = bud.role( pack, role );
-            if ( roleValue == null ) {
+            if( roleValue == null )
+            {
                 return notFound( "This Bud has no '" + pack + "/" + role + "' role" );
             }
 
@@ -74,84 +74,89 @@ public class BudRoles
             json.put( "state", roleValue.jsonRoleState() );
 
             return ok( json );
-
-        } finally {
+        }
+        finally
+        {
             uow.discard();
         }
     }
 
     @BodyParser.Of( BodyParser.Json.class )
     public static Result saveBudRole( String identity, String pack, String role )
-            throws UnitOfWorkCompletionException
+        throws UnitOfWorkCompletionException
     {
         UnitOfWork uow = module.newUnitOfWork();
-        try {
-
+        try
+        {
             Bud bud = budsRepository.findByIdentity( identity );
-            if ( bud == null ) {
-                uow.discard();
-                uow = null;
+            if( bud == null )
+            {
                 return notFound( "This Bud does not exists." );
             }
 
             Role roleEntity = bud.role( pack, role );
-            if ( roleEntity == null ) {
-                uow.discard();
-                uow = null;
+            if( roleEntity == null )
+            {
                 return notFound( "This Bud has no '" + pack + "/" + role + "' role" );
             }
 
             // Update Role
-            ObjectNode jsonState = ( ObjectNode ) request().body().asJson();
+            ObjectNode jsonState = (ObjectNode) request().body().asJson();
             roleEntity.roleState().set( Json.stringify( jsonState ) );
 
+            uow.complete();
+            uow = null;
             return ok();
-
-        } finally {
-            if ( uow != null ) {
-                uow.complete();
+        }
+        finally
+        {
+            if( uow != null )
+            {
+                uow.discard();
             }
         }
     }
 
     @BodyParser.Of( BodyParser.Json.class )
     public static Result invokeBudRoleAction( String identity, String pack, String role, String action )
-            throws UnitOfWorkCompletionException, InstantiationException, IllegalAccessException, RoleActionException, IOException
+        throws UnitOfWorkCompletionException, InstantiationException, IllegalAccessException, RoleActionException, IOException
     {
         UnitOfWork uow = module.newUnitOfWork();
-        try {
-
+        try
+        {
             Bud bud = budsRepository.findByIdentity( identity );
-            if ( bud == null ) {
-                uow.discard();
-                uow = null;
+            if( bud == null )
+            {
                 return notFound( "This Bud does not exists." );
             }
 
             Role roleValue = bud.role( pack, role );
-            if ( roleValue == null ) {
-                uow.discard();
-                uow = null;
+            if( roleValue == null )
+            {
                 return notFound( "This Bud has no '" + pack + "/" + role + "' role" );
             }
 
             RoleActionDescriptor actionDescriptor = budPacksService.budPack( pack ).role( role ).action( action );
-            if ( actionDescriptor == null ) {
-                uow.discard();
-                uow = null;
+            if( actionDescriptor == null )
+            {
                 return notFound( "This Bud Role Action does not exists" );
             }
 
             // Call Role Action
-            ObjectNode actionParam = ( ObjectNode ) request().body().asJson();
+            ObjectNode actionParam = (ObjectNode) request().body().asJson();
             RoleAction roleAction = actionDescriptor.roleActionType().newInstance();
             ObjectNode actionResult = roleAction.invokeAction( bud, roleValue, actionParam );
 
-            return ok( actionResult );
+            uow.complete();
+            uow = null;
 
-        } finally {
-            if ( uow != null ) {
-                uow.complete();
+            return ok( actionResult );
+        }
+        finally
+        {
+            if( uow != null )
+            {
+                uow.discard();
             }
         }
     }

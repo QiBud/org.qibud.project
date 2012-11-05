@@ -1,12 +1,30 @@
 @( loginForm: Form[Authentication.Login] )
 
 @import tags._
+@import helper._
 
-@main( "QiBud Login" ) {
+@main( "QiBud Login", "login" ) {
 
     @layout_fluid() {
 
         @page_header( "QiBud", "Login" )
+
+        @form( action = routes.Authentication.login() ) {
+            <fieldset>
+                @html5_text(
+                    loginForm("username"),
+                    '_label -> "User name"
+                )
+                @html5_password(
+                    loginForm("password"),
+                    '_label -> "Password"
+                )
+            </fieldset>
+            <div class="form-actions">
+                <input id="login" type="submit" class="btn btn-primary btn-mini" value="Login" />
+                <a href="@routes.Application.index()" class="btn btn-mini">Cancel</a>
+            </div>
+        }
 
     }
 

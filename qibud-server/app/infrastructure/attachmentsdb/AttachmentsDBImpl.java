@@ -40,41 +40,36 @@ import play.libs.Akka;
 import utils.QiBudException;
 
 public class AttachmentsDBImpl
-        implements AttachmentsDB, ServiceActivation
+    implements AttachmentsDB, ServiceActivation
 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger( AttachmentsDB.class );
-
     private static final String CONFIG_HOST = "qibud.attachmentsdb.host";
-
     private static final String CONFIG_PORT = "qibud.attachmentsdb.port";
-
     private static final String CONFIG_DB = "qibud.attachmentsdb.db";
-
     private String host;
-
     private Integer port;
-
     private String dbName;
-
     private Mongo mongo;
-
     private DB attachmentsDB;
 
     @Override
     public void activateService()
-            throws Exception
+        throws Exception
     {
         host = Play.application().configuration().getString( CONFIG_HOST );
         port = Play.application().configuration().getInt( CONFIG_PORT );
         dbName = Play.application().configuration().getString( CONFIG_DB );
-        if ( StringUtils.isEmpty( host ) ) {
+        if( StringUtils.isEmpty( host ) )
+        {
             throw new QiBudException( "AttachmentsDB host is empty, check your configuration (" + CONFIG_HOST + ")" );
         }
-        if ( port == null ) {
+        if( port == null )
+        {
             throw new QiBudException( "AttachmentsDB port is empty, check your configuration (" + CONFIG_PORT + ")" );
         }
-        if ( StringUtils.isEmpty( dbName ) ) {
+        if( StringUtils.isEmpty( dbName ) )
+        {
             throw new QiBudException( "AttachmentsDB database name is empty, check your configuration (" + CONFIG_DB + ")" );
         }
 
@@ -86,7 +81,7 @@ public class AttachmentsDBImpl
 
     @Override
     public void passivateService()
-            throws Exception
+        throws Exception
     {
         mongo.close();
         mongo = null;
@@ -126,12 +121,13 @@ public class AttachmentsDBImpl
     private void gatherMedatada( String filename )
     {
         GridFSDBFile dbFile = new GridFS( attachmentsDB ).findOne( filename );
-        if ( dbFile == null ) {
+        if( dbFile == null )
+        {
             LOGGER.warn( "Cannot gather metadata, attachment does not exists (filename: " + filename + ")" );
             return;
         }
-        try {
-
+        try
+        {
             Tika tika = new Tika();
 
             // Detecting content-type
@@ -147,15 +143,17 @@ public class AttachmentsDBImpl
             inputStream.close();
 
             DBObject mongometa = new BasicDBObject( tikameta.size() );
-            for ( String eachMetaKey : tikameta.names() ) {
+            for( String eachMetaKey : tikameta.names() )
+            {
                 mongometa.put( eachMetaKey, tikameta.get( eachMetaKey ) );
             }
             dbFile.setMetaData( mongometa );
 
             dbFile.save();
             LOGGER.info( "Gathered metadada for " + filename );
-
-        } catch ( IOException ex ) {
+        }
+        catch( IOException ex )
+        {
             LOGGER.error( "Unable to gather metadata (filename: " + filename + "): " + ex.getMessage(), ex );
         }
     }
@@ -180,7 +178,8 @@ public class AttachmentsDBImpl
         DBObject query = new BasicDBObject( BudAttachment.IDENTITY, identity );
         GridFS gridFS = new GridFS( attachmentsDB );
         List<GridFSDBFile> budDBFiles = gridFS.find( query );
-        for ( GridFSDBFile eachDBFile : budDBFiles ) {
+        for( GridFSDBFile eachDBFile : budDBFiles )
+        {
             gridFS.remove( eachDBFile.getFilename() );
         }
     }

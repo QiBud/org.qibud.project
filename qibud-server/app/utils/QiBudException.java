@@ -14,7 +14,7 @@
 package utils;
 
 public class QiBudException
-        extends RuntimeException
+    extends RuntimeException
 {
 
     public QiBudException( String string )

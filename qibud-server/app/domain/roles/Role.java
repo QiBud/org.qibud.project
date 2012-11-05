@@ -23,7 +23,7 @@ import play.libs.Json;
 
 @Mixins( Role.Mixin.class )
 public interface Role
-        extends EntityComposite
+    extends EntityComposite
 {
 
     Property<String> budPackName();
@@ -67,7 +67,7 @@ public interface Role
     void onBudChange( Bud bud );
 
     abstract class Mixin
-            implements Role
+        implements Role
     {
 
         @This

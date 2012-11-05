@@ -17,22 +17,16 @@ package application;
 import java.io.File;
 import java.lang.reflect.Method;
 import org.apache.commons.io.FileUtils;
-import org.qibud.eventstore.Usecase;
 import org.qibud.mongodb.MongoDB;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import play.Application;
 import play.GlobalSettings;
 import play.mvc.Action;
 import play.mvc.Http;
-import play.mvc.Result;
 import utils.Threads;
 
 public class Global
-        extends GlobalSettings
+    extends GlobalSettings
 {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger( "org.qibud.server" );
 
     private static final String SHUTDOWN_HOOK_THREAD_NAME = "QiBud.Shutdown";
 
@@ -40,8 +34,8 @@ public class Global
     public void beforeStart( Application app )
     {
         super.beforeStart( app );
-        if ( !app.isProd() && !Threads.isThreadRegisteredAsShutdownHook( SHUTDOWN_HOOK_THREAD_NAME ) ) {
-
+        if( !app.isProd() && !Threads.isThreadRegisteredAsShutdownHook( SHUTDOWN_HOOK_THREAD_NAME ) )
+        {
             // Entities
             final String entitiesHost = app.configuration().getString( "qibud.entities.host" );
             final int entitiesPort = app.configuration().getInt( "qibud.entities.port" );
@@ -64,35 +58,47 @@ public class Global
                 public void run()
                 {
                     // Entities
-                    try {
+                    try
+                    {
                         MongoDB.connectToMongoDB( entitiesHost, entitiesPort ).dropDatabase( entitiesDatabase );
                         System.out.println( "Entities Database Cleared!" );
-                    } catch ( Exception ex ) {
+                    }
+                    catch( Exception ex )
+                    {
                         System.err.println( "Unable to delete entities" );
                         ex.printStackTrace();
                     }
-                    try {
+                    try
+                    {
                         FileUtils.deleteDirectory( entitiesIndexPath );
                         System.out.println( "Entities Index Cleared!" );
-                    } catch ( Exception ex ) {
+                    }
+                    catch( Exception ex )
+                    {
                         System.err.println( "Unable to delete entities index" );
                         ex.printStackTrace();
                     }
 
                     // Attachments
-                    try {
+                    try
+                    {
                         MongoDB.connectToMongoDB( attachmentsHost, attachmentsPort ).dropDatabase( attachmentsDatabase );
                         System.out.println( "Attachments Database Cleared!" );
-                    } catch ( Exception ex ) {
+                    }
+                    catch( Exception ex )
+                    {
                         System.err.println( "Unable to delete attachments" );
                         ex.printStackTrace();
                     }
 
                     // Graph
-                    try {
+                    try
+                    {
                         FileUtils.deleteDirectory( graphPath );
                         System.out.println( "Graph Database Cleared!" );
-                    } catch ( Exception ex ) {
+                    }
+                    catch( Exception ex )
+                    {
                         System.err.println( "Unable to delete graph database from: " + graphPath );
                         ex.printStackTrace();
                     }
@@ -117,44 +123,7 @@ public class Global
     @Override
     public Action onRequest( Http.Request request, Method actionMethod )
     {
-        // Gather Usecase from controller methods annotation or create a generic one
-        Usecase annotation = actionMethod.getAnnotation( Usecase.class );
-        final String usecase;
-        if ( annotation == null ) {
-            usecase = request.method() + ":" + request.uri();
-        } else {
-            usecase = annotation.value();
-        }
-
-        // Wrap controller action to handle domain events
-        return new Action.Simple()
-        {
-
-            @Override
-            public Result call( Http.Context ctx )
-                    throws Throwable
-            {
-                LOGGER.trace( "Before request with Usecase '{}'", usecase );
-
-                try {
-
-                    Result result = delegate.call( ctx );
-                    LOGGER.trace( "After request with Usecase '{}'", usecase );
-                    return result;
-
-                } catch ( Throwable ex ) {
-
-                    LOGGER.trace( "Error after request with Usecase '{}'", usecase, ex );
-                    throw ex;
-
-                } finally {
-
-                    LOGGER.trace( "Finally after request with Usecase '{}'", usecase );
-
-                }
-            }
-
-        };
+        return super.onRequest( request, actionMethod );
     }
 
 }

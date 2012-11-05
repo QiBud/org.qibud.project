@@ -23,13 +23,9 @@ public class RoleDescriptor
 {
 
     private final String budPackName;
-
     private final String name;
-
     private final String description;
-
     private final Class<? extends Role> roleType;
-
     private final Map<String, RoleActionDescriptor> actions = new HashMap<String, RoleActionDescriptor>();
 
     public RoleDescriptor( String budPackName, String name, String description, Class<? extends Role> roleType )

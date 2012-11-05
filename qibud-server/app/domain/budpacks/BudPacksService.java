@@ -35,7 +35,7 @@ import play.libs.Json;
 
 @Mixins( BudPacksService.Mixin.class )
 public interface BudPacksService
-        extends ServiceComposite, ServiceActivation
+    extends ServiceComposite, ServiceActivation
 {
 
     Collection<BudPackDescriptor> budPacks();
@@ -49,33 +49,31 @@ public interface BudPacksService
     Role newRoleInstance( Bud bud, String budPackName, String roleName );
 
     abstract class Mixin
-            implements BudPacksService
+        implements BudPacksService
     {
 
         @Structure
         private Module module;
-
         @Uses
         private ServiceDescriptor descriptor;
-
         private Map<String, BudPackDescriptor> budPacks;
-
         private Map<String, RoleDescriptor> roles;
 
         @Override
         public void activateService()
-                throws Exception
+            throws Exception
         {
             budPacks = descriptor.metaInfo( Map.class );
             roles = new HashMap<String, RoleDescriptor>();
-            for ( BudPackDescriptor budPack : budPacks.values() ) {
+            for( BudPackDescriptor budPack : budPacks.values() )
+            {
                 roles.putAll( budPack.roles() );
             }
         }
 
         @Override
         public void passivateService()
-                throws Exception
+            throws Exception
         {
             budPacks = null;
             roles = null;
@@ -103,12 +101,15 @@ public interface BudPacksService
         public Collection<RoleDescriptor> unusedRoles( Bud bud )
         {
             List<RoleDescriptor> unused = new ArrayList<RoleDescriptor>( roles.values() );
-            for ( Role budRole : bud.roles() ) {
+            for( Role budRole : bud.roles() )
+            {
                 Iterator<RoleDescriptor> it = unused.iterator();
-                while ( it.hasNext() ) {
+                while( it.hasNext() )
+                {
                     RoleDescriptor availableRole = it.next();
-                    if ( availableRole.budPackName().equals( budRole.budPackName().get() )
-                         && availableRole.name().equals( budRole.roleName().get() ) ) {
+                    if( availableRole.budPackName().equals( budRole.budPackName().get() )
+                        && availableRole.name().equals( budRole.roleName().get() ) )
+                    {
                         it.remove();
                     }
                 }

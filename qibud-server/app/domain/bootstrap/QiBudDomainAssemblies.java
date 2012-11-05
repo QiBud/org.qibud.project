@@ -16,6 +16,9 @@ package domain.bootstrap;
 import application.bootstrap.BudPackDescriptor;
 import application.bootstrap.RoleActionDescriptor;
 import application.bootstrap.RoleDescriptor;
+import domain.aaa.AccountFactory;
+import domain.aaa.AccountRepository;
+import domain.aaa.LocalAccount;
 import domain.budpacks.BudPacksService;
 import domain.buds.Bud;
 import domain.buds.BudsFactory;
@@ -29,6 +32,9 @@ import java.util.Map;
 import org.qi4j.bootstrap.Assembler;
 import org.qi4j.bootstrap.AssemblyException;
 import org.qi4j.bootstrap.ModuleAssembly;
+import org.qi4j.library.shiro.assembly.PasswordDomainAssembler;
+import org.qi4j.library.shiro.assembly.PermissionsDomainAssembler;
+import org.qi4j.library.shiro.assembly.StandaloneShiroAssembler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,46 +49,86 @@ public final class QiBudDomainAssemblies
     {
         return new Assembler()
         {
+
             @Override
             public void assemble( ModuleAssembly ma )
-                    throws AssemblyException
+                throws AssemblyException
             {
                 ma.entities( Bud.class,
                              Role.class ).
-                        visibleIn( application );
+                    visibleIn( application );
 
                 List<Class<? extends Role>> roleTypes = new ArrayList<Class<? extends Role>>();
                 List<Class<? extends RoleAction>> roleActionTypes = new ArrayList<Class<? extends RoleAction>>();
-                for ( BudPackDescriptor budPack : budPacks.values() ) {
-                    for ( RoleDescriptor role : budPack.roles().values() ) {
+                for( BudPackDescriptor budPack : budPacks.values() )
+                {
+                    for( RoleDescriptor role : budPack.roles().values() )
+                    {
                         roleTypes.add( role.roleType() );
-                        for ( RoleActionDescriptor action : role.actions().values() ) {
+                        for( RoleActionDescriptor action : role.actions().values() )
+                        {
                             roleActionTypes.add( action.roleActionType() );
                         }
                     }
                 }
 
-                if ( !roleTypes.isEmpty() ) {
+                if( !roleTypes.isEmpty() )
+                {
                     Class<?>[] rolesArray = roleTypes.toArray( new Class<?>[ roleTypes.size() ] );
                     ma.entities( rolesArray ).
-                            visibleIn( application );
+                        visibleIn( application );
                     LOGGER.info( "Assembled {} BudRoles: {}", rolesArray.length, Arrays.toString( rolesArray ) );
                 }
 
-                if ( !roleActionTypes.isEmpty() ) {
+                if( !roleActionTypes.isEmpty() )
+                {
                     Class<?>[] actionsArray = roleActionTypes.toArray( new Class<?>[ roleActionTypes.size() ] );
                     ma.transients( actionsArray ).
-                            visibleIn( application );
+                        visibleIn( application );
                     LOGGER.info( "Assembled {} BudActions: {}", actionsArray.length, Arrays.toString( actionsArray ) );
                 }
 
                 ma.services( BudsRepository.class,
                              BudsFactory.class,
                              BudPacksService.class ).
-                        visibleIn( application ).
-                        instantiateOnStartup();
+                    visibleIn( application ).
+                    instantiateOnStartup();
 
                 ma.services( BudPacksService.class ).setMetaInfo( budPacks );
+            }
+
+        };
+    }
+
+    public static Assembler aaa( final ModuleAssembly configModule )
+    {
+        return new Assembler()
+        {
+
+            @Override
+            public void assemble( ModuleAssembly ma )
+                throws AssemblyException
+            {
+                // Apache Shiro Security and its domain
+                new StandaloneShiroAssembler().
+                    withVisibility( application ).
+                    withConfig( configModule ).
+                    withConfigVisibility( application ).
+                    assemble( ma );
+                new PasswordDomainAssembler().
+                    withVisibility( application ).
+                    withConfig( configModule ).
+                    withConfigVisibility( application ).
+                    assemble( ma );
+                new PermissionsDomainAssembler().
+                    withVisibility( application ).
+                    assemble( ma );
+                ma.entities( LocalAccount.class ).
+                    visibleIn( application );
+                ma.services( AccountFactory.class,
+                             AccountRepository.class ).
+                    instantiateOnStartup().
+                    visibleIn( application );
             }
 
         };

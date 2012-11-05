@@ -24,13 +24,13 @@ import org.qi4j.api.injection.scope.Service;
 import play.Play;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.With;
 import views.html.budpacks.all_budpacks;
 import views.html.budpacks.show_budpack;
 
-@With( { RootBudContext.class, AuthContext.class } )
+@WithRootBudContext
+@WithAuthContext
 public class BudPacks
-        extends Controller
+    extends Controller
 {
 
     @Service
@@ -51,20 +51,24 @@ public class BudPacks
      * BudPacks initializers first and then all Bud Roles.
      */
     public static Result packsJavascript()
-            throws IOException
+        throws IOException
     {
         StringBuilder jsBuilder = new StringBuilder();
-        for ( BudPackDescriptor budPack : budPacksService.budPacks() ) {
+        for( BudPackDescriptor budPack : budPacksService.budPacks() )
+        {
             String resourceName = "/public/budpacks/" + budPack.name() + "/_" + budPack.name() + ".js";
             URL resource = Play.application().resource( resourceName );
-            if ( resource != null ) {
+            if( resource != null )
+            {
                 jsBuilder.append( Strings.toString( new InputStreamReader( resource.openStream(), "UTF-8" ) ) ).append( Strings.NEWLINE );
             }
         }
-        for ( RoleDescriptor role : budPacksService.roles() ) {
+        for( RoleDescriptor role : budPacksService.roles() )
+        {
             String resourceName = "/public/budpacks/" + role.budPackName() + "/" + role.name() + ".js";
             URL resource = Play.application().resource( resourceName );
-            if ( resource != null ) {
+            if( resource != null )
+            {
                 jsBuilder.append( Strings.toString( new InputStreamReader( resource.openStream(), "UTF-8" ) ) ).append( Strings.NEWLINE );
             }
         }

@@ -39,15 +39,15 @@ public final class QiBudInfraAssemblies
 
             @Override
             public void assemble( ModuleAssembly ma )
-                    throws AssemblyException
+                throws AssemblyException
             {
                 // Entities Storage
                 new MongoMapEntityStoreAssembler().withVisibility( application ).
-                        withConfigModule( configModule ).
-                        withConfigVisibility( application ).
-                        assemble( ma );
+                    withConfigModule( configModule ).
+                    withConfigVisibility( application ).
+                    assemble( ma );
                 MongoEntityStoreConfiguration mongoESConf = configModule.forMixin( MongoEntityStoreConfiguration.class ).
-                        declareDefaults();
+                    declareDefaults();
                 mongoESConf.hostname().set( mongoHostname );
                 mongoESConf.port().set( mongoPort );
                 mongoESConf.username().set( mongoUsername );
@@ -63,13 +63,13 @@ public final class QiBudInfraAssemblies
 
                 // Attachments
                 ma.services( AttachmentsDBService.class ).
-                        visibleIn( application ).
-                        instantiateOnStartup();
+                    visibleIn( application ).
+                    instantiateOnStartup();
 
                 // Graph
                 ma.services( GraphDBService.class ).
-                        visibleIn( application ).
-                        instantiateOnStartup();
+                    visibleIn( application ).
+                    instantiateOnStartup();
             }
 
         };

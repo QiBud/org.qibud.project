@@ -27,30 +27,45 @@ public class Threads
     @SuppressWarnings( "unchecked" )
     public static boolean isThreadRegisteredAsShutdownHook( String threadName )
     {
-        try {
+        try
+        {
             Class clazz = Class.forName( "java.lang.ApplicationShutdownHooks" );
             Field field = clazz.getDeclaredField( "hooks" );
             field.setAccessible( true );
             Object rawHooks = field.get( null );
-            Map<Thread, Thread> hooks = ( Map<Thread, Thread> ) rawHooks;
+            Map<Thread, Thread> hooks = (Map<Thread, Thread>) rawHooks;
             Set<Thread> threads = hooks.keySet();
-            for ( Thread eachThread : threads ) {
-                if ( threadName.equals( eachThread.getName() ) ) {
+            for( Thread eachThread : threads )
+            {
+                if( threadName.equals( eachThread.getName() ) )
+                {
                     return true;
                 }
             }
             return false;
-        } catch ( IllegalArgumentException ex ) {
+        }
+        catch( IllegalArgumentException ex )
+        {
             throw new QiBudException( ex.getMessage(), ex );
-        } catch ( IllegalAccessException ex ) {
+        }
+        catch( IllegalAccessException ex )
+        {
             throw new QiBudException( ex.getMessage(), ex );
-        } catch ( NoSuchFieldException ex ) {
+        }
+        catch( NoSuchFieldException ex )
+        {
             throw new QiBudException( ex.getMessage(), ex );
-        } catch ( SecurityException ex ) {
+        }
+        catch( SecurityException ex )
+        {
             throw new QiBudException( ex.getMessage(), ex );
-        } catch ( ClassNotFoundException ex ) {
+        }
+        catch( ClassNotFoundException ex )
+        {
             throw new QiBudException( ex.getMessage(), ex );
-        } catch ( ClassCastException ex ) {
+        }
+        catch( ClassCastException ex )
+        {
             throw new QiBudException( ex.getMessage(), ex );
         }
     }

@@ -38,7 +38,7 @@ import org.qi4j.api.property.Property;
 
 @Mixins( Bud.Mixin.class )
 public interface Bud
-        extends EntityComposite
+    extends EntityComposite
 {
 
     String ROOT_BUD_IDENTITY = "root";
@@ -75,30 +75,27 @@ public interface Bud
     void removeRole( String pack, String role );
 
     abstract class Mixin
-            implements Bud
+        implements Bud
     {
 
         @Service
         private GraphDB graphDB;
-
         @Service
         private AttachmentsDB attachmentsDB;
-
         @Service
         private BudPacksService budPacksService;
-
         @This
         private Bud bud;
-
         private BudNode node;
-
         private List<BudAttachment> attachments;
 
         @Override
         public BudNode graphNode()
         {
-            synchronized( this ) {
-                if ( node == null ) {
+            synchronized( this )
+            {
+                if( node == null )
+                {
                     Node underlyingNode = graphDB.getBudNode( bud.identity().get() );
                     node = new BudNode( underlyingNode );
                 }
@@ -109,11 +106,14 @@ public interface Bud
         @Override
         public List<BudAttachment> attachments()
         {
-            synchronized( this ) {
-                if ( attachments == null ) {
+            synchronized( this )
+            {
+                if( attachments == null )
+                {
                     List<GridFSDBFile> budDBFiles = attachmentsDB.getBudDBFiles( bud.identity().get() );
                     List<BudAttachment> budAttachments = new ArrayList<BudAttachment>();
-                    for ( GridFSDBFile eachDBFile : budDBFiles ) {
+                    for( GridFSDBFile eachDBFile : budDBFiles )
+                    {
                         budAttachments.add( new BudAttachment( eachDBFile ) );
                     }
                     attachments = budAttachments;
@@ -131,9 +131,11 @@ public interface Bud
         @Override
         public Role role( String budPackName, String roleName )
         {
-            for ( Role role : bud.roles() ) {
-                if ( role.budPackName().get().equals( budPackName )
-                     && role.roleName().get().equals( roleName ) ) {
+            for( Role role : bud.roles() )
+            {
+                if( role.budPackName().get().equals( budPackName )
+                    && role.roleName().get().equals( roleName ) )
+                {
                     return role;
                 }
             }
@@ -145,16 +147,19 @@ public interface Bud
         {
             Role newRole = null;
             Iterator<Role> passivatedIterator = bud.passivatedRoles().iterator();
-            while ( passivatedIterator.hasNext() ) {
+            while( passivatedIterator.hasNext() )
+            {
                 Role unusedRole = passivatedIterator.next();
-                if ( unusedRole.is( pack, role ) ) {
+                if( unusedRole.is( pack, role ) )
+                {
                     passivatedIterator.remove();
                     newRole = unusedRole;
                     break;
                 }
             }
 
-            if ( newRole == null ) {
+            if( newRole == null )
+            {
                 newRole = budPacksService.newRoleInstance( bud, pack, role );
             }
 
@@ -166,10 +171,12 @@ public interface Bud
         public void removeRole( String pack, String role )
         {
             Iterator<Role> rolesIterator = bud.roles().iterator();
-            while ( rolesIterator.hasNext() ) {
+            while( rolesIterator.hasNext() )
+            {
                 Role candidate = rolesIterator.next();
-                if ( candidate.budPackName().get().equals( pack )
-                     && candidate.roleName().get().equals( role ) ) {
+                if( candidate.budPackName().get().equals( pack )
+                    && candidate.roleName().get().equals( role ) )
+                {
                     candidate.onDisable( bud );
                     rolesIterator.remove();
                     bud.passivatedRoles().add( candidate );

@@ -18,10 +18,10 @@ import org.codehaus.jackson.node.ObjectNode;
 import org.qi4j.api.composite.TransientComposite;
 
 public interface RoleAction<RoleType extends Role>
-        extends TransientComposite
+    extends TransientComposite
 {
 
     ObjectNode invokeAction( Bud bud, RoleType role, ObjectNode param )
-            throws RoleActionException;
+        throws RoleActionException;
 
 }

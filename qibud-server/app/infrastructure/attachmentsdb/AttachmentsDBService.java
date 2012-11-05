@@ -20,7 +20,6 @@ import org.qi4j.api.service.ServiceComposite;
 
 @Mixins( AttachmentsDBImpl.class )
 public interface AttachmentsDBService
-        extends AttachmentsDB, ServiceComposite, ServiceActivation
+    extends AttachmentsDB, ServiceComposite, ServiceActivation
 {
-    
 }

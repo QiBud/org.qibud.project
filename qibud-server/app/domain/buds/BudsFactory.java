@@ -33,38 +33,35 @@ import play.Play;
 
 @Mixins( BudsFactory.Mixin.class )
 public interface BudsFactory
-        extends ServiceComposite, ServiceActivation
+    extends ServiceComposite, ServiceActivation
 {
 
     Bud createNewBud( Bud creationBud, String title, String content );
 
     abstract class Mixin
-            implements BudsFactory
+        implements BudsFactory
     {
 
         private static final Logger LOGGER = LoggerFactory.getLogger( BudsFactory.class );
-
         @Structure
         private Module module;
-
         @Service
         private GraphDB graphDB;
-
         @Service
         private AttachmentsDB attachmentsDB;
 
         @Override
         public void activateService()
-                throws Exception
+            throws Exception
         {
             UnitOfWork uow = module.newUnitOfWork();
-            try {
-
+            try
+            {
                 uow.get( Bud.class, Bud.ROOT_BUD_IDENTITY );
                 uow.discard();
-
-            } catch ( NoSuchEntityException noRootBud ) {
-
+            }
+            catch( NoSuchEntityException noRootBud )
+            {
                 LOGGER.debug( "Root Bud does not exists, first start?" );
 
                 // Create ROOT BudEntity
@@ -84,47 +81,58 @@ public interface BudsFactory
                 InputStream attachmentInputStream = Play.application().resourceAsStream( filename );
                 attachmentsDB.storeAttachment( root.identity().get(), filename, attachmentInputStream );
 
-                try {
-
+                try
+                {
                     uow.complete();
-
                     LOGGER.info( "Rood Bud created!" );
-
-                } catch ( UnitOfWorkCompletionException ex ) {
-
+                }
+                catch( UnitOfWorkCompletionException ex )
+                {
                     // Manual Rollback
                     uow = module.newUnitOfWork();
-                    try {
+                    try
+                    {
                         Bud rootBud = uow.get( Bud.class, Bud.ROOT_BUD_IDENTITY );
-                        if ( rootBud != null ) {
-                            try {
+                        if( rootBud != null )
+                        {
+                            try
+                            {
                                 attachmentsDB.deleteBudDBFiles( Bud.ROOT_BUD_IDENTITY );
-                            } catch ( RuntimeException attachEx ) {
+                            }
+                            catch( RuntimeException attachEx )
+                            {
                                 LOGGER.warn( "Unable to cleanup RootBud attachments after creation failure", attachEx );
                             }
-                            try {
+                            try
+                            {
                                 graphDB.deleteBudNode( Bud.ROOT_BUD_IDENTITY );
-                            } catch ( RuntimeException graphEx ) {
+                            }
+                            catch( RuntimeException graphEx )
+                            {
                                 LOGGER.warn( "Unable to cleanup RootBud node after creation failure", graphEx );
                             }
-                            try {
+                            try
+                            {
                                 uow.remove( rootBud );
                                 uow.complete();
                                 LOGGER.error( "Something went wrong when creating Root Bud, changes have been manually rollbacked." );
-                            } catch ( UnitOfWorkCompletionException ex2 ) {
+                            }
+                            catch( UnitOfWorkCompletionException ex2 )
+                            {
                                 LOGGER.error( "Something went wrong when creating Root Bud AND when manually rollbacking changes!", ex2 );
                             }
                         }
-                    } catch ( NoSuchEntityException ex2 ) {
                     }
-
+                    catch( NoSuchEntityException ex2 )
+                    {
+                    }
                 }
             }
         }
 
         @Override
         public void passivateService()
-                throws Exception
+            throws Exception
         {
         }
 

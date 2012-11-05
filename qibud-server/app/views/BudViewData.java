@@ -27,9 +27,7 @@ public class BudViewData
 {
 
     public final Bud bud;
-
     public final Collection<Role> roles;
-
     public final Collection<RoleDescriptor> unused_roles;
 
     public BudViewData( Bud bud, Collection<RoleDescriptor> unused_roles )

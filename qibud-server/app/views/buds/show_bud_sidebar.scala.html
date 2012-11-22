@@ -45,14 +45,15 @@
         }
     }
 }
-<p>Add a role:</p>
-<select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
-    <option value="">Select...</option>
-    @for( unused_role <- budview.unused_roles) {
-        <option value='@routes.Buds.addBudRole(budview.bud.identity().get(), unused_role.budPackName(), unused_role.name() )'>@unused_role.budPackName()/@unused_role.name()</option>
-    }
-</select>
-
+@if( budview.accountCanWrite() ) {
+    <p>Add a role:</p>
+    <select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+        <option value="">Select...</option>
+        @for( unused_role <- budview.unused_roles) {
+            <option value='@routes.Buds.addBudRole(budview.bud.identity().get(), unused_role.budPackName(), unused_role.name() )'>@unused_role.budPackName()/@unused_role.name()</option>
+        }
+    </select>
+}
 
 @if( ! budview.bud.attachments().isEmpty() ) {
     <h3>Attachments</h3>

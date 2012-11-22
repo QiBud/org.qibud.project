@@ -85,6 +85,10 @@ public class BudRoles
     public static Result saveBudRole( String identity, String pack, String role )
         throws UnitOfWorkCompletionException
     {
+        if( !AuthContextAction.connected() )
+        {
+            return unauthorized();
+        }
         UnitOfWork uow = module.newUnitOfWork();
         try
         {
@@ -121,6 +125,10 @@ public class BudRoles
     public static Result invokeBudRoleAction( String identity, String pack, String role, String action )
         throws UnitOfWorkCompletionException, InstantiationException, IllegalAccessException, RoleActionException, IOException
     {
+        if( !AuthContextAction.connected() )
+        {
+            return unauthorized();
+        }
         UnitOfWork uow = module.newUnitOfWork();
         try
         {

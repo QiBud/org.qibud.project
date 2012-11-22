@@ -91,4 +91,19 @@ public class AuthContextAction
         return Http.Context.current().session().get( Authentication.ACCOUNT_IDENTITY_KEY );
     }
 
+    public static String connectedBudIdentity()
+    {
+        UnitOfWork uow = PlayQi.controllersModule().newUnitOfWork();
+        try
+        {
+            AccountRepository accountRepository = PlayQi.service( AccountRepository.class );
+            Account account = accountRepository.findAccountByIdentity( connectedAccountIdentity() );
+            return account.bud().get().identity().get();
+        }
+        finally
+        {
+            uow.discard();
+        }
+    }
+
 }

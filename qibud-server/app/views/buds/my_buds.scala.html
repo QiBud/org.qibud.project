@@ -2,14 +2,14 @@
 
 @import tags._
 
-@main( "Buds", "buds" ) {
+@main( "My Buds", "mybuds" ) {
 
     @layout_fluid() {
-    
-        @page_header( "Buds" )
-        
+
+        @page_header( "My Buds" )
+
         @if( buds.isEmpty() ) {
-            <p>No Bud found.</p>
+            <p>You have no Buds.</p>
         }
         @if( ! buds.isEmpty() ) {
             <ul>
@@ -18,7 +18,7 @@
                 }
             </ul>
         }
-    
+
     }
 
 }

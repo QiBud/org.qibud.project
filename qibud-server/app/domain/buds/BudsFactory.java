@@ -13,6 +13,7 @@
  */
 package domain.buds;
 
+import domain.aaa.Account;
 import infrastructure.attachmentsdb.AttachmentsDB;
 import infrastructure.graphdb.GraphDB;
 import java.io.InputStream;
@@ -68,9 +69,10 @@ public interface BudsFactory
                 EntityBuilder<Bud> builder = uow.newEntityBuilder( Bud.class );
                 Bud root = builder.instance();
                 root.identity().set( Bud.ROOT_BUD_IDENTITY );
+                root.visibility().set( BudVisibility.PUBLIC );
                 root.title().set( "Root Bud" );
                 root.postedAt().set( new DateTime() );
-                root.content().set( "## This is the Root Bud\nFor now this Bud has no Role and this sample content only." );
+                root.content().set( "## This is the Root Bud\nFor now this Bud is public, has no Role and this sample content only." );
                 root = builder.newInstance();
 
                 // Create ROOT BudNode

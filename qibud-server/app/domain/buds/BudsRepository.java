@@ -13,6 +13,7 @@
  */
 package domain.buds;
 
+import domain.aaa.Account;
 import org.qi4j.api.injection.scope.Structure;
 import org.qi4j.api.mixin.Mixins;
 import org.qi4j.api.query.Query;
@@ -30,6 +31,10 @@ public interface BudsRepository
     Bud findRootBud();
 
     Query<Bud> findAll();
+
+    Query<Bud> findPublic();
+
+    Query<Bud> findOwnedBuds( Account owner );
 
     Bud findByIdentity( String identity );
 
@@ -54,6 +59,22 @@ public interface BudsRepository
         public Query<Bud> findAll()
         {
             return module.currentUnitOfWork().newQuery( module.newQueryBuilder( Bud.class ) );
+        }
+
+        @Override
+        public Query<Bud> findPublic()
+        {
+            QueryBuilder<Bud> builder = module.newQueryBuilder( Bud.class );
+            builder = builder.where( eq( templateFor( Bud.class ).visibility(), BudVisibility.PUBLIC ) );
+            return module.currentUnitOfWork().newQuery( builder );
+        }
+
+        @Override
+        public Query<Bud> findOwnedBuds( Account owner )
+        {
+            QueryBuilder<Bud> builder = module.newQueryBuilder( Bud.class );
+            builder = builder.where( eq( templateFor( Bud.class ).owner(), owner ) );
+            return module.currentUnitOfWork().newQuery( builder );
         }
 
         @Override

@@ -14,6 +14,7 @@
 package views;
 
 import application.bootstrap.RoleDescriptor;
+import controllers.AuthContextAction;
 import domain.buds.Bud;
 import domain.roles.Role;
 import java.util.Collection;
@@ -44,6 +45,17 @@ public class BudViewData
     public boolean hasChildren()
     {
         return !children.isEmpty();
+    }
+
+    public boolean accountCanWrite()
+    {
+        if( AuthContextAction.connected()
+            && bud.owner().get() != null
+            && bud.owner().get().identity().get().equals( AuthContextAction.connectedAccountIdentity() ) )
+        {
+            return true;
+        }
+        return false;
     }
 
 }

@@ -9,6 +9,7 @@ POST    /login                                          controllers.Authenticati
 GET     /logout                                         controllers.Authentication.logout()
 GET     /account                                        controllers.Authentication.account()
 
+GET     /account/buds                                   controllers.Buds.my_buds
 GET     /buds                                           controllers.Buds.buds
 GET     /bud/:identity/new                              controllers.Buds.budCreateForm(identity: String)
 POST    /bud/:identity/create                           controllers.Buds.saveNewBud(identity: String)

@@ -16,8 +16,11 @@ package controllers;
 
 import com.mongodb.DBObject;
 import com.mongodb.gridfs.GridFSDBFile;
+import domain.aaa.Account;
+import domain.aaa.AccountRepository;
 import domain.budpacks.BudPacksService;
 import domain.buds.Bud;
+import domain.buds.BudVisibility;
 import domain.buds.BudsFactory;
 import domain.buds.BudsRepository;
 import domain.roles.Role;
@@ -37,7 +40,6 @@ import play.mvc.Call;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.BudViewData;
-import views.html.buds.all_buds;
 import views.html.buds.create_bud;
 import views.html.buds.edit_bud;
 import views.html.buds.show_bud;
@@ -51,6 +53,8 @@ public class Buds
     static final Form<BudForm> budForm = form( BudForm.class );
     @Structure
     public static Module module;
+    @Service
+    public static AccountRepository accountRepository;
     @Service
     public static BudPacksService budPacksService;
     @Service
@@ -67,8 +71,27 @@ public class Buds
         UnitOfWork uow = module.newUnitOfWork();
         try
         {
-            Query<Bud> allBuds = budsRepository.findAll();
-            return ok( all_buds.render( Iterables.toList( allBuds ) ) );
+            Query<Bud> publicBuds = budsRepository.findPublic();
+            return ok( views.html.buds.public_buds.render( Iterables.toList( publicBuds ) ) );
+        }
+        finally
+        {
+            uow.discard();
+        }
+    }
+
+    public static Result my_buds()
+    {
+        if( !AuthContextAction.connected() )
+        {
+            return unauthorized();
+        }
+        UnitOfWork uow = module.newUnitOfWork();
+        try
+        {
+            Account owner = accountRepository.findAccountByIdentity( AuthContextAction.connectedAccountIdentity() );
+            Query<Bud> myBuds = budsRepository.findOwnedBuds( owner );
+            return ok( views.html.buds.my_buds.render( Iterables.toList( myBuds ) ) );
         }
         finally
         {
@@ -78,6 +101,10 @@ public class Buds
 
     public static Result budCreateForm( String identity )
     {
+        if( !AuthContextAction.connected() )
+        {
+            return unauthorized();
+        }
         UnitOfWork uow = module.newUnitOfWork();
         try
         {
@@ -97,6 +124,10 @@ public class Buds
     public static Result saveNewBud( String identity )
         throws UnitOfWorkCompletionException
     {
+        if( !AuthContextAction.connected() )
+        {
+            return unauthorized();
+        }
         UnitOfWork uow = module.newUnitOfWork();
         try
         {
@@ -114,7 +145,9 @@ public class Buds
             else
             {
                 BudForm newBud = filledForm.get();
+                Account owner = accountRepository.findAccountByIdentity( AuthContextAction.connectedAccountIdentity() );
                 Bud createdBud = budsFactory.createNewBud( parent, newBud.title, newBud.content );
+                createdBud.owner().set( owner );
 
                 flash( "success", newBud.title + " created" );
                 Result result = redirect( routes.Buds.bud( createdBud.identity().get() ) );
@@ -143,6 +176,18 @@ public class Buds
             if( bud == null )
             {
                 return notFound();
+            }
+            if( bud.visibility().get() != BudVisibility.PUBLIC )
+            {
+                if( bud.owner().get() == null )
+                {
+                    return unauthorized( "Unauthorized" );
+                }
+                if( !bud.owner().get().identity().get().equals( AuthContextAction.connectedAccountIdentity() ) )
+                {
+                    // TODO Ensure shared with connected Account!
+                    return unauthorized( "Unauthorized" );
+                }
             }
             return ok( show_bud.render( new BudViewData( bud,
                                                          budPacksService.unusedRoles( bud ),
@@ -208,6 +253,10 @@ public class Buds
 
     public static Result budEditForm( String identity )
     {
+        if( !AuthContextAction.connected() )
+        {
+            return unauthorized();
+        }
         UnitOfWork uow = module.newUnitOfWork();
         try
         {
@@ -230,6 +279,10 @@ public class Buds
     public static Result saveBud( String identity )
         throws UnitOfWorkCompletionException
     {
+        if( !AuthContextAction.connected() )
+        {
+            return unauthorized();
+        }
         UnitOfWork uow = module.newUnitOfWork();
         try
         {
@@ -277,6 +330,10 @@ public class Buds
     public static Result deleteBud( String identity )
         throws UnitOfWorkCompletionException
     {
+        if( !AuthContextAction.connected() )
+        {
+            return unauthorized();
+        }
         UnitOfWork uow = module.newUnitOfWork();
         try
         {
@@ -325,6 +382,10 @@ public class Buds
     public static Result addBudRole( String identity, String pack, String role )
         throws UnitOfWorkCompletionException
     {
+        if( !AuthContextAction.connected() )
+        {
+            return unauthorized();
+        }
         UnitOfWork uow = module.newUnitOfWork();
         try
         {
@@ -354,6 +415,10 @@ public class Buds
     public static Result deleteBudRole( String identity, String pack, String role )
         throws UnitOfWorkCompletionException
     {
+        if( !AuthContextAction.connected() )
+        {
+            return unauthorized();
+        }
         UnitOfWork uow = module.newUnitOfWork();
         try
         {

@@ -1,0 +1,24 @@
+@(buds: List[_root_.domain.buds.Bud] )
+
+@import tags._
+
+@main( "Public Buds", "publicbuds" ) {
+
+    @layout_fluid() {
+
+        @page_header( "Public Buds" )
+
+        @if( buds.isEmpty() ) {
+            <p>No public Bud found.</p>
+        }
+        @if( ! buds.isEmpty() ) {
+            <ul>
+                @for( bud <- buds ) {
+                    <li><a href="@routes.Buds.bud( bud.identity().get() )">@bud.title()</a></li>
+                }
+            </ul>
+        }
+
+    }
+
+}

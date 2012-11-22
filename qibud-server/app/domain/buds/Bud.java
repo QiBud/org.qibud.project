@@ -15,6 +15,7 @@
 package domain.buds;
 
 import com.mongodb.gridfs.GridFSDBFile;
+import domain.aaa.Account;
 import domain.budpacks.BudPacksService;
 import domain.roles.Role;
 import infrastructure.attachmentsdb.AttachmentsDB;
@@ -46,6 +47,12 @@ public interface Bud
     @Optional
     Association<Bud> parent();
 
+    @Optional
+    Association<Account> owner();
+
+    @UseDefaults
+    Property<BudVisibility> visibility();
+
     Property<String> title();
 
     @Immutable
@@ -60,12 +67,12 @@ public interface Bud
 
     boolean isRoot();
 
-    @UseDefaults
     @Aggregated
+    @UseDefaults
     ManyAssociation<Role> roles();
 
-    @UseDefaults
     @Aggregated
+    @UseDefaults
     ManyAssociation<Role> passivatedRoles();
 
     Role role( String pack, String role );

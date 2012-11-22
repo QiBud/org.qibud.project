@@ -90,8 +90,10 @@ public interface AccountFactory
             account.subjectIdentifier().set( username );
             account.password().set( passwordService.encryptPassword( password ) );
             account.bud().set( accountBud );
+            account = builder.newInstance();
 
-            return builder.newInstance();
+            accountBud.owner().set( account );
+            return account;
         }
 
     }

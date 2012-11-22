@@ -13,8 +13,12 @@
  */
 package controllers;
 
+import domain.aaa.Account;
 import domain.aaa.AccountRepository;
 import domain.aaa.LocalAccount;
+import domain.budpacks.BudPacksService;
+import domain.buds.Bud;
+import domain.buds.BudsRepository;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -27,7 +31,9 @@ import play.Logger;
 import play.data.Form;
 import play.data.validation.Constraints;
 import play.mvc.Controller;
+import play.mvc.Http.Session;
 import play.mvc.Result;
+import views.BudViewData;
 
 @WithRootBudContext
 @WithAuthContext
@@ -52,6 +58,10 @@ public class Authentication
     public static Module module;
     @Service
     public static AccountRepository accountRepository;
+    @Service
+    public static BudsRepository budsRepository;
+    @Service
+    public static BudPacksService budPacksService;
 
     public static Result login_form()
     {
@@ -65,7 +75,6 @@ public class Authentication
         {
             return badRequest( views.html.auth.login.render( filledForm ) );
         }
-
         try
         {
             Login login = filledForm.get();
@@ -76,17 +85,15 @@ public class Authentication
 
             UnitOfWork uow = module.newUnitOfWork();
             LocalAccount account = accountRepository.findLocalAccount( login.username );
-            session().put( ACCOUNT_IDENTITY_KEY, account.identity().get() );
-            session().put( ACCOUNT_SUBJECT_KEY, login.username );
+            create_auth( session(), account.identity().get(), login.username );
             uow.discard();
 
-            return redirect( routes.Application.index() );
+            return redirect( routes.Authentication.account() );
         }
         catch( AuthenticationException ex )
         {
             Logger.debug( "Authentication failed", ex );
-            session().remove( ACCOUNT_IDENTITY_KEY );
-            session().remove( ACCOUNT_SUBJECT_KEY );
+            clear_auth( session() );
             flash( "error", "Invalid username or password." );
             return badRequest( views.html.auth.login.render( filledForm ) );
         }
@@ -94,10 +101,50 @@ public class Authentication
 
     public static Result logout()
     {
-        session().remove( ACCOUNT_IDENTITY_KEY );
-        session().remove( ACCOUNT_SUBJECT_KEY );
+        clear_auth( session() );
         flash( "success", "You have been logged out." );
         return redirect( routes.Application.index() );
+    }
+
+    public static Result account()
+    {
+        if( !AuthContextAction.connected() )
+        {
+            clear_auth( session() );
+            flash( "warn", "You are not authenticated." );
+            return redirect( routes.Authentication.login() );
+        }
+        UnitOfWork uow = module.newUnitOfWork();
+        try
+        {
+            Account account = accountRepository.findAccountByIdentity( AuthContextAction.connectedAccountIdentity() );
+            if( account == null )
+            {
+                clear_auth( session() );
+                flash( "warn", "You are not authenticated." );
+                return redirect( routes.Authentication.login() );
+            }
+            Bud bud = account.bud().get();
+            return ok( views.html.buds.show_bud.render( new BudViewData( bud,
+                                                                         budPacksService.unusedRoles( bud ),
+                                                                         budsRepository.findChildren( bud ) ) ) );
+        }
+        finally
+        {
+            uow.discard();
+        }
+    }
+
+    /* package */ static void create_auth( Session session, String accountIdentity, String subject )
+    {
+        session.put( ACCOUNT_IDENTITY_KEY, accountIdentity );
+        session.put( ACCOUNT_SUBJECT_KEY, subject );
+    }
+
+    /* package */ static void clear_auth( Session session )
+    {
+        session.remove( ACCOUNT_IDENTITY_KEY );
+        session.remove( ACCOUNT_SUBJECT_KEY );
     }
 
 }

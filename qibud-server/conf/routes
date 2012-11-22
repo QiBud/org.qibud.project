@@ -1,29 +1,23 @@
 # Routes
-# This file defines all application routes (Higher priority routes first)
-# ~~~~
 
-# Home page
+
 GET     /                                               controllers.Application.index()
 GET     /assets/javascripts/routes                      controllers.Application.javascriptRoutes()
 
 GET     /login                                          controllers.Authentication.login_form()
 POST    /login                                          controllers.Authentication.login()
 GET     /logout                                         controllers.Authentication.logout()
+GET     /account                                        controllers.Authentication.account()
 
 GET     /buds                                           controllers.Buds.buds
 GET     /bud/:identity/new                              controllers.Buds.budCreateForm(identity: String)
 POST    /bud/:identity/create                           controllers.Buds.saveNewBud(identity: String)
 
-# tous les roles du bud rajoutent de la vue \u00c3\u00a0 la vue de base
 GET     /bud/:identity                                  controllers.Buds.bud(identity: String)
-# bud attachments
 GET     /bud/:identity/attachment/:attachment_id        controllers.Buds.attachment(identity: String, attachment_id: String)
 GET     /bud/:identity/attachment/:attachment_id/meta   controllers.Buds.attachmentMetadata(identity: String, attachment_id: String)
-# tous les roles du bud rajoutent du formulaire
 GET     /bud/:identity/edit                             controllers.Buds.budEditForm(identity: String)
-# tous les roles du bud rajoutent de la validation, du "comportement BudStore"
 POST    /bud/:identity                                  controllers.Buds.saveBud(identity: String)
-# tous les roles du bud rajoutent de la validation, du "comportement BudStore"
 GET     /bud/:identity/delete                           controllers.Buds.deleteBud(identity: String)
 GET     /bud/:identity/:pack/:role/add                  controllers.Buds.addBudRole(identity: String, pack: String, role: String)
 GET     /bud/:identity/:pack/:role/delete               controllers.Buds.deleteBudRole(identity: String, pack: String, role: String)
@@ -36,5 +30,5 @@ GET     /packs                                          controllers.BudPacks.pac
 GET     /packs/js                                       controllers.BudPacks.packsJavascript
 GET     /pack/:pack                                     controllers.BudPacks.pack(pack: String)
 
-# Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                                   controllers.Assets.at(path="/public", file)
+

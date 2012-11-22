@@ -33,6 +33,8 @@ public interface BudsRepository
 
     Bud findByIdentity( String identity );
 
+    Query<Bud> findChildren( Bud bud );
+
     Query<Bud> findChildren( String identity );
 
     abstract class Mixin
@@ -58,6 +60,12 @@ public interface BudsRepository
         public Bud findByIdentity( String identity )
         {
             return module.currentUnitOfWork().get( Bud.class, identity );
+        }
+
+        @Override
+        public Query<Bud> findChildren( Bud bud )
+        {
+            return findChildren( bud.identity().get() );
         }
 
         @Override

@@ -47,8 +47,7 @@ public class AuthContextAction
             if( account == null )
             {
                 // Unknown account, automatic logout
-                ctx.session().remove( Authentication.ACCOUNT_IDENTITY_KEY );
-                ctx.session().remove( Authentication.ACCOUNT_SUBJECT_KEY );
+                Authentication.clear_auth( ctx.session() );
             }
             else
             {
@@ -63,10 +62,8 @@ public class AuthContextAction
         }
         else if( !Strings.isEmpty( accountIdentity ) || !Strings.isEmpty( principal ) )
         {
-            ctx.session().remove( Authentication.ACCOUNT_IDENTITY_KEY );
-            ctx.session().remove( Authentication.ACCOUNT_SUBJECT_KEY );
+            Authentication.clear_auth( ctx.session() );
         }
-
         try
         {
             Result result = delegate.call( ctx );

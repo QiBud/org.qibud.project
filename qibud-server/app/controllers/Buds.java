@@ -144,7 +144,9 @@ public class Buds
             {
                 return notFound();
             }
-            return ok( show_bud.render( new BudViewData( bud, budPacksService.unusedRoles( bud ) ) ) );
+            return ok( show_bud.render( new BudViewData( bud,
+                                                         budPacksService.unusedRoles( bud ),
+                                                         budsRepository.findChildren( bud ) ) ) );
         }
         finally
         {
@@ -214,7 +216,9 @@ public class Buds
             {
                 return notFound();
             }
-            return ok( edit_bud.render( new BudViewData( bud, budPacksService.unusedRoles( bud ) ),
+            return ok( edit_bud.render( new BudViewData( bud,
+                                                         budPacksService.unusedRoles( bud ),
+                                                         budsRepository.findChildren( bud ) ),
                                         form( BudForm.class ).fill( BudForm.filledWith( bud ) ) ) );
         }
         finally
@@ -239,7 +243,9 @@ public class Buds
 
             if( filledForm.hasErrors() )
             {
-                return badRequest( edit_bud.render( new BudViewData( bud, budPacksService.unusedRoles( bud ) ),
+                return badRequest( edit_bud.render( new BudViewData( bud,
+                                                                     budPacksService.unusedRoles( bud ),
+                                                                     budsRepository.findChildren( bud ) ),
                                                     filledForm ) );
             }
             else

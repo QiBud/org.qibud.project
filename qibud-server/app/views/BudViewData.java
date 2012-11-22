@@ -18,6 +18,8 @@ import domain.buds.Bud;
 import domain.roles.Role;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import org.qi4j.api.query.Query;
 import org.qi4j.functional.Iterables;
 
 /**
@@ -29,12 +31,19 @@ public class BudViewData
     public final Bud bud;
     public final Collection<Role> roles;
     public final Collection<RoleDescriptor> unused_roles;
+    public final List<Bud> children;
 
-    public BudViewData( Bud bud, Collection<RoleDescriptor> unused_roles )
+    public BudViewData( Bud bud, Collection<RoleDescriptor> unused_roles, Query<Bud> children )
     {
         this.bud = bud;
         this.roles = Collections.unmodifiableCollection( Iterables.toList( bud.roles() ) );
         this.unused_roles = Collections.unmodifiableCollection( unused_roles );
+        this.children = Iterables.toList( children );
+    }
+
+    public boolean hasChildren()
+    {
+        return !children.isEmpty();
     }
 
 }

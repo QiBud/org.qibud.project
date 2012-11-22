@@ -95,3 +95,12 @@
         }
     }
 }
+
+@if( budview.hasChildren() ) {
+    <h3>Children</h3>
+    <ul class="nav nav-list">
+        @for( child <- budview.children ) {
+            <li><a href="@routes.Buds.bud( child.identity().get() )">@child.title().get()</a></li>
+        }
+    </ul>
+}

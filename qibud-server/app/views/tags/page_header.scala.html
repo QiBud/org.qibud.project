@@ -1,5 +1,13 @@
-@( title: String, subtitle: String = "", id: String = "" )
+@( title: String, subtitle: String = null, id: String = null, btn_icon: String = null, btn_route: Call = null, btn_title: String = null )
 
-<div class="page-header"@if( ! id.isEmpty() ) { id="@id" } >
-    <h1 class="page_title">@title@if(!subtitle.isEmpty()) { <small class="page_title">@subtitle</small>}</h1>
+<div class="page-header"@if( id ) { id="@id" } >
+    <h1 class="page_title">
+        @if( btn_icon || btn_route != null ) {
+            <a href="@btn_route" class='btn btn-inverse' @if( btn_title ) { title="@btn_title" }>
+               <i class="@btn_icon"></i>
+            </a>
+        }
+        @title
+        @if( subtitle ) { <small class="page_title">@subtitle</small>}
+    </h1>
 </div>

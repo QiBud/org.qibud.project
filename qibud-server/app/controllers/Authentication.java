@@ -81,13 +81,12 @@ public class Authentication
             Subject currentUser = SecurityUtils.getSubject();
             currentUser.login( new UsernamePasswordToken( login.username, login.password ) );
 
-            flash( "success", "Logged in as " + login.username + "." );
-
             UnitOfWork uow = module.newUnitOfWork();
             LocalAccount account = accountRepository.findLocalAccount( login.username );
             create_auth( session(), account.identity().get(), login.username );
             uow.discard();
 
+            flash( "success", "Logged in as " + login.username + "." );
             return redirect( routes.Authentication.account() );
         }
         catch( AuthenticationException ex )

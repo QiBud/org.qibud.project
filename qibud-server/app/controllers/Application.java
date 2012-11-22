@@ -16,7 +16,6 @@ package controllers;
 import play.Routes;
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.index;
 
 /**
  * Web front controller.
@@ -30,7 +29,12 @@ public class Application
     // Homepage
     public static Result index()
     {
-        return ok( index.render() );
+        if( AuthContextAction.connected() )
+        {
+            // Redirected connected to their account home page
+            return redirect( routes.Authentication.account() );
+        }
+        return ok( views.html.index.render() );
     }
 
     // Javascript Routing

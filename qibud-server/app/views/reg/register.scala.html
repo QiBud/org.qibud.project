@@ -1,0 +1,35 @@
+@( regForm: Form[Registration.Register] )
+
+@import tags._
+@import helper._
+
+@main( "QiBud Registration", "Register" ) {
+
+    @layout_fluid() {
+
+        @page_header( "QiBud", "Register" )
+
+        @form( action = routes.Registration.register() ) {
+            <fieldset>
+                @html5_text(
+                    regForm("username"),
+                    '_label -> "User name"
+                )
+                @html5_password(
+                    regForm("password"),
+                    '_label -> "Password"
+                )
+                @html5_password(
+                    regForm("confirm"),
+                    '_label -> "Confirm"
+                )
+            </fieldset>
+            <div class="form-actions">
+                <input id="login" type="submit" class="btn btn-primary btn-mini" value="Register" />
+                <a href="@routes.Application.index()" class="btn btn-mini">Cancel</a>
+            </div>
+        }
+
+    }
+
+}

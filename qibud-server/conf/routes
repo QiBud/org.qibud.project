@@ -4,6 +4,9 @@
 GET     /                                               controllers.Application.index()
 GET     /assets/javascripts/routes                      controllers.Application.javascriptRoutes()
 
+GET     /register                                       controllers.Registration.register_form()
+POST    /register                                       controllers.Registration.register()
+
 GET     /login                                          controllers.Authentication.login_form()
 POST    /login                                          controllers.Authentication.login()
 GET     /logout                                         controllers.Authentication.logout()

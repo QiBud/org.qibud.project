@@ -25,6 +25,10 @@ import domain.buds.BudsFactory;
 import domain.buds.BudsRepository;
 import domain.roles.Role;
 import domain.roles.RoleAction;
+import domain.teams.Team;
+import domain.teams.TeamFactory;
+import domain.teams.TeamMembership;
+import domain.teams.TeamRepository;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -123,10 +127,16 @@ public final class QiBudDomainAssemblies
                 new PermissionsDomainAssembler().
                     withVisibility( application ).
                     assemble( ma );
-                ma.entities( LocalAccount.class ).
+
+                ma.entities( LocalAccount.class,
+                             Team.class,
+                             TeamMembership.class ).
                     visibleIn( application );
+
                 ma.services( AccountFactory.class,
-                             AccountRepository.class ).
+                             AccountRepository.class,
+                             TeamFactory.class,
+                             TeamRepository.class ).
                     instantiateOnStartup().
                     visibleIn( application );
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Samuel Loup. All Rights Reserved.
+ * Copyright (c) 2012, Paul Merlin. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,24 +11,21 @@
  * limitations under the License.
  *
  */
-package forms;
+package domain.teams;
 
-import domain.buds.Bud;
-import play.data.validation.Constraints;
+import domain.aaa.Account;
+import org.qi4j.api.association.Association;
+import org.qi4j.api.entity.EntityComposite;
 
-public class BudForm
+/**
+ * Acount <-> Team membership.
+ */
+public interface TeamMembership
+    extends EntityComposite
 {
 
-    @Constraints.Required
-    public String title;
-    public String content;
+    Association<Team> team();
 
-    public static BudForm filledWith( Bud bud )
-    {
-        BudForm budForm = new BudForm();
-        budForm.title = bud.title().get();
-        budForm.content = bud.content().get();
-        return budForm;
-    }
+    Association<Account> account();
 
 }

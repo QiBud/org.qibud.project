@@ -40,11 +40,14 @@
                                     <a href="@routes.Buds.buds()"><i class="icon-th-large"></i> Public Buds</a>
                                 </li>
                                  @if( AuthContextAction.connected() ) {
-                                    <li class='@( "active".when( nav.startsWith( "mybuds" ) ) )'>
-                                        <a href="@routes.Buds.my_buds()"><i class="icon-th-large"></i> My Buds</a>
+                                    <li class='@( "active".when( nav.startsWith( "accountbuds" ) ) )'>
+                                        <a href="@routes.Accounts.account_buds()"><i class="icon-user"></i> My Buds</a>
                                     </li>
                                     <li class='@( "active".when( nav.startsWith( "createbuds" ) ) )'>
                                         <a href="@routes.Buds.budCreateForm( AuthContextAction.connectedBudIdentity() )"><i class="icon-plus"></i> New Bud</a>
+                                    </li>
+                                    <li class='@( "active".when( nav.startsWith( "teams" ) ) )'>
+                                        <a href="@routes.Teams.teams()"><i class="icon-group"></i> Teams</a>
                                     </li>
                                 }
                                 <li class='@( "active".when( nav.startsWith( "budpacks" ) ) )'>
@@ -69,7 +72,8 @@
                                             <b class="caret"></b>
                                         </a>
                                         <ul class="dropdown-menu">
-                                            <li><a href="@routes.Authentication.account()"><i class="icon-user"></i> Account</a></li>
+                                            <li><a href="@routes.Accounts.account()"><i class="icon-user"></i> Account</a></li>
+                                            <li><a href="@routes.Teams.teams()"><i class="icon-group"></i> Teams</a></li>
                                             <li><a href="@routes.Authentication.logout()"><i class="icon-off"></i> Logout</a></li>
                                         </ul>
                                     }

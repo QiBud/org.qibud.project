@@ -1,0 +1,20 @@
+@( budview: _root_.views.BudViewData )
+
+<script type="text/javascript">
+    $(document).ready( function() {
+        @if( ! budview.roles.isEmpty() ) {
+            @for( role <- budview.roles ) {
+                if( roles.packs.@(role.budPackName()) && roles.packs.@(role.budPackName()).@(role.roleName()) ) {
+                    roles.budRole( "@budview.bud.identity().get()", "@(role.budPackName())", "@(role.roleName())", function( data ) {
+                        roles.packs.@(role.budPackName()).@(role.roleName()).inject_view(
+                            '@budview.bud.identity().get()',
+                            '@(role.idname())-view-placeholder',
+                            data.descriptor,
+                            data.state
+                        );
+                    } );
+                }
+            }
+        }
+    } );
+</script>

@@ -1,22 +1,26 @@
 # Routes
 
 
-GET     /                                               controllers.Application.index()
-GET     /assets/javascripts/routes                      controllers.Application.javascriptRoutes()
+GET     /                                               controllers.Application.index
+GET     /assets/javascripts/routes                      controllers.Application.javascriptRoutes
 
-GET     /register                                       controllers.Registration.register_form()
-POST    /register                                       controllers.Registration.register()
+GET     /register                                       controllers.Registration.register_form
+POST    /register                                       controllers.Registration.register
 
-GET     /login                                          controllers.Authentication.login_form()
-POST    /login                                          controllers.Authentication.login()
-GET     /logout                                         controllers.Authentication.logout()
-GET     /account                                        controllers.Authentication.account()
+GET     /login                                          controllers.Authentication.login_form
+POST    /login                                          controllers.Authentication.login
+GET     /logout                                         controllers.Authentication.logout
 
-GET     /account/buds                                   controllers.Buds.my_buds
+GET     /account                                        controllers.Accounts.account
+GET     /account/buds                                   controllers.Accounts.account_buds
+
+GET     /teams                                          controllers.Teams.teams
+POST    /teams                                          controllers.Teams.team_create
+GET     /team/:identity                                 controllers.Teams.team(identity: String)
+
 GET     /buds                                           controllers.Buds.buds
 GET     /bud/:identity/new                              controllers.Buds.budCreateForm(identity: String)
 POST    /bud/:identity/create                           controllers.Buds.saveNewBud(identity: String)
-
 GET     /bud/:identity                                  controllers.Buds.bud(identity: String)
 GET     /bud/:identity/attachment/:attachment_id        controllers.Buds.attachment(identity: String, attachment_id: String)
 GET     /bud/:identity/attachment/:attachment_id/meta   controllers.Buds.attachmentMetadata(identity: String, attachment_id: String)

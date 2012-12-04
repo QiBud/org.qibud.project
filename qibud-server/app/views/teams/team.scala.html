@@ -1,15 +1,20 @@
-@( budview: _root_.views.BudViewData )
+@( team: _root_.domain.teams.Team, budview: _root_.views.BudViewData )
 
 @import tags._
 @import _root_.play.libs._
 @import _root_.views.tools._
+@import buds.show_bud_content
+@import buds.show_bud_roles_views_script
+@import buds.show_bud_sidebar
 
-@main( budview.bud.title().get(), "buds", show_bud_roles_views_script( budview ) ) {
+@main( team.title().get(), "teams", show_bud_roles_views_script( budview ) ) {
 
     <div class="container-fluid">
         <div class="row-fluid">
             <div class="span9">
                 @show_bud_content( budview )
+                <p>TODO LIST MEMBERS</p>
+                <p>TODO IF OWNER, ADD/REMOVE MEMBERS</p>
             </div>
             <div class="span3">
                 <div class="well" style="min-height: 400px">

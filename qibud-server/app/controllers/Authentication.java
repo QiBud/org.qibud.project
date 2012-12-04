@@ -13,12 +13,8 @@
  */
 package controllers;
 
-import domain.aaa.Account;
 import domain.aaa.AccountRepository;
 import domain.aaa.LocalAccount;
-import domain.budpacks.BudPacksService;
-import domain.buds.Bud;
-import domain.buds.BudsRepository;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -33,7 +29,6 @@ import play.data.validation.Constraints;
 import play.mvc.Controller;
 import play.mvc.Http.Session;
 import play.mvc.Result;
-import views.BudViewData;
 
 @WithRootBudContext
 @WithAuthContext
@@ -58,10 +53,6 @@ public class Authentication
     public static Module module;
     @Service
     public static AccountRepository accountRepository;
-    @Service
-    public static BudsRepository budsRepository;
-    @Service
-    public static BudPacksService budPacksService;
 
     public static Result login_form()
     {
@@ -87,7 +78,7 @@ public class Authentication
             uow.discard();
 
             flash( "success", "Logged in as " + login.username + "." );
-            return redirect( routes.Authentication.account() );
+            return redirect( routes.Accounts.account() );
         }
         catch( AuthenticationException ex )
         {
@@ -103,35 +94,6 @@ public class Authentication
         clear_auth( session() );
         flash( "success", "You have been logged out." );
         return redirect( routes.Application.index() );
-    }
-
-    public static Result account()
-    {
-        if( !AuthContextAction.connected() )
-        {
-            clear_auth( session() );
-            flash( "warn", "You are not authenticated." );
-            return redirect( routes.Authentication.login() );
-        }
-        UnitOfWork uow = module.newUnitOfWork();
-        try
-        {
-            Account account = accountRepository.findAccountByIdentity( AuthContextAction.connectedAccountIdentity() );
-            if( account == null )
-            {
-                clear_auth( session() );
-                flash( "warn", "You are not authenticated." );
-                return redirect( routes.Authentication.login() );
-            }
-            Bud bud = account.bud().get();
-            return ok( views.html.buds.show_bud.render( new BudViewData( bud,
-                                                                         budPacksService.unusedRoles( bud ),
-                                                                         budsRepository.findChildren( bud ) ) ) );
-        }
-        finally
-        {
-            uow.discard();
-        }
     }
 
     /* package */ static void create_auth( Session session, String accountIdentity, String subject )

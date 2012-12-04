@@ -93,7 +93,7 @@ public class Registration
             Authentication.create_auth( session(), accountIdentity, register.username );
 
             flash( "success", "Logged in as " + register.username + "." );
-            return redirect( routes.Authentication.account() );
+            return redirect( routes.Accounts.account() );
         }
         finally
         {

@@ -32,7 +32,7 @@ public class Application
         if( AuthContextAction.connected() )
         {
             // Redirected connected to their account home page
-            return redirect( routes.Authentication.account() );
+            return redirect( routes.Accounts.account() );
         }
         return ok( views.html.index.render() );
     }

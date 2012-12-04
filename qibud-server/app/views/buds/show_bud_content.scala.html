@@ -1,0 +1,25 @@
+@( budview: _root_.views.BudViewData )
+
+@import tags._
+@import _root_.play.libs._
+@import _root_.views.tools._
+
+@if( budview.bud.parent().get() == null ) {
+    @page_header( budview.bud.title().get() )
+}
+@if( budview.bud.parent().get() != null ) {
+    @page_header( budview.bud.title().get(),
+                  btn_route = routes.Buds.bud( budview.bud.parent().get().identity().get() ),
+                  btn_icon = "icon-chevron-left",
+                  btn_title = budview.bud.parent().get().title().get() )
+}
+
+<p>
+    @if( budview.accountCanWrite() ) {
+        <a href="@routes.Buds.budCreateForm( budview.bud.identity().get() )" class="btn btn-mini btn-primary"><i class="icon-plus"></i> New</a>
+        <a href="@routes.Buds.budEditForm( budview.bud.identity().get() )" class="btn btn-mini btn-primary"><i class="icon-edit"></i> Edit</a>
+        <a href="@routes.Buds.deleteBud( budview.bud.identity().get() )" class="btn btn-mini btn-danger">Delete</a>
+    }
+</p>
+
+@markdown( budview.bud.content().get() )

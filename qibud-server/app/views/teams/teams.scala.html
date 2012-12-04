@@ -1,0 +1,61 @@
+@( owned: List[_root_.domain.teams.Team], member: List[_root_.domain.teams.Team], create: Form[_root_.controllers.Teams.TeamForm] )
+
+@import tags._
+
+@teams_content = {
+    @page_header( "My Teams" )
+    @if( owned.isEmpty() ) {
+        <p>You don't own any Team.</p>
+    }
+    @if( ! owned.isEmpty() ) {
+        <ul>
+            @for( team <- owned ) {
+                <li><a href="@routes.Teams.team( team.identity().get() )">@team.title()</a></li>
+            }
+        </ul>
+    }
+
+    @page_header( "Teams I'm member of" )
+    @if( member.isEmpty() ) {
+        <p>You aren't member of any Team.</p>
+    }
+    @if( ! member.isEmpty() ) {
+        <ul>
+            @for( team <- member ) {
+                <li><a href="@routes.Teams.team( team.identity().get() )">@team.title()</a></li>
+            }
+        </ul>
+    }
+}
+
+@teams_sidebar = {
+    <h3>Create Team</h3>
+    @helper.form( action = routes.Teams.team_create() ) {
+        <fieldset>
+            @html5_text(
+                create("title"),
+                '_label -> "Title"
+            )
+        </fieldset>
+        <div class="form-actions">
+            <input id="create" type="submit" class="btn btn-primary btn-mini" value="Create Team" />
+        </div>
+    }
+}
+
+@main( "Teams", "teams" ) {
+
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="span9">
+                @teams_content
+            </div>
+            <div class="span3">
+                <div class="well" style="min-height: 400px">
+                    @teams_sidebar
+                </div>
+            </div>
+        </div>
+    </div>
+
+}

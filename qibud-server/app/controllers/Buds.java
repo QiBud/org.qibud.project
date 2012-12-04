@@ -24,7 +24,6 @@ import domain.buds.BudVisibility;
 import domain.buds.BudsFactory;
 import domain.buds.BudsRepository;
 import domain.roles.Role;
-import forms.BudForm;
 import infrastructure.attachmentsdb.AttachmentsDB;
 import infrastructure.graphdb.GraphDB;
 import java.util.Iterator;
@@ -36,6 +35,7 @@ import org.qi4j.api.structure.Module;
 import org.qi4j.api.unitofwork.UnitOfWork;
 import org.qi4j.api.unitofwork.UnitOfWorkCompletionException;
 import play.data.Form;
+import play.data.validation.Constraints;
 import play.mvc.Call;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -50,7 +50,24 @@ public class Buds
     extends Controller
 {
 
-    static final Form<BudForm> budForm = form( BudForm.class );
+    public static class BudForm
+    {
+
+        @Constraints.Required
+        public String title;
+        public String content;
+
+        public static BudForm filledWith( Bud bud )
+        {
+            BudForm budForm = new BudForm();
+            budForm.title = bud.title().get();
+            budForm.content = bud.content().get();
+            return budForm;
+        }
+
+    }
+
+    static final Form<BudForm> BUD_FORM = form( BudForm.class );
     @Structure
     public static Module module;
     @Service
@@ -80,25 +97,6 @@ public class Buds
         }
     }
 
-    public static Result my_buds()
-    {
-        if( !AuthContextAction.connected() )
-        {
-            return unauthorized();
-        }
-        UnitOfWork uow = module.newUnitOfWork();
-        try
-        {
-            Account owner = accountRepository.findAccountByIdentity( AuthContextAction.connectedAccountIdentity() );
-            Query<Bud> myBuds = budsRepository.findOwnedBuds( owner );
-            return ok( views.html.buds.my_buds.render( Iterables.toList( myBuds ) ) );
-        }
-        finally
-        {
-            uow.discard();
-        }
-    }
-
     public static Result budCreateForm( String identity )
     {
         if( !AuthContextAction.connected() )
@@ -113,7 +111,7 @@ public class Buds
             {
                 return notFound();
             }
-            return ok( create_bud.render( parent, budForm ) );
+            return ok( create_bud.render( parent, BUD_FORM ) );
         }
         finally
         {
@@ -136,27 +134,24 @@ public class Buds
             {
                 return notFound();
             }
-            Form<BudForm> filledForm = budForm.bindFromRequest();
-
+            Form<BudForm> filledForm = BUD_FORM.bindFromRequest();
             if( filledForm.hasErrors() )
             {
                 return badRequest( create_bud.render( parent, filledForm ) );
             }
-            else
-            {
-                BudForm newBud = filledForm.get();
-                Account owner = accountRepository.findAccountByIdentity( AuthContextAction.connectedAccountIdentity() );
-                Bud createdBud = budsFactory.createNewBud( parent, newBud.title, newBud.content );
-                createdBud.owner().set( owner );
 
-                flash( "success", newBud.title + " created" );
-                Result result = redirect( routes.Buds.bud( createdBud.identity().get() ) );
+            BudForm newBud = filledForm.get();
+            Account owner = accountRepository.findAccountByIdentity( AuthContextAction.connectedAccountIdentity() );
+            Bud createdBud = budsFactory.createNewBud( parent, newBud.title, newBud.content );
+            createdBud.owner().set( owner );
 
-                uow.complete();
-                uow = null;
+            flash( "success", newBud.title + " created" );
+            Result result = redirect( routes.Buds.bud( createdBud.identity().get() ) );
 
-                return result;
-            }
+            uow.complete();
+            uow = null;
+
+            return result;
         }
         finally
         {
@@ -292,7 +287,7 @@ public class Buds
                 return notFound();
             }
 
-            Form<BudForm> filledForm = budForm.bindFromRequest();
+            Form<BudForm> filledForm = BUD_FORM.bindFromRequest();
 
             if( filledForm.hasErrors() )
             {

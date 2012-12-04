@@ -14,7 +14,10 @@
 package domain.aaa;
 
 import domain.buds.Bud;
+import domain.teams.Team;
 import org.qi4j.api.association.Association;
+import org.qi4j.api.association.ManyAssociation;
+import org.qi4j.api.common.UseDefaults;
 import org.qi4j.library.shiro.domain.permissions.RoleAssignee;
 
 public interface Account
@@ -22,5 +25,8 @@ public interface Account
 {
 
     Association<Bud> bud();
+
+    @UseDefaults
+    ManyAssociation<Team> ownedTeams();
 
 }

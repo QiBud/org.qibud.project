@@ -27,6 +27,12 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>org.qibud.eventstore-mongodb</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.json</groupId>
+                    <artifactId>json</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Qi4j -->

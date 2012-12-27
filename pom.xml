@@ -21,7 +21,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <play2.version>2.0.4</play2.version>
-        <qi4j.version>2.0-SNAPSHOT</qi4j.version>
+        <qi4j.version>2.0-RC1</qi4j.version>
     </properties>
 
     <repositories>
@@ -30,8 +30,8 @@
             <url>http://repo.typesafe.com/typesafe/releases/</url>
         </repository>
         <repository>
-            <id>ops4j</id>
-            <url>http://repository.ops4j.org/maven2/</url>
+            <id>qi4j-release</id>
+            <url>https://repository-qi4j.forge.cloudbees.com/release/</url>
         </repository>
         <repository>
             <id>openrdf</id>
